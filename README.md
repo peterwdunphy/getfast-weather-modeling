@@ -29,12 +29,13 @@ machine that has one (the same setup that builds the research repo).
 
 ## Figures
 
-- The seven result figures (`fig_heat_response`, `fig_g_vs_literature`,
-  `fig_distance_scaling`, `fig_validation`, `fig_dl_response`, `fig_acclimation`,
-  `fig_tolerance`) are built fresh by `build_paper_figures.py` in one consistent,
-  colorblind-safe style. It reads the result artifacts under `/weather/results/`,
-  `/weather/data/` (the OOF prediction parquets and the DL percentile npz), and the
-  clean activity table. Rebuild with `python build_paper_figures.py`.
+- The four result figures (`fig_mape_ladder`, `fig_error_by_temp`, `fig_dl_vs_coach`,
+  `fig_gamma`) are built by `build_paper_figures.py` in one consistent, colorblind-safe
+  style. They report the held-out analysis in notebooks 09/10 (population and personalized
+  deep-learning heat features added to a weather-blind XGBoost). Values are the authoritative
+  numbers from notebook 10; the DL curve reads `/weather/data/heat_percentile_averaged.npz`.
+  Rebuild with `python build_paper_figures.py`.
 - Three review figures (`fig_marathon_starts_trend`, `fig_functional_forms_compared`,
   `fig_acclimation_timeline`) are carried over from `getfast-weather-research`.
-- Three process diagrams are TikZ, drawn inline in the `.tex`.
+- Two process diagrams (the experiment pipeline and the deep-learning architecture) are
+  TikZ, drawn inline in the `.tex` and wrapped in `\resizebox` so they fit the page width.
