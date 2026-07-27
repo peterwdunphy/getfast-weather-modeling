@@ -1,0 +1,559 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{setspace}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage[hang,flushmargin]{footmisc}  % no first-line indent on footnotes
+\usepackage{hyperref}
+\usepackage[round, authoryear]{natbib}
+\usepackage{booktabs}
+\usepackage{caption}
+\usepackage{float}
+\usepackage{textcomp}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, positioning, fit, backgrounds, calc, shapes.geometric}
+\renewcommand{\_}{\textunderscore\allowbreak}
+\setlength{\emergencystretch}{2em}
+
+% APA-style spacing in references
+\setlength{\bibsep}{6pt plus 2pt minus 1pt}
+\renewcommand{\bibsection}{\section*{References}}
+
+% Hanging indents on references (APA convention)
+\makeatletter
+\renewenvironment{thebibliography}[1]{%
+  \section*{References}%
+  \list{}{%
+    \setlength{\labelwidth}{0pt}%
+    \setlength{\leftmargin}{1.5em}%
+    \setlength{\itemindent}{-1.5em}%
+    \setlength{\itemsep}{6pt}%
+  }%
+  \sloppy\clubpenalty4000\widowpenalty4000%
+}{\endlist}
+\makeatother
+
+\hypersetup{colorlinks=true, linkcolor=black, citecolor=black, urlcolor=blue}
+
+% --- TikZ node styles for the process diagrams -----------------------------
+\definecolor{gfblue}{HTML}{2A78D6}
+\definecolor{gfgreen}{HTML}{2E8B57}
+\definecolor{gforange}{HTML}{EB6834}
+\definecolor{gfgray}{HTML}{52514E}
+\definecolor{gfsand}{HTML}{DED9CC}
+\tikzset{
+  io/.style   ={rectangle, rounded corners=2pt, draw=gfgray, fill=gfsand!55, line width=0.7pt,
+                align=center, inner sep=5pt, font=\footnotesize},
+  proc/.style ={rectangle, rounded corners=2pt, draw=gfgray, fill=blue!7, line width=0.7pt,
+                align=center, inner sep=5pt, font=\footnotesize},
+  headx/.style={rectangle, rounded corners=2pt, draw=gfgray, fill=green!8, line width=0.7pt,
+                align=center, inner sep=5pt, font=\footnotesize},
+  out/.style  ={rectangle, rounded corners=2pt, draw=gfgray, fill=orange!10, line width=0.9pt,
+                align=center, inner sep=5pt, font=\footnotesize\bfseries},
+  flow/.style ={-{Latex[length=2.4mm]}, draw=gfgray, line width=0.7pt},
+  lbl/.style  ={font=\scriptsize\itshape, text=gfgray},
+}
+
+\title{Weather Effects and Heat Acclimation in Endurance Running:\\
+Modeling and Results for the GetFast Weather-Adjusted Predictor}
+\author{GetFast Research}
+\date{\today}
+
+\begin{document}
+\maketitle
+\vspace{-1.1cm}
+
+% --- Primer -------------
+\begin{center}
+\rule{\linewidth}{0.4pt}\\[3pt]
+{\large\textbf{Overview}}\\[1pt]
+\rule{\linewidth}{0.4pt}
+\end{center}
+
+\begingroup\small
+
+\noindent\textbf{\textsc{Motivation.}} Anthropogenic warming is making extreme-heat events more frequent, and large road races increasingly take place in conditions their fields did not train for. Across the six World Marathon Majors, abnormally hot editions remain rare but have arrived roughly six times more often per year since 2020 than in the preceding four decades. Hot race-day conditions can cost a mass-field runner on the order of 10--15\% of expected pace. How heat degrades endurance performance and how repeated exposure builds tolerance are each well understood. No product currently exists that combines a personalized, fitness-based finish-time prediction with real-time and forecasted climate data that updates a runner's race-day expectations as conditions come into view.
+
+\smallskip
+\noindent\textbf{\textsc{From Review to Model.}} This document is the second of a pair. The first was a literature review that turned 68 peer-reviewed papers into priors for a weather-adjusted predictor. This version keeps that review intact and then reports what happened when the priors met data: we assembled a large observational training corpus, estimated the weather effect, and built the predictor. The technical sections that were written as proposals in the review are rewritten here as results.
+
+\smallskip
+\noindent\textbf{\textsc{The Sports Science.}} Heat slows distance runners nonlinearly. Performance is roughly flat through a cool optimum near 50--59 \textdegree F (10--15 \textdegree C) wet-bulb globe temperature (WBGT) and degrades increasingly above it. Slower amateurs lose two to three times more time per degree than elites, and this penalty grows with race distance (marathon $\gg$ half $\gg$ 10K). WBGT is the most useful single composite heat metric. Dew point should be preferred to relative humidity, which is confounded with air temperature within a race day. Over 5--14 days, heat exposure expands plasma volume, lowers core temperature and heart rate at a given effort, and brings on earlier, heavier sweating. These adaptations offset a meaningful share of the heat penalty, but they decay over the following weeks once exposure stops.
+
+\smallskip
+\noindent\textbf{\textsc{What We Found.}} We estimated the heat effect within runners, so each runner acts as their own control. Across roughly 356{,}000 outdoor runs from about 1{,}700 runners, the response is a clear U-curve: pace is flat through an optimum near 11\,\textdegree C WBGT, then slows by about 0.29\% per \textdegree C above 15\,\textdegree C, reaching roughly +3.5\% at WBGT 27. A Bayesian hierarchical model extrapolated to the marathon puts the penalty at WBGT 30 near +10.8\%, about 23 minutes on a 3:30 finish. The effect is real but small next to day-to-day training noise, which is why its value shows up as calibration on the hot end, not as a lower average error. Heat tolerance varies between runners and is best read on the heart-rate axis, but it resolves cleanly into only three to five coarse tiers, not fine percentiles. Acclimation is present in pace as an asymmetry (running hotter than you trained costs more than running cooler saves) and is clearest in heart rate.
+
+\smallskip
+\noindent\textbf{\textsc{The Predictor.}} The shipped design keeps GetFast's fitness prediction as a weather-neutral baseline and multiplies a separate, interpretable weather adjustment on top. A calibrated regression pipeline (fitness baseline, a calibration intercept, a two-hinge population heat curve, and a per-runner tolerance scaling) removes the hot-day optimism of a weather-blind model, moving the mean bias at extreme WBGT from about +1.2\% (predicted too fast) to near zero. A separate deep-learning track (a transformer over each runner's training streams, with a monotone heat gate) reproduces the same population curve end-to-end and serves as the interaction engine. Both are documented here.
+
+\endgroup
+
+\newpage
+
+% Main Document
+
+\section{Motivation}
+
+Extreme heat events are becoming more frequent worldwide. \citet{king2017} showed that anthropogenic climate change has at least doubled the likelihood of record-breaking hot years globally since the late 1960s. \citet{russo2014} found that the share of global land area affected by moderate-to-extreme heat waves tripled between 1980--2001 and 2002--2012, and projected that severe heat waves will recur every two years in many populated regions by century's end.
+
+Marathons expose tens of thousands of runners to whatever conditions race day delivers. Analyzing 240 marathon races held by the six World Marathon Majors (Boston, London, Berlin, Chicago, New York City, and Tokyo) from 1980 through 2026, there has been a marked increase in the frequency of unusually hot editions in the most recent decade, which we document below.
+
+For each race we computed the wet-bulb globe temperature (WBGT) --- a single number combining ambient air temperature, the cooling effect of humidity (or lack of it), and solar load --- at 10\,am local time at the start line.\footnote{WBGT was estimated using Open-Meteo reanalysis with the Stull (2011) wet-bulb formula and a globe-temperature approximation following \citet{hunter1999}. Fixing the lookup at 10\,am local gives a consistent cross-decade comparison but does not perfectly match on-course exposure, since gun times have shifted over the decades.}
+
+\begin{figure}[!ht]
+  \centering
+  \includegraphics[width=0.95\linewidth]{figures/fig_marathon_starts_trend.pdf}
+  \caption{Estimated 10\,am-local WBGT at the start line of each of the six World Marathon Majors, 1980--2026. Marker shape encodes marathon; marker fill color encodes decade.}
+  \label{fig:marathon_starts_trend}
+\end{figure}
+
+The headline is that average WBGT across the six majors is roughly flat: decadal means sit between 48 and 51°F (9--11°C) from the 1980s through the 2020s, and the linear trend is small. A na\"ive ``marathons are getting hotter on average'' framing is not supported. The action is in the rare hot races. Between 1980 and 2019, only three of 211 races exceeded 65 °F (18 °C) WBGT --- a rate of about 0.08 per year. Between 2020 and 2026, three of 29 races already have, a rate of about 0.43 per year, or roughly a sixfold increase. The full set of severe-heat races in the corpus: NYC 1984 (66°F/19°C), Chicago 2007 (74°F/23°C), Boston 2012 (68°F/20°C), Chicago 2021 (69°F/21°C), NYC 2022 (68°F/20°C), and Berlin 2025 (68°F/20°C). Chicago is the clearest individual signal, with three of its hottest editions falling in the 2020s. Two honest caveats temper the precision without overturning the direction. First, the recent count rests on only three events, so the implied rate carries wide uncertainty --- this is a directional signal, not a tightly estimated one. Second, several 2020--2021 majors were cancelled or shifted to atypical dates by the pandemic, which thins and distorts that window. A third, measurement caveat: these WBGT values are sampled at a fixed 10\,am local time, but gun times have drifted across the decades (modern majors often start earlier, partly to avoid heat), so the fixed-hour comparison is approximate and small level differences across eras should not be over-read. With those caveats, the clustering of hot editions in the 2020s remains consistent with the broader climate-attribution evidence cited above, and the operational point is robust to the exact rate: hot marathons are rare but appear to be arriving more often, and a predictor that handles them well is increasingly worth having.
+
+The 2007 Chicago Marathon was halted mid-race after temperatures climbed rapidly through the morning; one runner died and the event prompted widespread changes in how organizers handle heat \citep{davey2007}. Above roughly 85 °F (29 °C) WBGT, race directors typically cancel or curtail events outright \citep{kigen2023, mantzios2022}, so observations of marathons run in genuinely dangerous heat are rare by design --- the data are censored at the hot end.
+
+This matters for prediction because when unusually warm conditions hit, a runner's recent personal-record and training paces are no longer a reliable guide to finish time. \citet{vernon2021} documented this directly: at the unusually warm 2018 London Marathon (24 °C maximum), mass-participation runners finished roughly 47 minutes slower than their pre-race expectations on average, or about 14\% off target. Other large-population estimates of the heat penalty for amateur marathoners fall in a similar range \citep{ely2007, knechtle2019, nikolaidis2019}. For a 3:30 marathoner, that is the difference between a personal-record day and a disappointing one. Two runners with identical recent paces will not respond identically to a hot race: the runner who has been training in warm conditions tolerates heat better than the one who has not, by a margin documented in meta-analyses of heat acclimation \citep{tyler2016, pryor2019, periard2015, daanen2018}.
+
+This paper analyzes 68 academic papers grouped into two themes: 34 papers on the direct effects of weather (especially heat) on running performance, and 34 papers on heat acclimation --- how runners adapt to repeated heat exposure and which physiological variables track that adaptation. Papers were chosen to focus primarily on the marathon distance, with secondary coverage of half-marathon, 10K, and 5K races. Sections~\ref{sec:sportscience} through~\ref{sec:strategic} synthesize that corpus and derive the priors for the GetFast weather-adjusted predictor. Sections~\ref{sec:methods} and~\ref{sec:results} then report the model we actually built and what the data said when the priors were re-estimated against roughly 356{,}000 real runs.
+
+\section{The sports science}
+\label{sec:sportscience}
+
+The next three subsections synthesize the corpus: how weather (chiefly heat) degrades running performance, how runners adapt to heat and how that adaptation decays, and the explicit predictive formulas the literature offers. Together they form the evidence base for the strategic and technical decisions that follow.
+
+\subsection{Weather effects}
+
+\subsubsection{Temperature}
+
+The magnitude of marathon slowdown with rising ambient temperature varies substantially across studies, and the reported coefficient depends heavily on which runners are sampled. For elite men, \citet{ely2007} found that mean finishing times slowed by about 2.8 percentage points off course record going from 5--10 °C to 20--25 °C WBGT, and \citet{guy2014} reported a 3.1\% mean slowdown for top-10 IAAF World Championship men when air temperature exceeded 25 °C. \citet{nikolaidis2019} estimated about 38 seconds slower per °C air temperature for annual top-10 finishers at Boston, and \citet{knechtle2019} reported 20 seconds per °C for annual Boston winners. Among mass-field runners the slope is consistently steeper: \citet{ely2007} reported about 3.2\% slowdown per 5 °C WBGT increase for 300th-place finishers; \citet{nikolaidis2019} found about 1:53 (min:sec) per °C for all Boston finishers; \citet{knechtle2021b} reported about eight minutes additional finishing time in the hottest NYC Marathon temperature tertile (17--24 °C) versus the coldest (5--12 °C). \citet{vernon2021} found an approximate 2.8\% slowdown per 5 °C above 12 °C for London Marathon mass participants, and \citet{tan2022} reported per-percent elasticities of roughly 7.6\% on finish time per 1\% rise in dry-bulb temperature in tropical Singapore.
+
+The functional form is debated. Linear fits work reasonably well across the moderate temperature ranges observed at most majors and dominate the regression literature \citep{ely2007, knechtle2019, nikolaidis2019, vernon2021}. Quadratic fits with a U-shaped optimum appear in \citet{martin1999} (optimum near 54 °F / 12 °C for elite men at NYC), \citet{elhelou2012} (optima ranging from 3.8 °C to 9.9 °C across performance levels), \citet{gasparetto2020} (cluster-specific quadratics with tipping point near 8 °C WBGT), and \citet{llewellyn2025} (J-curve with optimum around 5--10 °C for median runners). \citet{mantzios2022} synthesized 1,258 elite races and reported a piecewise structure with an optimum band of 7.5--15 °C WBGT and a slope of roughly 0.3--0.4\% performance decline per °C outside that band, asymmetric across events (steeper on the hot side for racewalking, gentler for the marathon).
+
+\begin{figure}[!ht]
+  \centering
+  \includegraphics[width=0.95\linewidth]{figures/fig_functional_forms_compared.pdf}
+  \caption{How different authors have fit the WBGT-to-slowdown relationship for the marathon. Linear, quadratic, and J-shaped forms have all been published; above roughly 18 \textdegree C / 64 \textdegree F WBGT the studies diverge, and observations in genuinely dangerous heat are rare because races are typically cancelled or postponed above about 29 \textdegree C / 85 \textdegree F WBGT.}
+  \label{fig:functional_forms_compared}
+\end{figure}
+
+On cold-side asymmetry, this review focuses on heat penalties. A few papers do report J-curves with modest slowdown below the optimum: \citet{martin1999} found Boston/NYC times rising at the cold end; \citet{mantzios2022} reported a cold-side slope of about 0.3\% per °C; \citet{llewellyn2025} observed the same for median runners. The GetFast model in its current form will not attempt to model cold-side penalties --- those are out of scope for v1.
+
+\subsubsection{Humidity, dew point, and composite heat indices}
+
+The literature converges on WBGT as the most useful single composite heat metric, outperforming raw air temperature in cross-event comparisons \citep{mantzios2022, ely2007, aylwin2023}. The standard formula is
+\begin{equation}
+  \mathrm{WBGT} = 0.7\,T_{\mathrm{nwb}} + 0.2\,T_{\mathrm{bg}} + 0.1\,T_{\mathrm{db}},
+\end{equation}
+where $T_{\mathrm{nwb}}$ is the natural wet-bulb temperature (a thermometer with a wet cloth wick, ventilated by ambient wind, capturing combined humidity and wind), $T_{\mathrm{bg}}$ is the black-globe temperature (a thermometer inside a matte-black copper sphere, capturing solar load), and $T_{\mathrm{db}}$ is the ambient air temperature \citep{cheuvront2021}.
+
+Operationally, the convenient news is that Open-Meteo, the weather API GetFast uses for both forecasts and historical reanalysis, exposes two of these three terms as directly-queryable hourly variables: \texttt{wet\_bulb\_temperature\_2m} supplies the natural wet-bulb temperature $T_{\mathrm{nwb}}$, and \texttt{temperature\_2m} supplies the ambient air (dry-bulb) temperature $T_{\mathrm{db}}$. Querying $T_{\mathrm{nwb}}$ directly removes the need to estimate it from Stull's (2011) formula or any other empirical approximation; the API does the work. Only the black-globe term, $T_{\mathrm{bg}}$, must still be approximated, because no operational API exposes a measured globe temperature. A simple linear approximation, due to \citet{hunter1999} and derived for standard meteorological inputs, is:
+\begin{equation}
+  T_{\mathrm{bg}} \approx T_{\mathrm{db}} + 0.0083\,S - 0.005\,U,
+\end{equation}
+where $S$ is shortwave solar radiation in W/m\textsuperscript{2} (\texttt{shortwave\_radiation\_instant} from Open-Meteo) and $U$ is wind speed in m/s (\texttt{wind\_speed\_10m}). Combined with the directly-queried wet-bulb and ambient air temperature, this gives GetFast a complete WBGT estimator from four standard Open-Meteo hourly variables: \texttt{temperature\_2m}, \texttt{wet\_bulb\_temperature\_2m}, \texttt{shortwave\_radiation\_instant}, and \texttt{wind\_speed\_10m}. If a future Open-Meteo release exposes a built-in WBGT, GetFast should switch to that. One caveat carries through to the rest of this document: the globe term is the least certain part of the estimate. The \citet{hunter1999} approximation was fit to general meteorological data rather than running-specific exposure, and linear globe-temperature models of this kind degrade at low solar elevation (early morning, heavy overcast, night), so $T_{\mathrm{bg}}$ is the dominant source of error in the WBGT estimate and should be checked against any available measured-globe reference. With that caveat, WBGT is practical for both forecast and historical training-run lookups in the current API surface.
+
+For fallbacks: if shortwave radiation is unavailable for a historical timestamp, substitute total cloud cover (\texttt{cloud\_cover}) as a coarse proxy and bias-correct empirically. If both solar and wet-bulb are unavailable, fall back to the heat index (a function of air temperature and relative humidity only) or to Open-Meteo's \texttt{apparent\_temperature} variable, which integrates wind chill, humidity, and radiation in a similar spirit to WBGT but is calibrated differently.
+
+On preferring dew point over relative humidity in regressions: \citet{vihma2010} showed that relative humidity is anti-correlated with air temperature within a race day, producing spurious negative humidity coefficients in OLS (faster times at higher humidity). \citet{knechtle2021b}, \citet{weiss2022b}, and \citet{weiss2024} reproduce this artifact at NYC and Berlin. Dew point or specific humidity avoid the confound and should be the default if humidity enters the model directly \citep{vihma2010, weiss2024}.
+
+\subsubsection{Distance dependence}
+
+Heat effects scale with race distance. \citet{guy2014} reported that elite marathon times slowed about 3\% in hot (>25 °C) versus temperate IAAF Championship conditions, while 5,000 m and 10,000 m times slowed only about 2\%. \citet{mantzios2022} fit per-°C-WBGT slopes that scale with event duration: about 0.2\% per °C above optimum for the marathon, 0.3\% for the 5,000 m, 0.04\% for the 10,000 m, and 0.4--1.1\% for the longer 20 km and 50 km racewalks. \citet{taylor2006} modeled the underlying physiology and concluded that heat-related performance benefits only become physiologically meaningful for events beyond about 1500 m. A rough rule of thumb from these data is that the half-marathon penalty is roughly half to three-quarters of the marathon penalty at the same WBGT; the 10K is roughly one-third. The literature directly comparing distances on the same days under matched fitness is thin --- mostly \citet{guy2014} and \citet{mantzios2022} --- so this rule of thumb should be treated as a prior, not a fact.
+
+\subsubsection{Elite vs.\ amateur runners}
+
+Across nearly every observational study, slower runners experience a larger percent slowdown in heat than faster runners. \citet{ely2007} reported that 25th-place finishers slowed about 1.1\% per 5 °C WBGT increase while 300th-place finishers slowed about 3.2\% per 5 °C. \citet{vihma2010} found that going from 10 °C to 25 °C added 5 minutes to an elite male marathon time but 23 minutes to a 4-hour finisher's time. \citet{nikolaidis2019} estimated 1:53 per °C for all Boston finishers versus 37--38 seconds per °C for the top 100 and top 10. \citet{knechtle2019} found similar magnitudes: 1:47 per °C for all Boston finishers versus 20 seconds per °C for annual winners. \citet{knechtle2021b} reported eight minutes of heat penalty for the NYC mass field versus under two minutes for the top 10. \citet{tan2022} reported larger Singapore Marathon temperature elasticities for slow runners than fast (regression coefficient 10.5 versus 6.9). A rough rule of thumb: amateur and back-of-pack runners are roughly 2--3 times more heat-sensitive in absolute percent-slowdown terms than elite runners.
+
+The mechanism is partly that slower runners spend longer exposed to deteriorating midday conditions \citep{ely2007, cheuvront2021}, and partly that elite runners are smaller and lighter (lower heat production per surface area) and more likely to be heat-acclimatized through climate of origin \citep{marino2008, maughan2010, scheer2021, ioannou2018}. Two counter-examples are worth flagging: \citet{ely2008} found that within a women's championship field, the within-race pacing decay in warm conditions was actually larger for elites than for the mass field (though slower runners still ran slower overall); and \citet{gasparetto2020} found cluster-specific WBGT coefficients in which the fastest NYC cluster actually had the largest percent decrement. \citet{knechtle2021a} also reported that top-3 and top-10 finishers at Berlin run \emph{faster} on warmer days, attributed to East African dominance of the elite tier and possibly to start-time exposure windows that miss the afternoon heat. The dominant signal is still that amateurs lose more time per °C, but the elite tier is heterogeneous.
+
+\subsubsection{Wind and other variables}
+
+Wind and pressure receive much less attention in the corpus. \citet{nikolaidis2019} and \citet{knechtle2019} both fit wind speed effects at Boston: roughly 13--19 seconds per km/h for all finishers, dropping toward zero or slightly negative for elites. Wind direction matters on point-to-point courses: at Boston, head wind from the east cost about 11 minutes versus a tail wind from the west for all finishers, dropping to about 5 minutes for winners \citep{knechtle2019, nikolaidis2019}. On the loop courses (Berlin, Chicago, NYC), the direction effect washes out. \citet{vihma2010} found wind speed had no significant net effect on Stockholm Marathon finishing times, attributed to compensating tailwind/headwind segments. Barometric pressure shows small effects --- about 6--9 seconds per hPa at Boston and NYC \citep{knechtle2019, nikolaidis2019, weiss2024} --- but is likely confounded with temperature. Precipitation slows non-elite runners modestly \citep{knechtle2019, nikolaidis2019}.
+
+\subsection{Heat acclimation and moderating effects}
+
+\subsubsection{Protocols and exposure shapes}
+
+The acclimation literature is dominated by controlled exercise-in-heat protocols, with growing attention to passive methods (sauna, hot water immersion) and natural climate residence.
+
+Active exercise-in-heat protocols typically run 60--90 minutes per day for 5--14 days at 30--40 °C, 40--60\% relative humidity, at intensities targeting either a fixed workload (50--65\% of $\dot{V}\mathrm{O}_2\mathrm{max}$) or a controlled hyperthermia endpoint of core temperature around 38.5 °C \citep{garrett2011, periard2015, gibson2020, tyler2016, tyler2024}. Short-term ($\leq$7 day), medium-term (8--14 day), and long-term ($\geq$15 day) categorizations are now standard \citep{tyler2024, kelly2023}.
+
+Passive sauna protocols typically use 30-minute post-exercise sessions for 10--15 sessions over 2--3 weeks at sauna temperatures of roughly 176--194 °F (80--90 °C) and 10--20\% relative humidity \citep{heathcote2018, pryor2019}. Hot water immersion uses 40 °C water for 30--40 minutes post-exercise, daily for 6--14 days \citep{heathcote2018, casadio2017, chaillou2022}. Both passive modalities reliably produce plasma volume expansion of 7--18\% and reductions in resting core temperature of about 0.3 °C \citep{heathcote2018, pryor2019}.
+
+Natural climate residence --- training in a hot location for 8--15 days --- produces the most complete adaptation when combined with active training. \citet{schmit2017} reported 12--17\% plasma volume expansion after 8 days in Guadeloupe (~30 °C, 74\% relative humidity), and \citet{charlot2017} and \citet{malgoyre2018} documented broad cardiovascular and perceptual adaptations in French soldiers over 5--15 days in the United Arab Emirates. \citet{brown2022} reviewed seasonal acclimatization across 29 studies and reported that adaptations emerge at a mean summer daytime WBGT of about 25 °C.
+
+\subsubsection{Why heat adaptation works (physiological basis)}
+
+The short version: with repeated exposure, the body learns to keep cooler at the same effort. Blood plasma volume expands, so the heart can pump more blood per beat and supply both the working muscles and the skin (for cooling) without the rate climbing as steeply. Sweating starts earlier in exercise, with more total volume but less sodium loss, so evaporative cooling is more effective and more sustainable. Skin blood flow becomes more responsive to a given rise in core temperature. At a fixed workload, an acclimated runner ends up with a lower heart rate, a lower core temperature, a lower perceived effort rating, and a lower sense of how hot they feel --- all together \citep{periard2015, tyler2016, tyler2024, racinais2017, gibson2020}.
+
+The practical consequence is that an acclimated runner running the same pace in the same conditions has more thermoregulatory headroom and can hold that pace longer before pace must drop \citep{periard2015, marino2008, rodrigues2020}.
+
+\subsubsection{Time course and decay}
+
+The shape of acclimation onset and decay is now reasonably well characterized across markers. \autoref{fig:acclimation_timeline} plots parametric curves calibrated to time constants reported in the cited literature.
+
+\begin{figure}[!ht]
+  \centering
+  \includegraphics[width=0.95\linewidth]{figures/fig_acclimation_timeline.pdf}
+  \caption{Time course of four major heat-acclimation markers --- onset over a 28-day acclimation block (left) and decay after exposure stops (right). Curves are parametric, calibrated to time constants reported in the cited literature.}
+  \label{fig:acclimation_timeline}
+\end{figure}
+
+Heart-rate and core-temperature adaptations develop fastest, with roughly 75\% of the gain achieved in the first 4--7 days \citep{periard2015, tyler2016, racinais2020, pryor2019}. Sweat-rate and sweat-sodium adaptations emerge more slowly and continue to develop through 10--14 days and beyond \citep{tyler2016, kelly2023, mikkelsen2019, cubel2024}. Plasma volume expansion appears within 3--6 days and can reach 4--15\% by two weeks \citep{periard2015, chalmers2014, tyler2024}. Total hemoglobin mass adapts more slowly, requiring 3--5 weeks of sustained heat training \citep{cubel2024, mccleave2017}.
+
+Decay, once exposure stops, runs at roughly 2.5\% per day for heart-rate and core-temperature adaptations \citep{daanen2018, gibson2020}, with about 35\% of the heart-rate adaptation and 30\% of the sweat-rate adaptation lost over two weeks of cool conditions \citep{daanen2018, racinais2020, pryor2019}. Plasma volume retreats faster --- often back to baseline within one week of stopping --- while hemoglobin-mass gains persist longer \citep{cubel2024, mccleave2017, chalmers2014}. Re-acclimation is asymmetric: 2--5 days of renewed heat exposure can restore most of the adaptation lost over 2--4 weeks, at roughly 8--12 times the rate of initial induction \citep{racinais2020, daanen2018, pryor2019}.
+
+Roughly a 10--14 day acclimation block captures the bulk of available adaptation, and at least one heat session every 5--7 days maintains it \citep{daanen2018, pryor2018, pryor2019, racinais2020, garrett2011}. For GetFast operationally, a runner's acclimation state should be approximated from their training-temperature history over the trailing 14--28 days. Heart-rate-channel adaptations decay faster, so they should be weighted more heavily on recent sessions, while the blood-volume-channel adaptations decay slower and can be weighted over a longer window.
+
+\subsubsection{How the literature models adaptation analytically}
+
+Most large-sample observational studies treat heat adaptation implicitly through proxies rather than as an explicit model term. The dominant pattern is a geographic-or-fitness proxy: \citet{ioannou2018} used average maximum temperature in each runner's country of origin as a heat-acclimatization index for the Marathon des Sables; \citet{scheer2021} and \citet{knechtle2021a} pointed to East African origin among elite Berlin Marathon winners as an explanation for their reduced heat sensitivity; \citet{tan2022} attributed the modest heat slopes at the Singapore Marathon to the tropical-resident participant population. Almost no observational study fits an individual-level acclimation state.
+
+The exception is \citet{vernon2021}, who computed the difference between race-day maximum temperature and each runner's rolling 60-day prior training-environment temperature and found a very large correlation ($r = 0.85$) between this differential and \emph{mean} finish time, with about 2.6\% additional slowdown per 5 °C of positive differential. Two cautions attach to that $r = 0.85$. It is computed at the race-mean (aggregate) level, describing how average finish time tracks the average temperature differential; ecological correlations of this kind are typically far larger than the individual-runner association they are taken to imply. And it comes from a single race (2018 London). It is nonetheless the closest the heat-effects corpus comes to an individual-level acclimation feature, and the differential it defines is directly aligned with the approach GetFast takes.
+
+Controlled experiments, in contrast, almost always work at the individual level, measuring adaptation pre- and post-intervention for each subject. But these studies have small samples (typically $n = 10$--30) and rarely connect their individual-level acclimation measurements to race-day performance prediction. The GetFast model bridges these literatures: it learns an individual acclimation state for each user from training-environment history, anchored by the literature-derived onset and decay rates as priors.
+
+\subsection{Predictive formulas in the literature}
+\label{sec:litformulas}
+
+A handful of papers in the corpus provide explicit functional forms that can be used directly as priors.
+
+For weather-to-performance, \citet{elhelou2012} fit quadratic functions of air temperature to top-quartile and median running speed across six major marathons and reported optimal temperatures ranging from about 39 to 50 °F (4 to 10 °C) depending on performance level. \citet{martin1999} fit a quadratic to elite men's NYC winning times: $\mathrm{WT}(\mathrm{min}) = 148.51 - 0.713\,T + 0.00657\,T^2$, with $T$ in °F, minimized at 54 °F (12 °C). \citet{vernon2021} fit two linear regressions to London Marathon mean finishing times: time (min) $= 1.5248 \cdot T_{\max} + 246.52$ for race-day maximum temperature, and time (min) $= 1.4918 \cdot \Delta T + 265.54$ for the differential between race-day maximum and prior 60-day mean maximum --- the latter is the closest in the corpus to an acclimation-aware predictor. \citet{aylwin2023} fit a linear relationship between WBGT and race-level percent of personal best across elite IAAF World Championship road races: $\%\mathrm{PB} = 2.1534 \cdot \mathrm{WBGT} + 52.513$, with $R^2 = 0.89$. \citet{gasparetto2020} fit cluster-specific quadratics in WBGT with linear coefficients ranging from $-58.75$ to $-202.9$ s/°C and quadratic coefficients from $3.79$ to $13.03$ s/°C${}^2$ across four performance clusters. These are the published forms against which we compare our own estimated curve in Section~\ref{sec:res_form}.
+
+\citet{vihma2010} fit a non-finisher-rate equation for the Stockholm Marathon:
+\begin{equation}
+  \mathrm{PNF} = 0.30\,T + 0.54\,q,
+\end{equation}
+where $T$ is ambient air temperature in °C and $q$ is specific humidity in grams per kilogram. Vihma uses specific humidity rather than relative humidity because relative humidity is anti-correlated with air temperature and produces spurious coefficients in OLS.
+
+For acclimation onset and decay, \citet{daanen2018} fit three regressions across 21 controlled-acclimation studies for heart-rate, core-temperature, and sweat-rate adaptation. Those regressions reference physiological channels GetFast cannot measure directly, so GetFast does \emph{not} use the coefficients as plug-in features. It takes one thing from them: the relative \emph{ordering} of decay rates across channels (heart-rate adaptation fading fastest, plasma-volume and sweat adaptations more slowly), which sets the relative half-lives of the training-history features.
+
+\section{Strategic goals and decisions}
+\label{sec:strategic}
+
+This section states what the weather-adjusted predictor is for, how it should be exposed to users, what additional data it would benefit from, and how its success should be judged. These are product and research decisions that were settled during the review stage; the model reported later was built to serve them.
+
+\subsection*{Product goals and deployment surfaces}
+
+The weather-adjusted predictor exists to close a specific gap. Existing race-weather tools --- MeteoPace being the most prominent --- map a runner-supplied goal time and a self-reported heat-adaptation level onto a pace adjustment. Both of those inputs are guesses the runner has to make. GetFast's purpose is to replace each with a quantity learned from data: the goal time becomes a fitness prediction from the runner's training streams, and the heat-adaptation level becomes the acclimation-state estimate. The product claim becomes ``MeteoPace with both of its manual inputs inferred.''
+
+Two deployment surfaces follow, and they are the same engine behind two front-ends rather than two systems:
+\begin{itemize}
+  \item \textbf{Race-bound prediction (auto-forecast).} The runner selects a race and their start time; GetFast pulls the forecast (if the race is within two weeks) or historical-reanalysis WBGT for that start line and gun time and returns a finish-time prediction with intervals. This answers ``what will I run at this race under its likely conditions?''
+  \item \textbf{Interactive what-if (sliders).} GetFast computes the runner's weather-neutral baseline finish time and lets the user move weather controls to watch the prediction respond. No weather API call is made as conditions are user-specified.
+\end{itemize}
+Both require the same two pieces: a weather-neutral baseline finish time, and a monotonic, runner-tier- and acclimation-aware WBGT adjustment applied on top of it. The auto-forecast surface feeds real WBGT into that adjustment; the slider surface sweeps user-set WBGT through it. This argues for a decoupled (two-stage) design --- a baseline model plus an interpretable, monotonic weather-adjustment head --- rather than folding weather entirely into the recurrent layers, because a structured head is what keeps the slider response stable, monotone, and explainable. This decoupling is exactly the $f \times g$ structure realized in Section~\ref{sec:methods}.
+
+\subsection*{Non-GPX file data that would enhance predictor accuracy}
+
+The literature documents several variables that would improve weather-adjusted prediction but are not captured in raw GPX files from Strava or Garmin. They could be imported by asking users or through Apple HealthKit or the Garmin health summary: body mass (heat production scales with body mass, and smaller runners are advantaged in heat, \citealp{marino2008, maughan2010}); biological sex (an established performance differential under heat, \citealp{llewellyn2025, vihma2010, kelly2023, weiss2022b}); and resting heart rate (one of the most validated acclimation markers, \citealp{periard2015, tyler2016, pryor2019}). Each could be added with a small product change. We do not recommend collecting lab-only variables such as true plasma volume or sweat sodium concentration.
+
+\subsection*{Success criteria and evidence asymmetry}
+
+The predictor should be judged against a weather-na\"ive baseline --- the same fitness model with no weather term --- on hot races specifically, rather than on the full race distribution where most days are temperate and the weather term is near zero. A candid note on evidence weight, written at the review stage and borne out by the results below: the weather-to-performance relationship is supported by many large observational studies and enters as a firm prior, while the individual-level acclimation-state feature rests on essentially one aggregate-level study \citep{vernon2021} and is the most speculative part of the design. As Section~\ref{sec:res_validation} shows, the right success metric turned out to be calibration (signed bias on hot runs), not mean absolute error, because the heat effect is small next to run-to-run noise.
+
+\section{Data and methods: from priors to a fitted model}
+\label{sec:methods}
+
+The review left five things to build: a training corpus, a WBGT value for every run, a weather-neutral fitness baseline, an estimate of the heat response, and a predictor that applies it. This section describes each. The guiding principle throughout is the decoupled $f \times g$ design from Section~\ref{sec:strategic}: keep the fitness prediction as a baseline $f$, estimate a separate weather adjustment $g$, and multiply. Figure~\ref{fig:pipeline} is the map.
+
+\begin{figure}[!ht]
+\centering
+\begin{tikzpicture}[node distance=8mm and 11mm]
+  % inputs
+  \node[io] (streams) {Garmin activity streams\\(per-second pace, HR,\\GPS, altitude)};
+  \node[io, below=of streams] (weather) {Open-Meteo reanalysis\\(temp, wet-bulb, radiation,\\wind at run time + place)};
+  % feature construction
+  \node[proc, right=of streams, yshift=-9mm] (feat) {Feature construction\\per run: fitness 32-vector,\\WBGT, HR, distance, elevation};
+  % estimation engines
+  \node[proc, right=16mm of feat, yshift=8mm] (reg) {Regression track\\within-runner OLS +\\XGBoost baseline};
+  \node[proc, right=16mm of feat, yshift=-14mm] (dl) {Deep track\\transformer over\\training streams + heat gate};
+  % g components
+  \node[headx, right=14mm of reg, yshift=6mm] (gpop) {Population $g(\mathrm{WBGT})$\\two-hinge heat curve};
+  \node[headx, right=14mm of reg, yshift=-9mm] (gtier) {Per-runner tolerance\\(HR-heat slope tier)};
+  \node[headx, below=5mm of gtier] (gacc) {Acclimation state\\(climate divergence)};
+  % output
+  \node[out, right=13mm of gtier, yshift=1mm] (pred) {Weather-adjusted\\prediction\\$f \times g$};
+  % flows
+  \draw[flow] (streams) -- (feat);
+  \draw[flow] (weather) -- (feat);
+  \draw[flow] (feat) -- (reg);
+  \draw[flow] (feat) -- (dl);
+  \draw[flow] (reg) -- (gpop);
+  \draw[flow] (reg) -- (gtier);
+  \draw[flow] (dl.east) to[out=0,in=180] (gacc.west);
+  \draw[flow] (gpop) -- (pred);
+  \draw[flow] (gtier) -- (pred);
+  \draw[flow] (gacc.east) to[out=0,in=250] (pred.south);
+\end{tikzpicture}
+\caption{The modeling pipeline. Two data sources (each runner's activity streams and matched Open-Meteo weather) become per-run features. Two estimation engines (a transparent regression track and a deep-learning track) recover the same population heat curve. The shipped predictor multiplies a weather-neutral fitness baseline $f$ by a weather adjustment $g$ built from the population curve, a per-runner tolerance scaling, and an acclimation term.}
+\label{fig:pipeline}
+\end{figure}
+
+\subsection{The training corpus}
+
+The corpus is observational: real training runs recorded by real runners on Garmin devices, not a controlled experiment. We enriched every outdoor run with the weather it was actually run in, by querying Open-Meteo at the run's time and location. The enriched table covers roughly 2.07 million weather rows (start, a 15-minute grid, and end for each run), spanning the United States, Great Britain, India, France, Australia, Spain, Canada, and more, so the hot end of the WBGT range is genuinely populated rather than inferred. Collapsing that to one row per run and joining the activity summaries gives about 356{,}000 outdoor runs from roughly 1{,}700 runners. A physical-plausibility filter (removing dropped-HR sensor artifacts and GPS pace glitches, about 1.4\% of runs) leaves the clean modeling table of 351{,}369 runs from 1{,}639 runners.
+
+Two facts about this corpus shape everything downstream. First, there are \emph{no race labels}. These are training runs, run at training effort, so the estimated slopes are averaged over mostly easy running and understate what happens at race effort. We handle this two ways: we estimate pace directly (not races), and we use a within-runner ``hard effort'' band (runs above a runner's own median fraction of maximum heart rate) as a race-effort proxy. Second, the runs are unbalanced across runners and conditions, so pooled between-runner comparisons are confounded (hot places attract different runners). We address that with a within-runner design, described next.
+
+\subsection{Building WBGT for every run}
+
+For the deep-learning track we compute a radiation-aware and wind-aware outdoor WBGT at every weather sample using the \texttt{thermofeel} implementation, which takes the measured shortwave radiation and wind speed and solves for the globe temperature rather than approximating it linearly. For the transparent regression track and the shipped slider, we use the closed-form shade approximation
+\begin{equation}
+  \mathrm{WBGT} = 0.567\,T + 0.393\,e + 3.94, \qquad e = \tfrac{\mathrm{RH}}{100}\cdot 6.105\,\exp\!\Big(\tfrac{17.27\,T}{237.7+T}\Big),
+\end{equation}
+with $T$ in \textdegree C and $\mathrm{RH}$ in percent, because it reconstructs cleanly from the familiar quantities a user sets on a slider (temperature and humidity). The two definitions differ in level (the radiation-aware outdoor WBGT sits several degrees below the shade formula, since the shade formula bakes in an assumed sunny radiant load), so knot locations do not transfer between them and each track uses knots fit on its own axis. Because a run is not a single instant, we summarize each run's WBGT trajectory by its time-weighted mean over the run, not its starting value: a runner who starts at 6\,am in the cool and finishes in the heat should be scored by the middle of that curve.
+
+\subsection{The weather-neutral fitness baseline}
+
+The baseline $f$ is a fitness prediction with no weather term. We use two versions. The transparent version is a rolling proxy, the runner's recent realized pace over a trailing window, which correlates about 0.73 with the pace of an arbitrary run. The production version reconstructs the frozen GetFast marathon model's 32 fitness features (fastest-segment times over a set of distances, computed within strict date windows) from each runner's stream history as of each run's date, then runs the frozen XGBoost model to get a fitness estimate in hours. Swapping the production fitness in for the proxy left the estimated heat curve essentially unchanged (the optimum moved from about 12.5 to 11.5\,\textdegree C and the mild slope from 0.20 to 0.26\% per \textdegree C), which is the reassurance we wanted: the weather curve is pinned by the data, not by the choice of fitness proxy.
+
+\subsection{The estimation strategy: within-runner, log-pace}
+
+The single most important modeling decision is to estimate the heat effect \emph{within runners}. Each runner's own average pace, average conditions, and average effort are subtracted out, so the heat slope is identified only from how a given runner's pace moves as their own race-day conditions move. This removes the between-runner confound (fast runners cluster in certain climates) at the cost of throwing away between-runner variation we do not trust. We estimate in log-pace, because the weather adjustment is multiplicative ($g$ is a percentage, applied on top of a baseline time), and a model should be estimated in the space in which it is applied.
+
+The canonical specification regresses log-pace on a nonlinear WBGT basis plus controls for fitness, distance, and elevation, within runner, with cluster-robust standard errors by runner. It deliberately omits heart rate. Heart rate is post-treatment: heat raises heart rate, so controlling for it absorbs part of the very effect we are trying to measure. Including it roughly doubles the apparent hot-end slope, which is an artifact of conditioning on a mediator, and reconciles the ``contradictory'' slope numbers seen in earlier passes. Effort enters instead through the hard-versus-easy stratification described above.
+
+A linear temperature term is the wrong functional form and hides the effect. Because the response is a U-curve, a single linear slope averages the cooling side against the heating side and cancels to almost nothing (about +0.36\% per 10\,\textdegree C). We therefore use a nonlinear basis throughout: a restricted cubic spline to \emph{find} the shape, then a two-sided hinge (a cold arm below the optimum and one or two heat arms above a breakpoint) to \emph{report} it, because the hinge coefficients are directly interpretable as percent per degree.
+
+\subsection{Two estimation engines and how weather enters each}
+
+We built the same estimand two ways, as a cross-check (Figure~\ref{fig:twotrack}). The regression track is the transparent one: within-runner OLS for the shape, and a calibrated XGBoost pipeline for the shipped predictor. The deep track is a transformer over each runner's recent training activities (a factored-attention network in the style of the production fitness model), which reconstructs fitness from raw streams and lets weather modulate the result. In the deep model, weather enters either as its own tokenized input channel or, in the preferred variant, through a structured monotone gate that multiplies the predicted pace by $g = \exp(\beta \cdot \mathrm{shape}(\mathrm{WBGT}))$, where the shape is a shared monotone hinge curve and $\beta$ is a per-runner steepness read off the fitness representation. That gate is the neural-network analogue of the regression's $f \times g$: the network provides the baseline, the gate provides the interpretable, monotone heat multiplier.
+
+\begin{figure}[!ht]
+\centering
+\begin{tikzpicture}[node distance=7mm and 10mm]
+  \node[io] (base) {Fitness baseline $f$\\(weather-neutral finish time)};
+  \node[headx, right=26mm of base] (g) {Weather head $g$\\$g(\mathrm{WBGT},\ \mathrm{tier},\ \mathrm{acclim})$\\monotone, interpretable};
+  \node[out, below=16mm of base, xshift=22mm] (mult) {$\hat{t} = f \times g$};
+  \node[proc, below=14mm of mult, xshift=-24mm] (naive) {Race-na\"ive surface\\user sweeps WBGT slider};
+  \node[proc, below=14mm of mult, xshift=24mm] (fore) {Race-forecast surface\\real forecast WBGT};
+  \draw[flow] (base) -- (mult);
+  \draw[flow] (g) -- (mult);
+  \draw[flow] (mult) -- (naive);
+  \draw[flow] (mult) -- (fore);
+  \node[lbl, above=1mm of base] {stage 1};
+  \node[lbl, above=1mm of g] {stage 2};
+\end{tikzpicture}
+\caption{The decoupled two-stage architecture and its two product surfaces. Stage 1 is the existing fitness prediction with no weather term. Stage 2 is a monotone weather head. Because they are separate, the same multiply drives both the interactive slider (sweep user-set WBGT) and the auto-forecast (feed real forecast WBGT), and the head stays stable and explainable.}
+\label{fig:twotrack}
+\end{figure}
+
+Figure~\ref{fig:dlarch} sketches the deep track in more detail, since it is the less familiar of the two.
+
+\begin{figure}[!ht]
+\centering
+\begin{tikzpicture}[node distance=6mm and 9mm]
+  \node[io] (ch) {Per-run channels\\pace, HR, cadence,\\distance, altitude, \dots,\\WBGT (last)};
+  \node[proc, right=of ch] (tok) {Tokenize + embed\\each channel\\(WBGT: quantile-100\\or RFF encoding)};
+  \node[proc, right=of tok] (sum) {Sum$/\sqrt{C}$\\+ LayerNorm\\+ positional};
+  \node[proc, right=of sum] (attn) {Factored attention\\within-run \&\\cross-run (history)};
+  \node[proc, right=of attn] (head) {Pace head};
+  \node[headx, above=9mm of head] (gate) {Heat gate\\$g=\exp(\beta\cdot\mathrm{shape})$};
+  \node[out, right=of head] (yhat) {$\widehat{\mathrm{pace}}$};
+  \draw[flow] (ch) -- (tok);
+  \draw[flow] (tok) -- (sum);
+  \draw[flow] (sum) -- (attn);
+  \draw[flow] (attn) -- (head);
+  \draw[flow] (head) -- (yhat);
+  \draw[flow] (gate) -- (yhat);
+  \draw[flow] (attn.north) to[out=90,in=180] (gate.west);
+\end{tikzpicture}
+\caption{The deep track. Each channel of each run is tokenized and embedded, summed with a $1/\sqrt{C}$ scale and layer-normalized, then passed through factored attention that mixes information within a run and across the runner's recent runs (this cross-run pathway is where acclimation context would live). The pace head predicts pace; the optional heat gate multiplies it by a monotone $g$ whose steepness is read per runner off the fitness representation. Thirty runs of history give the model an acclimation window for free.}
+\label{fig:dlarch}
+\end{figure}
+
+\section{Results}
+\label{sec:results}
+
+We report results in the order a runner experiences them: first how the body pays the heat cost, then the population heat curve and its shape against the literature, then how the penalty scales to the marathon, then how much of it is personal (tolerance and acclimation), then the deep model, and finally what all of it buys in prediction accuracy. Table~\ref{tab:slopes} collects the headline heat-slope estimates across our methods and the published forms, so the ``how do we compare'' question has one place to look.
+
+\subsection{How runners pay the heat cost: pace and heart rate}
+\label{sec:res_descriptive}
+
+Heat is one stress that shows up on two axes. At a matched pace, a hotter run costs heart rate: within runners, moving from 15 to 28\,\textdegree C WBGT adds about +0.42 beats per minute per \textdegree C ($p \approx 10^{-50}$). At a matched effort (fraction of maximum heart rate), the same heat costs pace: about +0.41\% per \textdegree C ($p \approx 10^{-30}$). A runner in the heat can spend the cost on either axis or split it, and in the data they mostly split it while leaning toward letting heart rate rise (Figure~\ref{fig:pacehr}). This is why heart rate is the more sensitive channel for reading heat strain, and it is the reason our tolerance estimate later is sourced from the heart-rate axis rather than pace.
+
+\begin{figure}[!ht]
+  \centering
+  \includegraphics[width=0.82\linewidth]{figures/fig_pace_hr_tradeoff.png}
+  \caption{The two axes of the heat cost, from within-runner slopes (about 262{,}000 runs). Holding pace fixed, heart rate rises; holding heart rate fixed, pace slows; runners typically do some of each. The baseline point is illustrative; the slopes are estimated.}
+  \label{fig:pacehr}
+\end{figure}
+
+\subsection{The population heat curve}
+\label{sec:res_gcurve}
+
+Estimated within runners across 156{,}449 runs from 1{,}126 runners, the pace response to WBGT is a clear U-curve with an optimum near 11\,\textdegree C. Fitting a two-sided hinge on the shade-WBGT axis, pace is flat through the optimum and then slows by about +0.29\% per \textdegree C above roughly 15\,\textdegree C, reaching about +3.5\% at WBGT 27. On the radiation-aware outdoor-WBGT axis (a full global cohort of 276{,}357 runs, 1{,}637 runners, with the optimum near 8.8\,\textdegree C and knots at 0/16/22\,\textdegree C), the same analysis separates a mild arm (+0.16\% per \textdegree C) from a distinct severe arm above 22\,\textdegree C, giving a total of about +0.49\% per \textdegree C in the severe range. The severe arm is separately identified for the first time here because the global data added genuine hot mass (about 58{,}000 runs above WBGT 20 and 14{,}600 above WBGT 25); earlier US-only data could not distinguish it.
+
+Two refinements matter for the product. First, effort amplifies the curve. Restricting to each runner's hard-effort runs roughly doubles the hot-end slope relative to all runs (about +0.46\% per \textdegree C versus +0.29\%), which is the expected direction: race effort should cost more than easy-run effort, and the training corpus is mostly easy runs, so the all-runs slope is a floor. Second, the effect is real but modest in absolute terms. At the median training distance the hot-end slope is on the order of 1.1 to 1.2 seconds per kilometer per \textdegree C, which is small next to the 15--30\% run-to-run swings in effort and terrain. That smallness is not a defect; it is the reason the payoff is calibration, not average error (Section~\ref{sec:res_validation}).
+
+\subsection{Functional form: our curve against the literature}
+\label{sec:res_form}
+
+Placing our estimated curve on the same axes as the published forms (Figure~\ref{fig:formcompare}) is the clearest way to see that the model landed in the mainstream. Every curve is expressed as percent slowdown versus a 10\,\textdegree C anchor. Our deep-model median and an independent coaching heuristic sit almost on top of each other and squarely in the middle of the published range: steeper than the shallow elite fits (Mantzios's roughly +0.20\% per \textdegree C marathon slope, Martin's elite quadratic), and well below the steep mass-field fits (Ely's +0.64\% per \textdegree C, Vernon's +0.56\% per \textdegree C above 12\,\textdegree C). That is the right place for a mixed-effort amateur cohort: not an elite curve, not a back-of-pack curve, and consistent with an external coaching table the model never saw. The shape also matches the literature consensus of ``flat, then accelerating,'' with our curve and Martin's quadratic both staying near zero through about 15\,\textdegree C before bending up.
+
+\begin{figure}[!ht]
+  \centering
+  \includegraphics[width=0.95\linewidth]{figures/fig_functional_forms_compared_getfast.pdf}
+  \caption{Our estimated heat curve (GetFast deep-model median) and an independent coaching benchmark plotted against four published functional forms, all as percent pace slowdown versus a 10\,\textdegree C anchor. Right-edge labels give minutes added to a 3:30 marathon. Some published forms are natively air-temperature (Martin, Vernon), so their horizontal placement above about 18\,\textdegree C is approximate; the comparison is of shape and magnitude.}
+  \label{fig:formcompare}
+\end{figure}
+
+\subsection{Scaling to the marathon}
+\label{sec:res_marathon}
+
+The training corpus tops out around a 32\,km 99th percentile, so the marathon penalty is an extrapolation and we treat it as a range, not a point. We approached it two ways. A Bayesian hierarchical model (partial pooling of runner- and region-specific heat slopes, with the literature's severe-slope range as a weak prior) was fit to 165{,}732 runs from 1{,}161 runners; it converged cleanly (no divergences, $\hat{R} \le 1.007$ on the quoted parameters). Its posterior hot-end slope grows with distance, from +1.73 s/km/\textdegree C at 10\,km, to +2.46 at the half, to +3.84 s/km/\textdegree C at the marathon (94\% interval [1.38, 6.44]). Translated to a finish time, the marathon penalty at WBGT 30 versus 21 is about +10.8\% (interval [7.1, 14.7]), or roughly 23 minutes on a 3:30 finish. A completely separate supplementary analysis, restricting to the 655 runs of 41--43\,km that can plausibly be assumed marathons, gives +2.31\% per \textdegree C above 15\,\textdegree C ($p \approx 8\times 10^{-6}$) and about +10\% for hot ($>$21\,\textdegree C) versus cool runs, robust to leaving out any single race date. Figure~\ref{fig:gmarathon} shows the race-day curve fit to these marathon-length efforts. The two roads reach the same neighborhood, which is the reassurance we wanted for a number this far out of sample: the marathon-proxy curve reads about +12\% at WBGT 24 and about +20\% at WBGT 30 relative to cool conditions, several times steeper than the all-runs training slope and consistent with the hierarchical marathon posterior.
+
+\begin{figure}[!ht]
+  \centering
+  \includegraphics[width=0.82\linewidth]{figures/nb_g_marathon.png}
+  \caption{Race-day heat curve fit to the marathon-proxy runs (roughly 41--43\,km, treated as assumed marathons; about one thousand efforts). The single-hinge slope is about +1.36\% per \textdegree C above 15\,\textdegree C, reaching roughly +12\% at WBGT 24 and +20\% at WBGT 30 relative to cool conditions. The shaded band is the confidence interval; the curve is several times steeper than the all-runs training slope, as expected for race effort.}
+  \label{fig:gmarathon}
+\end{figure}
+
+\subsection{How much of the penalty is personal: tolerance}
+\label{sec:res_tolerance}
+
+Runners differ in heat tolerance, and the difference is real, but it is far less resolvable than the population effect. Our sharpest reading of an individual's tolerance is the slope of their heart rate against heat at a matched load, because heart rate is the sensitive channel (Section~\ref{sec:res_descriptive}). Two facts govern how we can ship it.
+
+It is stable enough to display. The product number is a trailing average over a runner's recent windows, so adding one run nudges it by about two percentile points, and month-to-month it rarely jumps more than a bin. A user will not see it flicker.
+
+It is only weakly valid. Test-retest reliability of a per-runner estimate plateaus around 0.66--0.68 no matter how much history we add, because the between-runner true spread (about 1.08\% pace, standard deviation) is not much larger than the measurement noise (about 0.77\%), a signal-to-noise ratio near 1.4. The standard error corresponds to roughly 17 percentile points, so the honest resolution is three to five coarse tiers, not deciles and certainly not a precise percentile. A cross-method check makes the point unambiguous: an independent XGBoost within-runner heat slope and the deep-model heat readout each split-half-replicate on their own, yet they rank runners almost orthogonally ($r \approx -0.04$), which means the between-runner \emph{ranking} is method-specific rather than a single physiological trait. Averaging them therefore hurts rather than helps. Joint HR-and-pace estimation (Figure~\ref{fig:jointtol}) confirms the ceiling: the two axes share a latent tolerance (between-runner $r \approx 0.63$), but they read it off the same runs, so their errors are shared and combining them does not raise reliability. More \emph{data} on the heart-rate axis beats adding the pace axis.
+
+\begin{figure}[!ht]
+  \centering
+  \includegraphics[width=0.86\linewidth]{figures/fig_joint_tolerance.png}
+  \caption{Heat tolerance on the heart-rate and pace axes. The two per-runner slopes share a common latent trait but are read off the same runs, so a precision-weighted joint estimate does not beat the heart-rate axis alone. Reliability is a data-quantity problem, not a channel-count problem.}
+  \label{fig:jointtol}
+\end{figure}
+
+The product consequence is deliberate: we ship tolerance as three to five coarse, stable tiers with a confidence band, sourced from the heart-rate axis, and we do not ship deciles or the deep-model readout as a tolerance number. The population curve is solid; the per-runner ranking is coarse by nature.
+
+\subsection{How much of the penalty is personal: acclimation}
+\label{sec:res_acclim}
+
+Acclimation is a within-runner \emph{state}, not a fixed trait: it is where a runner has been training lately relative to where they are racing. We measure it as the deviation of a run's WBGT from the runner's recent training climate. The pace response to that deviation is asymmetric, which is the signature of acclimation: running hotter than you have been training costs about +0.219\% per \textdegree C of positive deviation ($p \approx 6\times 10^{-9}$), while running cooler than you trained saves almost nothing (about $-0.034\%$ per \textdegree C). A cool-climate runner (trained near 10\,\textdegree C) racing at WBGT 25 pays roughly +3.2\% from the deviation alone, on top of the absolute-WBGT penalty. Figure~\ref{fig:gdeviation} shows the decomposition.
+
+\begin{figure}[!ht]
+  \centering
+  \includegraphics[width=0.86\linewidth]{figures/nb_g_deviation.png}
+  \caption{Decomposing race-day WBGT into a trailing training climate and a deviation. The pace penalty for a positive deviation (racing hotter than trained) is larger in magnitude than the benefit of a negative deviation, an asymmetry consistent with heat acclimation being visible in pace.}
+  \label{fig:gdeviation}
+\end{figure}
+
+The acclimation signal is cleaner on the heart-rate axis than in pace, matching the physiology. At a matched load, the heat-to-heart-rate slope is itself moderated by recent training climate: an interaction of about $-0.023$ bpm/\textdegree C per \textdegree C of trailing climate ($p \approx 0.012$), which survives decorrelating against same-day WBGT and training volume. In pace the same effect is present but only suggestive ($p \approx 0.08$ in a free decomposition), which is an honest downgrade of an earlier, overstated pass: a constrained ``difference'' feature had looked far more significant than the free decomposition warranted, and the lesson we logged is to always decompose before believing a differential. We also tested giving the deep model an explicit acclimation channel and a full 12-channel history; it did not help (it hurt, through capacity competition), and the deep model's per-runner heat readout does not track a runner's recent heat exposure. Acclimation is therefore best treated as a population-level within-runner adjustment (the deviation asymmetry, and a recovery curve for a runner who has recently changed climates), not as a reliable per-person tracker.
+
+\subsection{The deep-learning track}
+\label{sec:res_dl}
+
+The deep model matters for two reasons: it reconstructs fitness from raw streams end-to-end (so it is the natural home for the interaction between fitness, effort, and weather), and it is an independent check that the population heat curve is not an artifact of the regression. Its central result is that weather became \emph{additive} rather than harmful once it was given room. A sensors-only model predicts hot and extreme runs too fast (a bias of roughly $-1.3\%$ on hot runs and $-3.0\%$ on the extreme tail). Adding a single WBGT channel removes about 87\% of the extreme-run bias and halves the hot-run bias, which is the deep-model analogue of the regression finding that heat makes a weather-blind model optimistic on the hot end. The champion single-stream model reaches a held-out $R^2$ of about 0.73 and a MAPE of about 6.3\% on a fixed panel of 158 held-out runners.
+
+The structured heat gate (Section~\ref{sec:methods}) is the preferred form. Forcing heat through one monotone shape scaled by a per-runner steepness produced better hot and extreme error than the free-form tokenized channel at no cost in $R^2$, and it yields the interpretable, monotone per-runner curves in Figure~\ref{fig:gate}: about 91\% of runners get a monotone heat penalty, with a real spread in steepness (penalty at 30\,\textdegree C ranging from roughly +0.5\% at the 10th percentile to +4.3\% at the 90th). The gate is the better model for the population deliverable. It does not, however, rescue the per-runner tolerance ranking: the gate raised reliability by anchoring its steepness to the stable fitness representation, so its ``heat sensitivity'' is a reliable fitness-linked construct rather than a better measurement of heat tolerance. That is the same conclusion the regression track reached from the other side, and it is why tolerance ships from the heart-rate regression, not the deep readout.
+
+\begin{figure}[!ht]
+  \centering
+  \includegraphics[width=0.9\linewidth]{figures/fig_gate_curves.png}
+  \caption{Per-runner heat curves from the deep model's monotone gate. Every runner shares one learned shape scaled by a per-runner steepness, so the curves differ in slope, not shape. About 91\% are monotone in WBGT, with a genuine spread in steepness across runners.}
+  \label{fig:gate}
+\end{figure}
+
+\subsection{What the model buys: bias, not MAPE}
+\label{sec:res_validation}
+
+The most important result to state plainly is why a correct weather layer barely moves mean absolute error and yet is worth building. The heat effect is about 3\% at the hot end; run-to-run variation in effort, terrain, and sleep is 15--30\%. A per-run absolute-error metric is dominated by that noise, so adding weather moves hot MAPE only from about 8.1 to 8.0\% (Figure~\ref{fig:vfull}C). This is not a failure of the weather layer; it is a property of the metric. A diagnostic ladder makes the mechanism explicit (Figure~\ref{fig:null}): adding WBGT to a fitness model \emph{without} the fitness term actually hurts hot-run error (pooled between-runner WBGT is confounded and does not generalize to held-out runners), while adding it \emph{with} fitness helps only slightly on average. The correction is real (+0.29\% per \textdegree C, $p \approx 10^{-15}$); it is simply small next to noise, and its value is race-day calibration that a training-run MAPE test structurally cannot see.
+
+\begin{figure}[!ht]
+  \centering
+  \includegraphics[width=0.98\linewidth]{figures/nb_v5_full.png}
+  \caption{The shipped regression pipeline, out-of-fold. Left: the two-hinge population $g$ (flat below 15\,\textdegree C, a mild arm, and a steeper arm above 24\,\textdegree C), reaching +2.0\% at 24, +3.9\% at 27, and +5.9\% at 30\,\textdegree C. Center: a weather-blind model predicts hot runs too fast (positive bias); calibration plus the two-hinge $g$ flattens the bias to near zero across the whole WBGT range. Right: MAPE is essentially unchanged, because the heat effect is small next to run-to-run noise. Weather moves bias, not MAPE.}
+  \label{fig:vfull}
+\end{figure}
+
+\begin{figure}[!ht]
+  \centering
+  \includegraphics[width=0.86\linewidth]{figures/fig_weather_null.png}
+  \caption{Why a naive weather correction can look like it does nothing. On held-out runners grouped by user, WBGT added without a fitness term hurts hot-run error (it is a confounded between-runner signal), and added with fitness it helps only slightly on average. The effect is real but small relative to day-to-day noise.}
+  \label{fig:null}
+\end{figure}
+
+The right test is signed bias on hot runs, and there the layer earns its place. Figure~\ref{fig:vpop} shows the population insight: a weather-blind model is optimistic on hot runs (it predicts them too fast), and adding the population slowdown removes that optimism, driving the mean bias at extreme WBGT from about +1.2\% (in a single held-out split) or +1.96\% (out-of-fold at scale) to near zero. Figure~\ref{fig:vpers} shows the personalized insight: sorting runners into heat-tolerance tiers, a weather-blind model predicts the intolerant too fast and the tolerant too slow, a spread of about seven percentage points; scaling the slowdown by the runner's heart-rate-tolerance tier removes most of it (about 65\% in a single split, and about 95\% out-of-fold at scale, where every tolerance-eligible runner is evaluated held-out). Crucially, this personalization is genuine heat tolerance and not a fitness proxy: the correlation between a runner's fitness and their heart-rate heat slope is only about $-0.05$, and removing fitness makes the tolerance effect stronger, not weaker. The deep-model readout, by contrast, correlates about $-0.07$ with heart-rate tolerance, which is why it is the wrong source for personalization even though it is an excellent population engine.
+
+\begin{figure}[!ht]
+  \centering
+  \includegraphics[width=0.98\linewidth]{figures/nb_boss_population.png}
+  \caption{Population validation. Left: hot-run signed bias before and after adding the population slowdown; the weather-blind model's hot-end optimism is removed. Right: the calibrated population $g$ used, flat below the breakpoint and rising through the observed range.}
+  \label{fig:vpop}
+\end{figure}
+
+\begin{figure}[!ht]
+  \centering
+  \includegraphics[width=0.82\linewidth]{figures/nb_boss_personalized.png}
+  \caption{Personalized validation. Hot-run signed bias by heart-rate-tolerance tier. A weather-blind model predicts the intolerant too fast and the tolerant too slow (a gap of about seven points). The population slowdown shifts levels but does not close the per-runner gap; scaling the slowdown by the runner's tolerance tier closes most of it.}
+  \label{fig:vpers}
+\end{figure}
+
+\subsection{The shipped predictor}
+\label{sec:res_shipped}
+
+The version-1 predictor is the transparent regression pipeline, because it is interpretable, it does not depend on a deep-learning run converging, and it delivers the calibration that matters. Individualized race-day pace is
+\begin{equation}
+  \widehat{\mathrm{pace}} \;=\; \underbrace{f_{\text{fitness}}}_{\text{XGBoost baseline}} \;\times\; \underbrace{g_{\text{pop}}(\mathrm{WBGT})}_{\text{two-hinge heat curve}} \;\times\; \underbrace{h_{\text{tol}}(\text{tier})}_{\text{HR-tolerance scaling}},
+\end{equation}
+with an acclimation term available as a within-runner adjustment when a runner has recently changed climates. The baseline is an XGBoost model on log-pace using heart rate, the fitness proxy, distance, and both elevation gain per kilometer and total climb (adding elevation lowered baseline MAPE from about 7.76 to 7.29). A calibration intercept then centers the bias, and the two-hinge population $g$ (flat below 15\,\textdegree C, a mild arm, and a steeper arm above 24\,\textdegree C) supplies the heat shape. The heart-rate-tolerance scaling makes it personal, acting only in heat and staying inert on cool days. Out of fold, this pipeline moves the overall signed bias from about $-0.51\%$ to $0.00\%$, flattens the bias across every WBGT band (the moderate-heat over-correction of a one-hinge curve is gone), and leaves MAPE essentially unchanged, exactly as the bias-not-MAPE logic predicts. A key calibration lesson is embedded in that result: the calibration must be fit on the exact metric it will be judged on (winsorized bias) and then inverted, because fitting on a ratio undershoots.
+
+One methodological guardrail deserves emphasis, because it is the difference between a real effect and a mirage. The between-runner comparison ``hot-climate runners versus cool-climate runners'' is confounded: hot places attract different runners. Restricting the comparison to runners within the same country and then partialling out fitness shrinks the naive between-runner pace-climate slope substantially, toward the within-runner causal slope we trust. Figure~\ref{fig:confound} shows that ladder. It is the reason every headline number in this section is estimated within runners.
+
+\begin{figure}[!ht]
+  \centering
+  \includegraphics[width=0.95\linewidth]{figures/fig_climate_runner_confound.png}
+  \caption{Why the estimates are within-runner. Comparing hot- versus cool-climate runners naively conflates the heat effect with who trains where. Restricting to within-country pairs and controlling for fitness shrinks the between-runner pace-climate slope toward the within-runner causal slope, which is the estimand the model uses.}
+  \label{fig:confound}
+\end{figure}
+
+\begin{table}[!ht]
+  \centering
+  \small
+  \caption{Estimated heat slopes across our methods and the published forms. Percent-per-\textdegree C figures are pace slowdown unless noted; s/km/\textdegree C figures are on the seconds-per-kilometer scale. Our estimates are within-runner unless the row says pooled. The literature rows are the WBGT-native forms used in Figure~\ref{fig:formcompare}.}
+  \label{tab:slopes}
+  \begin{tabular}{@{}p{4.9cm}p{3.0cm}p{4.4cm}p{2.3cm}@{}}
+    \toprule
+    \textbf{Method} & \textbf{Sample} & \textbf{Heat slope} & \textbf{Scope} \\
+    \midrule
+    Within-runner curve (Model 3) & 156k runs, 1{,}126 runners & +0.29\%/\textdegree C above 15 (all runs); +0.46\%/\textdegree C hard effort & pace, all distances \\
+    Outdoor-WBGT knots (global) & 276k runs, 1{,}637 runners & +0.16\%/\textdegree C mild; +0.49\%/\textdegree C total above 22 & pace, all distances \\
+    Bayesian hierarchical (Model 4) & 166k runs, 1{,}161 runners & marathon +3.84 s/km/\textdegree C above 27; +10.8\% at WBGT 30 vs 21 & marathon (extrapolated) \\
+    Supplementary assumed-marathons & 655 runs, 365 runners & +2.31\%/\textdegree C above 15 (pooled); +10\% hot vs cool & marathon (proxy) \\
+    Shipped two-hinge $g$ (calibrated) & out-of-fold, 269k runs & +2.0\% at 24, +3.9\% at 27, +5.9\% at 30\,\textdegree C & pace, population \\
+    Deep-model median (gate) & 1{,}349-run panel & +5.0\% at 28\,\textdegree C vs 10 & pace, population \\
+    \midrule
+    Ely (2007), mass field & literature & +0.64\%/\textdegree C & marathon \\
+    Vernon (2021), London mass & literature & +0.56\%/\textdegree C above 12 & marathon \\
+    Mantzios (2022), elite & literature & +0.20\%/\textdegree C above optimum & marathon \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\section{Limitations and gaps}
+\label{sec:limitations}
+
+\begin{itemize}
+  \item \textbf{No race labels.} The corpus is training runs. Every slope is estimated on training-effort pace and is a floor for race effort; the hard-effort band and the assumed-marathon supplement are proxies, not labels. True race calibration awaits a labeled race set, which is the single most valuable data addition.
+  \item \textbf{The marathon penalty is extrapolated.} Training runs top out near 32\,km, so the marathon figure is a modeled range (Model 4 and the assumed-marathon supplement agree near +10--11\% at WBGT 30), not a directly observed one. Data above about 25\,\textdegree C WBGT are also sparse because hot races are cancelled, so the very hot tail is thin by design and the slider is capped there.
+  \item \textbf{Per-runner tolerance is coarse.} Between-runner heat tolerance resolves into three to five tiers, not deciles. Cross-method rankings are nearly orthogonal, so the tier is a useful coarse signal, not a precise trait. The decisive open test is to validate the shipped tier against an external physiological heat-strain measure.
+  \item \textbf{Acclimation is population-level.} It appears as the within-runner deviation asymmetry and is clearest in heart rate; it is not a reliable per-person tracker, and the deep model did not learn it from a 30-run window.
+  \item \textbf{The globe term is the weakest input.} The WBGT estimate inherits its largest uncertainty from the approximated black-globe (solar) term, especially at low sun angles.
+  \item \textbf{A leakage check is open.} The production fitness model was trained on a marathon-majors set; we still owe a confirmation that these runners' major races are not in its training labels, so the fitness baseline carries no circularity.
+  \item \textbf{Cold-side, wind-direction, and distance-scaling effects are deferred.} v1 models heat only, uses wind speed rather than course-projected direction, and treats distance scaling as a modeled prior anchored to a thin direct-comparison literature.
+\end{itemize}
+
+This document will be revised as a labeled race set becomes available and as the deep-learning track is validated against the shipped regression pipeline on race-day calibration.
+
+\bibliographystyle{apalike}
+\bibliography{references}
+
+\end{document}
