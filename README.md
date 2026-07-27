@@ -27,9 +27,14 @@ machine that has one (the same setup that builds the research repo).
 - `references.bib` -- shared bibliography (copied from the research repo).
 - `figures/` -- reused review figures plus model-result figures.
 
-## Figure provenance
+## Figures
 
-Model-result figures are exported by scripts under
-`/weather/getfast-weather/deep_learning_model/` (notebooks 01-09, `build_*` scripts,
-`results/`). Review figures (`fig_marathon_starts_trend`, `fig_functional_forms_compared`,
-`fig_acclimation_timeline`) are carried over from `getfast-weather-research`.
+- The seven result figures (`fig_heat_response`, `fig_g_vs_literature`,
+  `fig_distance_scaling`, `fig_validation`, `fig_dl_response`, `fig_acclimation`,
+  `fig_tolerance`) are built fresh by `build_paper_figures.py` in one consistent,
+  colorblind-safe style. It reads the result artifacts under `/weather/results/`,
+  `/weather/data/` (the OOF prediction parquets and the DL percentile npz), and the
+  clean activity table. Rebuild with `python build_paper_figures.py`.
+- Three review figures (`fig_marathon_starts_trend`, `fig_functional_forms_compared`,
+  `fig_acclimation_timeline`) are carried over from `getfast-weather-research`.
+- Three process diagrams are TikZ, drawn inline in the `.tex`.
