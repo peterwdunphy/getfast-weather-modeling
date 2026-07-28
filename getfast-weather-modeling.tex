@@ -136,14 +136,7 @@ The next three subsections synthesize the corpus: how weather (chiefly heat) deg
 
 The magnitude of marathon slowdown with rising ambient temperature varies substantially across studies, and the reported coefficient depends heavily on which runners are sampled. For elite men, \citet{ely2007} found that mean finishing times slowed by about 2.8 percentage points off course record going from 5--10 °C to 20--25 °C WBGT, and \citet{guy2014} reported a 3.1\% mean slowdown for top-10 IAAF World Championship men when air temperature exceeded 25 °C. \citet{nikolaidis2019} estimated about 38 seconds slower per °C air temperature for annual top-10 finishers at Boston, and \citet{knechtle2019} reported 20 seconds per °C for annual Boston winners. Among mass-field runners the slope is consistently steeper: \citet{ely2007} reported about 3.2\% slowdown per 5 °C WBGT increase for 300th-place finishers; \citet{nikolaidis2019} found about 1:53 (min:sec) per °C for all Boston finishers; \citet{knechtle2021b} reported about eight minutes additional finishing time in the hottest NYC Marathon temperature tertile (17--24 °C) versus the coldest (5--12 °C). \citet{vernon2021} found an approximate 2.8\% slowdown per 5 °C above 12 °C for London Marathon mass participants, and \citet{tan2022} reported per-percent elasticities of roughly 7.6\% on finish time per 1\% rise in dry-bulb temperature in tropical Singapore.
 
-The functional form is debated. Linear fits work reasonably well across the moderate temperature ranges observed at most majors and dominate the regression literature \citep{ely2007, knechtle2019, nikolaidis2019, vernon2021}. Quadratic fits with a U-shaped optimum appear in \citet{martin1999} (optimum near 54 °F / 12 °C for elite men at NYC), \citet{elhelou2012} (optima ranging from 3.8 °C to 9.9 °C across performance levels), \citet{gasparetto2020} (cluster-specific quadratics with tipping point near 8 °C WBGT), and \citet{llewellyn2025} (J-curve with optimum around 5--10 °C for median runners). \citet{mantzios2022} synthesized 1,258 elite races and reported a piecewise structure with an optimum band of 7.5--15 °C WBGT and a slope of roughly 0.3--0.4\% performance decline per °C outside that band, asymmetric across events (steeper on the hot side for racewalking, gentler for the marathon).
-
-\begin{figure}[!ht]
-  \centering
-  \includegraphics[width=0.95\linewidth]{figures/fig_functional_forms_compared.pdf}
-  \caption{How different authors have fit the WBGT-to-slowdown relationship for the marathon. Linear, quadratic, and J-shaped forms have all been published; above roughly 18 \textdegree C / 64 \textdegree F WBGT the studies diverge, and observations in genuinely dangerous heat are rare because races are typically cancelled or postponed above about 29 \textdegree C / 85 \textdegree F WBGT.}
-  \label{fig:functional_forms_compared}
-\end{figure}
+The functional form is debated. Linear fits work reasonably well across the moderate temperature ranges observed at most majors and dominate the regression literature \citep{ely2007, knechtle2019, nikolaidis2019, vernon2021}. Quadratic fits with a U-shaped optimum appear in \citet{martin1999} (optimum near 54 °F / 12 °C for elite men at NYC), \citet{elhelou2012} (optima ranging from 3.8 °C to 9.9 °C across performance levels), \citet{gasparetto2020} (cluster-specific quadratics with tipping point near 8 °C WBGT), and \citet{llewellyn2025} (J-curve with optimum around 5--10 °C for median runners). \citet{mantzios2022} synthesized 1,258 elite races and reported a piecewise structure with an optimum band of 7.5--15 °C WBGT and a slope of roughly 0.3--0.4\% performance decline per °C outside that band, asymmetric across events (steeper on the hot side for racewalking, gentler for the marathon). Section~\ref{sec:res_curve} places the present estimate against these published forms.
 
 On cold-side asymmetry, this review focuses on heat penalties. A few papers do report J-curves with modest slowdown below the optimum: \citet{martin1999} found Boston/NYC times rising at the cold end; \citet{mantzios2022} reported a cold-side slope of about 0.3\% per °C; \citet{llewellyn2025} observed the same for median runners. The present analysis does not model cold-side penalties, which are left to future work.
 
@@ -199,13 +192,13 @@ The practical consequence is that an acclimated runner running the same pace in 
 
 \subsubsection{Time course and decay}
 
-The shape of acclimation onset and decay is now reasonably well characterized across markers. \autoref{fig:acclimation_timeline} plots parametric curves calibrated to time constants reported in the cited literature.
+The shape of acclimation onset and decay is now reasonably well characterized across markers. Figure~\ref{fig:acclimation} plots the literature time courses together with the two-timescale decay weighting this paper would use to summarize a runner's recent heat exposure.
 
 \begin{figure}[!ht]
   \centering
-  \includegraphics[width=0.95\linewidth]{figures/fig_acclimation_timeline.pdf}
-  \caption{Time course of four major heat-acclimation markers --- onset over a 28-day acclimation block (left) and decay after exposure stops (right). Curves are parametric, calibrated to time constants reported in the cited literature.}
-  \label{fig:acclimation_timeline}
+  \includegraphics[width=\linewidth]{figures/fig_acclimation_lit.pdf}
+  \caption{Heat-acclimation onset and decay: literature time courses against the model proposed here. Left: onset over an acclimation block for the fast (heart-rate and core-temperature), medium (plasma volume), and slow (sweat-rate) markers, as parametric curves calibrated to reported time constants; marker shape indicates the study population (diamond, highly trained; square, recreational). Right: decay after exposure stops for the same markers, together with the two-timescale weighting proposed here (a short and a long half-life) for summarizing a runner's recent training-temperature exposure.}
+  \label{fig:acclimation}
 \end{figure}
 
 Heart-rate and core-temperature adaptations develop fastest, with roughly 75\% of the gain achieved in the first 4--7 days \citep{periard2015, tyler2016, racinais2020, pryor2019}. Sweat-rate and sweat-sodium adaptations emerge more slowly and continue to develop through 10--14 days and beyond \citep{tyler2016, kelly2023, mikkelsen2019, cubel2024}. Plasma volume expansion appears within 3--6 days and can reach 4--15\% by two weeks \citep{periard2015, chalmers2014, tyler2024}. Total hemoglobin mass adapts more slowly, requiring 3--5 weeks of sustained heat training \citep{cubel2024, mccleave2017}.
@@ -345,13 +338,13 @@ Stratifying the held-out error by WBGT shows where each model helps (Figure~\ref
 \subsection{The learned heat curve against external references}
 \label{sec:res_curve}
 
-The deep model's population heat curve can be compared to an independent coaching heuristic and to the published literature without any shared fitting (Figure~\ref{fig:dl_vs_coach}). The curve and the coaching benchmark agree in direction and in hot-end magnitude: both are anchored near zero at $10\,^{\circ}$C and reach roughly 5 to 6\% by $28\,^{\circ}$C. At $28\,^{\circ}$C the coaching value is 5.62\% and the DL median is 5.04\%, which places the heuristic near the DL 72nd percentile at that endpoint. The two shapes are not identical, since the coaching heuristic assigns more slowdown through moderate heat while the DL curve stays flatter longer and rises more sharply near $28\,^{\circ}$C. Against the published marathon fits, the DL curve sits in the mainstream: below the steep mass-field slopes of \citet{ely2007} and \citet{vernon2021} and near the shallow elite slope of \citet{mantzios2022}, which is the expected place for a mixed-effort amateur cohort.
+The deep model's population heat curve can be compared to the published literature without any shared fitting (Figure~\ref{fig:heateffects}). Expressed as percent slowdown versus a $10\,^{\circ}$C anchor, the published forms fall into two bands: steep slopes for amateur and mass fields (\citealp{ely2007, nikolaidis2019, knechtle2019, vernon2021}, reaching 10 to 16\% by $30\,^{\circ}$C) and shallow slopes for elite fields (\citealp{mantzios2022, martin1999, guy2014}, near 3 to 5\%). Our curve sits at the lower edge of this range, close to the elite and shallow-amateur forms and reaching about 5\% by $28\,^{\circ}$C, which is the expected place for a mixed-effort cohort whose runs are mostly training rather than racing. It also agrees with an independent coaching heuristic, which reaches about 5.6\% at $28\,^{\circ}$C, near the deep model's 72nd percentile.
 
 \begin{figure}[!ht]
   \centering
-  \includegraphics[width=0.9\linewidth]{figures/fig_dl_vs_coach.pdf}
-  \caption{The deep model's population heat curve (median and 10th-to-90th-percentile band across runners) against an independent coaching benchmark and three published marathon fits, all as percent slowdown versus a $10\,^{\circ}$C anchor. The DL curve and the coaching heuristic agree in direction and hot-end magnitude and sit in the middle of the published range. The held-out cohort has no runs above $25\,^{\circ}$C, so the region beyond it is model extrapolation.}
-  \label{fig:dl_vs_coach}
+  \includegraphics[width=\linewidth]{figures/fig_heat_effects_lit.pdf}
+  \caption{The deep model's population heat curve (this study, bold) against published marathon heat-slowdown forms, all as percent pace slowdown versus a $10\,^{\circ}$C anchor. Marker shape encodes the study population: diamonds for elite fields, squares for amateur or mass fields. Slopes reported in seconds per degree are converted to percent using a representative finish time (elite 130 min, amateur 240 min), and forms native to air temperature rather than WBGT are drawn on the same axis, so placement above about $18\,^{\circ}$C is approximate.}
+  \label{fig:heateffects}
 \end{figure}
 
 \subsection{What the personalization is: calibration, not a heat interaction}
