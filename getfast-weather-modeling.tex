@@ -17,6 +17,7 @@
 \usepackage{float}
 \usepackage{textcomp}
 \usepackage{tikz}
+\usepackage{authblk}
 \usetikzlibrary{arrows.meta, positioning, fit, backgrounds, calc, shapes.geometric}
 \renewcommand{\_}{\textunderscore\allowbreak}
 \setlength{\emergencystretch}{2em}
@@ -62,7 +63,10 @@
 
 \title{Weather Effects and Heat Acclimation in Endurance Running:\\
 A Deep-Learning Approach to Heat-Adjusted Pace Prediction}
-\author{[Author names and affiliations]}
+\author{Peter Dunphy}
+\author{Thomas Mulc}
+\author{Gabe Cupino}
+\affil{Kailo, Mountain View, CA, U.S.A.}
 \date{\today}
 
 \begin{document}
@@ -78,16 +82,16 @@ A Deep-Learning Approach to Heat-Adjusted Pace Prediction}
 
 \begingroup\small
 
-\noindent\textbf{\textsc{Motivation.}} Anthropogenic warming is making extreme-heat events more frequent, and large road races increasingly take place in conditions their fields did not train for. Across the six World Marathon Majors, abnormally hot editions remain rare but have arrived roughly six times more often per year since 2020 than in the preceding four decades. Hot race-day conditions can cost a mass-field runner on the order of 10--15\% of expected pace, so a finish-time predictor that accounts for heat is increasingly worth having. This document keeps a companion literature review intact and reports the modeling experiment it motivated.
+\noindent\textbf{\textsc{Motivation.}} Anthropogenic warming is making extreme-heat events more frequent, and large road races increasingly take place in conditions their fields did not train for. Across the six Abbott World Marathon Majors, abnormally hot editions remain rare but have arrived roughly six times more often per year since 2020 than in the preceding four decades. New models have allowed runners to better predict their finishing times. However, no existing finish-time predictor accounts for abnormal heat and/or adverse weather conditions. 
 
 \smallskip
-\noindent\textbf{\textsc{Literature.}} Heat slows distance runners nonlinearly: performance is roughly flat through a cool optimum near 10--15\,\textdegree C wet-bulb globe temperature (WBGT) and degrades increasingly above it. Slower amateurs lose two to three times more time per degree than elites, and the penalty grows with race distance. WBGT is the most useful single composite heat metric, and dew point is preferred to relative humidity, which is confounded with air temperature within a race day. Over 5--14 days, heat exposure builds tolerance, as plasma volume expands and heart rate and core temperature fall at a given effort, but that adaptation decays once exposure stops. Individual-level acclimation is the least-established part of the corpus.
+\noindent\textbf{\textsc{Literature.}} Heat slows distance runners nonlinearly: performance is roughly flat through a cool optimum near 10--15\,\textdegree C wet-bulb globe temperature (WBGT) and degrades increasingly above it. Slower amateur runners lose two to three times more time per degree than those in the elite field. This penalty grows with race distance. Individual-level impact of heat varies based on previous exposure to warm temperatures in training. Over 5--14 days, heat exposure builds tolerance, as plasma volume expands and heart rate and core temperature fall at a given effort, but that adaptation decays once exposure stops.
 
 \smallskip
-\noindent\textbf{\textsc{Methods.}} We assembled a large observational corpus of Garmin training runs, each enriched with the weather it was run in. A transformer trained on each runner's recent streams predicts pace and, through counterfactual WBGT sweeps, yields two heat features: a population heat curve and a per-runner sensitivity score. We add these to a weather-blind XGBoost pace model (heart rate, fitness, distance, and elevation) and evaluate on a runner-disjoint held-out set of 15{,}892 activities from 104 runners, using robust MAPE and signed bias with runner-clustered bootstrap intervals, plus a direct affine calibration of the heat features.
+\noindent\textbf{\textsc{Methods.}} We assembled an observational corpus of roughly a quarter million Garmin training runs, each enriched with the weather it was run in. A transformer trained on each runner's recent streams predicts pace and, through counterfactual WBGT sweeps, yields two heat features: a population heat curve and a per-runner sensitivity score. We add these to a weather-blind XGBoost pace model (heart rate, fitness, distance, and elevation) and evaluate on a runner-disjoint held-out set of 15{,}892 activities from 104 runners, using robust MAPE and signed bias with runner-clustered bootstrap intervals, plus a direct affine calibration of the heat features.
 
 \smallskip
-\noindent\textbf{\textsc{Results.}} Adding the population heat curve lowered robust held-out error modestly (MAPE from 7.34 to 7.29\%), and adding the per-runner sensitivity score lowered it further (to 7.13\%), with a shuffled control confirming that the personalized gain is runner-specific. The population curve is well calibrated, since its scale is compatible with what the model needs, and it agrees with an independent coaching heuristic. The personalized score is genuine predictive signal, but it behaves mostly as a runner-level calibration offset rather than a temperature interaction: its effect is nearly flat across WBGT, only about 55\% survives when forced through the temperature curve, and its residual direction is reversed, plausibly because heart rate in the baseline already carries heat sensitivity. Acclimation evidence is suggestive but not individually validated.
+\noindent\textbf{\textsc{Results.}} Adding the population heat curve lowered robust held-out error modestly (MAPE from 7.34 to 7.29\%), and adding the per-runner sensitivity score lowered it further (to 7.13\%), with a shuffled control confirming that the personalized gain is runner-specific. The population curve is well calibrated, compatible with what the model needs. The personalized score provides a genuine predictive signal, mostly acting as a runner-level calibration offset rather than a temperature interaction. This effect is nearly flat across WBGT, only about 55\% survives when forced through the temperature curve, and its residual direction is reversed, plausibly because heart rate in the baseline already carries heat sensitivity.
 
 \smallskip
 \noindent\textbf{\textsc{Implications.}} A population heat adjustment can be applied to finish-time predictions now, letting runners see how forecast conditions are likely to change their expected pace; it is well calibrated and agrees with an independent coaching heuristic. Individualized heat correction is predictive but not yet a directly applicable adjustment, and remains a question for future work, pending a baseline with an explicit mediation structure and, above all, race-day performance labels. The appropriate accuracy metric is calibration on hot runs rather than average error, because the heat effect is small next to day-to-day training variation.
