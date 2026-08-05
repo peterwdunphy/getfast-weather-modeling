@@ -17,6 +17,7 @@
 \usepackage{float}
 \usepackage{textcomp}
 \usepackage{tikz}
+\usepackage{titling}
 \onehalfspacing
 \usepackage{authblk}
 \usetikzlibrary{arrows.meta, positioning, fit, backgrounds, calc, shapes.geometric}
@@ -71,6 +72,7 @@ A Deep-Learning Approach to Heat-Adjusted Pace Prediction}
 \date{\today}
 
 \begin{document}
+\setlength{\droptitle}{-2cm} 
 \maketitle
 \vspace{-1.1cm}
 
@@ -81,7 +83,7 @@ A Deep-Learning Approach to Heat-Adjusted Pace Prediction}
 \rule{\linewidth}{0.4pt}
 \end{center}
 
-\begingroup\small
+\begin{singlespace}\small
 
 \noindent\textbf{\textsc{Motivation.}} Anthropogenic warming is making extreme-heat events more frequent, and large road races increasingly take place in conditions their fields did not train for. Across the six Abbott World Marathon Majors, abnormally hot editions remain rare but have arrived roughly six times more often per year since 2020 than in the preceding four decades. Finish-time prediction has improved over the same period, drawing on the training data now collected passively by GPS watches, but the predictors in current use remain weather-blind, and are therefore systematically optimistic on precisely the days when a runner most needs a dependable estimate.
 
@@ -97,7 +99,7 @@ A Deep-Learning Approach to Heat-Adjusted Pace Prediction}
 \smallskip
 \noindent\textbf{\textsc{Implications.}} A population heat adjustment can be applied to finish-time predictions now, letting runners see how forecast conditions are likely to change their expected pace; it is well calibrated and agrees with an independent coaching heuristic. Individualized heat correction is predictive but not yet a directly applicable adjustment, and remains a question for future work, pending a baseline with an explicit mediation structure and, above all, race-day performance labels. The appropriate accuracy metric is calibration on hot runs rather than average error, because the heat effect is small next to day-to-day training variation.
 
-\endgroup
+\end{singlespace}
 
 \newpage
 
