@@ -1,11 +1,9 @@
 """build_lit_comparison.py
 
-Two literature-comparison figures for the manuscript:
+Literature-comparison figure for the manuscript:
   1. fig_heat_effects_lit  -- our estimated heat-slowdown curve against the published
      functional forms and slopes. Marker shape encodes the study population:
      DIAMOND = elite field, SQUARE = amateur / mass field.
-  2. fig_acclimation_lit   -- heat-acclimation onset and decay: literature time courses
-     against the decay-weighting model this paper proposes for the exposure feature.
 
 All heat-effect curves are expressed as percent pace slowdown versus a 10 C anchor on a
 common temperature axis. Slopes reported in seconds per degree are converted with a
@@ -118,53 +116,7 @@ def fig_heat_effects_lit():
     fig.subplots_adjust(right=0.75)
     finish(fig, "fig_heat_effects_lit")
 
-# =========================================================================== #
-# FIGURE 2 -- heat-acclimation onset and decay: literature vs our proposed model
-# =========================================================================== #
-def fig_acclimation_lit():
-    d = np.linspace(0, 28, 200)
-    onset = lambda tau: 100*(1-np.exp(-d/tau))            # % of full adaptation achieved by day d
-
-    fig, (axA, axB) = plt.subplots(1, 2, figsize=(9.8, 4.2), sharey=True)
-
-    # ---- Panel A: onset over an acclimation block (literature time courses) ----
-    axA.plot(d, onset(3.5), color=BLUE,  lw=1.8, label="HR / core temp (fast)")
-    axA.plot(d, onset(5.0), color=GREEN, lw=1.8, label="plasma volume (medium)")
-    axA.plot(d, onset(9.0), color=VERM,  lw=1.8, label="sweat rate (slow)")
-    # a few literature anchor points, shaped by study population
-    axA.plot([5], [onset(3.5)[np.argmin(abs(d-5))]], "D", ms=8, mfc=BLUE, mec="white",  # Periard/Tyler, trained
-             mew=0.6, zorder=5)
-    axA.plot([8], [onset(5.0)[np.argmin(abs(d-8))]], "D", ms=8, mfc=GREEN, mec="white", # Schmit, trained/military
-             mew=0.6, zorder=5)
-    axA.plot([12],[onset(9.0)[np.argmin(abs(d-12))]], "s", ms=8, mfc=VERM, mec="white", # recreational cohorts
-             mew=0.6, zorder=5)
-    axA.set_xlabel("day of acclimation block"); axA.set_ylabel("adaptation achieved (%)")
-    axA.set_title("A. Onset (literature)", loc="left", fontsize=10.5); axA.legend(loc="lower right")
-    axA.set_xlim(0, 28); axA.set_ylim(0, 100)
-
-    # ---- Panel B: decay after exposure stops -----------------------------------
-    # Meta-regression equations from Daanen et al. (2018), plotted as the fraction
-    # of the adaptation still retained. Each equation is linear in decay days, so
-    # these are the published forms rather than fitted exponentials.
-    #   HR : decay(%) = 3.6 + 2.3 x decay days                    (n = 29, r = 0.60)
-    #   Tc : decay(%) = 126 + 2.6 x decay days - 1.2 x duration
-    #                       + 6.8 x WBGT                          (n = 27)
-    #   SR : decay(%) = 964 - 27.7 x HA days - 18.2 x WBGT        (n = 13)
-    # The SR equation carries no decay-days term, so sweat-rate adaptation is flat
-    # in this coordinate: it does not fade with time away from the heat.
-    axB.plot(d, 100 - (3.6 + 2.3*d), color=BLUE, lw=1.8, label="heart rate (2.3%/day)")
-    axB.plot(d, 100 - 2.6*d,         color=SKY,  lw=1.8, label="core temperature (2.6%/day)")
-    axB.plot(d, np.full_like(d, 100.0), color=VERM, lw=1.8, label="sweat rate (no decay-day term)")
-    axB.set_xlabel("days since last heat exposure")
-    # panels share the y scale but not its meaning: A accumulates, B is what remains
-    axB.set_ylabel("adaptation retained (%)", labelpad=6)
-    axB.set_title("B. Decay (literature)", loc="left", fontsize=10.5)
-    axB.legend(loc="upper right"); axB.set_xlim(0, 28)
-    fig.tight_layout()
-    finish(fig, "fig_acclimation_lit")
-
 if __name__ == "__main__":
-    print("building literature-comparison figures ...")
+    print("building literature-comparison figure ...")
     fig_heat_effects_lit()
-    fig_acclimation_lit()
     print("done ->", OUT_PDF)
