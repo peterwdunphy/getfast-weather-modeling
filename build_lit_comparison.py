@@ -123,7 +123,6 @@ def fig_heat_effects_lit():
 def fig_acclimation_lit():
     d = np.linspace(0, 28, 200)
     onset = lambda tau: 100*(1-np.exp(-d/tau))            # % of full adaptation achieved by day d
-    decay = lambda tau: 100*np.exp(-d/tau)               # % of adaptation retained d days after stopping
 
     fig, (axA, axB) = plt.subplots(1, 2, figsize=(9.8, 4.2), sharey=True)
 
@@ -142,16 +141,27 @@ def fig_acclimation_lit():
     axA.set_title("A. Onset (literature)", loc="left", fontsize=10.5); axA.legend(loc="lower right")
     axA.set_xlim(0, 28); axA.set_ylim(0, 100)
 
-    # ---- Panel B: decay after exposure stops, with our proposed weighting ----
-    axB.plot(d, decay(20.0), color=BLUE,  lw=1.8, label="HR / core temp (lit.)")
-    axB.plot(d, decay(6.0),  color=GREEN, lw=1.8, label="plasma volume (lit.)")
-    axB.plot(d, decay(25.0), color=VERM,  lw=1.8, label="sweat rate (lit.)")
-    # our proposed exposure-weighting decay: a short and a long half-life channel
-    tau_short = 5.0/np.log(2); tau_long = 14.0/np.log(2)
-    axB.plot(d, decay(tau_short), color=INK, lw=2.4, ls=(0,(5,2)), label="proposed: short half-life (5 d)")
-    axB.plot(d, decay(tau_long),  color=INK, lw=2.4, ls=(0,(1,1.3)), label="proposed: long half-life (14 d)")
+    # ---- Panel B: decay after exposure stops -----------------------------------
+    # Daanen et al. (2018) meta-regression: ~2.5% of the HR and core-temperature
+    # adaptation is lost per decay day. That pooled rate is linear, so it is drawn
+    # as a straight line rather than as an exponential.
+    axB.plot(d, np.clip(100 - 2.5*d, 0, None), color=BLUE, lw=2.2,
+             label="HR / core temp: pooled 2.5%/day")
+    # Individual studies in the same review scatter widely around the pooled rate.
+    # Retention = 100 - reported % decay, at the timepoint each study reported.
+    wk1_day, wk1_ret = [7, 7, 7], [30, 54, 60]        # 70%, 46%, 40% loss at 1 week
+    wk3_day, wk3_ret = [21, 21], [46, 0.5]            # 54% and 99-100% loss at 3 weeks
+    axB.plot(wk1_day + wk3_day, wk1_ret + wk3_ret, "o", ms=7, mfc="none",
+             mec=BLUE, mew=1.4, label="individual studies (HR)")
+    # Sweat rate is deliberately NOT drawn: the same review found SR decay had no
+    # significant dependence on the number of decay days.
+    axB.annotate("sweat-rate decay showed no significant\ndependence on decay days",
+                 xy=(0.04, 0.20), xycoords="axes fraction", ha="left", va="top",
+                 fontsize=8, color=MUTE, style="italic")
     axB.set_xlabel("days since last heat exposure")
-    axB.set_title("B. Decay (literature vs proposed)", loc="left", fontsize=10.5)
+    # panels share the y scale but not its meaning: A accumulates, B is what remains
+    axB.set_ylabel("adaptation retained (%)", labelpad=6)
+    axB.set_title("B. Decay (literature)", loc="left", fontsize=10.5)
     axB.legend(loc="upper right"); axB.set_xlim(0, 28)
     fig.tight_layout()
     finish(fig, "fig_acclimation_lit")
