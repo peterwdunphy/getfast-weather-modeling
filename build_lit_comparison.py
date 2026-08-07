@@ -28,6 +28,7 @@ os.makedirs(OUT_PNG, exist_ok=True)
 
 INK, MUTE, GRID = "#1a1a1a", "#5c5b57", "#e6e5df"
 BLUE, VERM, GREEN, GREY = "#0072B2", "#D55E00", "#009E73", "#8a897f"
+SKY = "#56B4E9"   # Okabe-Ito sky blue: core temperature, paired with HR
 ELITE_C, AMATEUR_C, OURS_C = "#2c6fb0", "#d1662b", "#111111"   # elite / amateur / ours
 plt.rcParams.update({
     "figure.facecolor":"white","axes.facecolor":"white",
@@ -142,22 +143,18 @@ def fig_acclimation_lit():
     axA.set_xlim(0, 28); axA.set_ylim(0, 100)
 
     # ---- Panel B: decay after exposure stops -----------------------------------
-    # Daanen et al. (2018) meta-regression: ~2.5% of the HR and core-temperature
-    # adaptation is lost per decay day. That pooled rate is linear, so it is drawn
-    # as a straight line rather than as an exponential.
-    axB.plot(d, np.clip(100 - 2.5*d, 0, None), color=BLUE, lw=2.2,
-             label="HR / core temp: pooled 2.5%/day")
-    # Individual studies in the same review scatter widely around the pooled rate.
-    # Retention = 100 - reported % decay, at the timepoint each study reported.
-    wk1_day, wk1_ret = [7, 7, 7], [30, 54, 60]        # 70%, 46%, 40% loss at 1 week
-    wk3_day, wk3_ret = [21, 21], [46, 0.5]            # 54% and 99-100% loss at 3 weeks
-    axB.plot(wk1_day + wk3_day, wk1_ret + wk3_ret, "o", ms=7, mfc="none",
-             mec=BLUE, mew=1.4, label="individual studies (HR)")
-    # Sweat rate is deliberately NOT drawn: the same review found SR decay had no
-    # significant dependence on the number of decay days.
-    axB.annotate("sweat-rate decay showed no significant\ndependence on decay days",
-                 xy=(0.04, 0.20), xycoords="axes fraction", ha="left", va="top",
-                 fontsize=8, color=MUTE, style="italic")
+    # Meta-regression equations from Daanen et al. (2018), plotted as the fraction
+    # of the adaptation still retained. Each equation is linear in decay days, so
+    # these are the published forms rather than fitted exponentials.
+    #   HR : decay(%) = 3.6 + 2.3 x decay days                    (n = 29, r = 0.60)
+    #   Tc : decay(%) = 126 + 2.6 x decay days - 1.2 x duration
+    #                       + 6.8 x WBGT                          (n = 27)
+    #   SR : decay(%) = 964 - 27.7 x HA days - 18.2 x WBGT        (n = 13)
+    # The SR equation carries no decay-days term, so sweat-rate adaptation is flat
+    # in this coordinate: it does not fade with time away from the heat.
+    axB.plot(d, 100 - (3.6 + 2.3*d), color=BLUE, lw=1.8, label="heart rate (2.3%/day)")
+    axB.plot(d, 100 - 2.6*d,         color=SKY,  lw=1.8, label="core temperature (2.6%/day)")
+    axB.plot(d, np.full_like(d, 100.0), color=VERM, lw=1.8, label="sweat rate (no decay-day term)")
     axB.set_xlabel("days since last heat exposure")
     # panels share the y scale but not its meaning: A accumulates, B is what remains
     axB.set_ylabel("adaptation retained (%)", labelpad=6)
