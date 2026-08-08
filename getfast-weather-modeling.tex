@@ -191,7 +191,9 @@ Sustained over years rather than weeks, this dynamic process hardens into someth
 \section{Methods}
 \label{sec:methods}
 
-The results in this paper come from a single held-out experiment: whether a deep-learning model's learned heat response improves a weather-blind pace model, first as a population temperature feature and then as runner-specific heat information. This section describes the training corpus, the deep-learning model that produces the heat features, the weather-blind baseline that consumes them, and the held-out evaluation. Figure~\ref{fig:pipeline} is the map.
+\subsection{Design}
+
+The study estimates whether a heat response learned by a deep-learning model improves pace prediction for runners the model has never seen. A weather-blind pace model is fitted first, and heat information is then supplied to it in two stages: a population heat curve that depends only on the conditions of a run, and a per-runner sensitivity score that depends on the individual. Each stage is evaluated on the same runner-disjoint holdout, against negative and constrained controls, and is separately calibrated against the correction the weather-blind model actually requires. Figure~\ref{fig:pipeline} summarizes the design.
 
 \begin{figure}[!ht]
 \centering
@@ -218,13 +220,21 @@ The results in this paper come from a single held-out experiment: whether a deep
 \label{fig:pipeline}
 \end{figure}
 
-\subsection{The training corpus}
+\subsection{Data}
 
-The corpus is observational: real training runs recorded on Garmin devices, not a controlled experiment. Every outdoor run is enriched with the weather it was actually run in, queried from Open-Meteo at the run's time and location, so the table spans the United States, Great Britain, India, France, Australia, and more, and the hot end of the WBGT range is genuinely populated. The full model frame is about 259{,}000 activities from 1{,}628 runners. The held-out experiment reported here uses a runner-disjoint slice of 15{,}892 activities from 104 runners, none of whom were used to fit any model. Two facts shape the analysis. There are no race labels: these are training runs at training effort, so the results describe held-out prediction, not a causal physiological estimate. And this particular held-out cohort spans WBGT from about $-18$ to $25\,^{\circ}$C, so the hottest bins carry more sampling uncertainty than the mild ones.
+The corpus consists of outdoor running activities recorded on Garmin devices by athletes who consented to the research use of their data. All records were anonymized before analysis, and no age, sex or body-composition information was available or used. Activities were retained if they carried a GPS trace, since indoor and treadmill runs cannot be matched to ambient conditions, and if the runner had a sufficient preceding history for the model's context window to be populated. The resulting frame comprises approximately 259{,}000 activities from 1{,}628 runners, spanning the United States, Great Britain, India, France and Australia among others, so that the upper end of the temperature range is populated by runs actually performed in heat rather than by extrapolation.
 
-We summarize each run's WBGT by its time-weighted mean over the run rather than its starting value, because a runner who starts at 6\,am in the cool and finishes in the heat should be scored by the middle of that curve. The deep model uses a radiation-aware outdoor WBGT, computed from the measured shortwave radiation and wind and solved for globe temperature with \texttt{thermofeel}; a closed-form shade approximation is used only where a value must be reconstructed from the familiar quantities a user would supply, namely air temperature and humidity.
+The target variable, $y_{a,i}$, is the mean pace of activity $i$ for runner $a$, in minutes per kilometre. Two properties of the corpus constrain what can be estimated from it. First, the records carry no race labels: these are training runs performed at training effort, so every quantity reported below describes held-out prediction rather than a causal physiological estimate. Second, the runs are unevenly distributed across the temperature range, and the held-out cohort spans a time-weighted WBGT of approximately $-18$ to $25\,^{\circ}$C, so estimates in the hottest bins rest on fewer observations than those in the mild ones.
 
-\subsection{The deep-learning heat model}
+Runners were partitioned by identity rather than by activity, so that no runner contributes to both model fitting and evaluation. The deep-learning model was fitted on 1{,}186 runners, with its population curve referenced against a further 750 runners contributing one averaged value each, so that prolific runners do not dominate the percentile scale. The held-out evaluation set comprises 15{,}892 activities from 104 runners who appear in no fitting stage.
+
+\subsection{Weather enrichment}
+
+Each activity was matched to the conditions under which it was run by querying Open-Meteo at the time and location of the run. Conditions are summarized by the wet-bulb globe temperature, computed in its radiation-aware outdoor form from measured shortwave radiation and wind speed with the globe temperature solved numerically using the \texttt{thermofeel} implementation. A closed-form shade approximation is retained only for the case in which a value must be reconstructed from the quantities a user could supply directly, namely air temperature and relative humidity.
+
+Rather than the value at the start line, each run is characterized by $\bar{W}_{a,i}$, the time-weighted mean WBGT over its duration. This follows from the accumulation argument in Section~\ref{sec:literature}: because thermal strain builds over the effort, a run beginning in cool morning air and finishing in midday heat is described by neither endpoint alone.
+
+\subsection{Deep-learning heat model}
 
 The heat features come from a transformer trained on each runner's recent training streams, a factored-attention network in the style of an existing fitness-prediction model (checkpoint \texttt{singleC\_q100\_s1\_500k}). It reads each activity as a stack of per-second channels (pace, heart rate, distance, cadence, altitude, and WBGT), tokenizes and embeds each channel, sums them with a $1/\sqrt{C}$ scale, and passes them through attention that mixes information within a run and across the runner's recent runs. It predicts pace directly (Figure~\ref{fig:dlarch}). Two heat artifacts are read off the trained model by counterfactual WBGT sweeps that hold everything else fixed.
 
@@ -254,68 +264,28 @@ The \emph{per-runner sensitivity score} is each runner's percentile rank of DL-p
 \label{fig:dlarch}
 \end{figure}
 
-\subsection{The weather-blind baseline and the feature progression}
+\subsection{Baseline model and feature progression}
 
 The baseline is a weather-blind XGBoost pace model with no temperature input: current-run average heart rate, trailing 30-day fitted pace, current-run distance, and elevation (gain and grade). The experiment adds the deep-learning heat information in two steps. The population step adds the DL population curve's value at the run's WBGT as one feature, which the tree model is free to use or ignore. The personalized step additionally adds the runner's sensitivity score. Two controls sharpen the reading. A \emph{shuffled control} reassigns each runner's sensitivity score to a random runner, so any genuine personalization gain should vanish. A \emph{constrained variant} supplies only the percentile-matched deviation of the DL curve, which forces personalization to act through the temperature curve rather than as a free runner-level number. A supplementary branch (Section~\ref{sec:results}) replaces the heart-rate-and-trailing-pace baseline with the fixed, independently-trained marathon-fitness estimate plus distance and elevation, to test whether the findings survive a deliberately different, pre-run baseline.
 
-\subsection{Evaluation and calibration tests}
+\subsection{Experimental setup}
 
-Every comparison uses the same 15{,}892-activity holdout, the same XGBoost hyperparameters, and three seeds (100, 200, 300). Error is reported as robust MAPE (clipped at its 99th percentile) and signed bias (clipped at its 1st and 99th percentiles), applied identically to every model, with runner-clustered bootstrap confidence intervals. Beyond prediction error, we run a direct calibration test of whether the DL curves point the right way. We fit an affine correction to the weather-blind prediction, $\mathrm{pace} = \hat{p}_0\,(1 + \beta + \alpha\,c_{\mathrm{pop}} + \gamma\,d_{\mathrm{pers}})$, where $c_{\mathrm{pop}}$ is the population curve and $d_{\mathrm{pers}}$ the personalized deviation, and read two coefficients: $\alpha$, the scale of the population curve, where a value near 1 means the curve is already the right size, and $\gamma$, the direction of the personalized deviation, where a positive value means the saved DL sensitivity points the right way.
+All comparisons use the same 15{,}892-activity holdout, identical hyperparameters, and three random seeds (100, 200, 300), so that differences between models reflect the features supplied rather than the fitting procedure.
+
+Two error measures are reported. Let $r_{a,i} = (y_{a,i} - \hat{y}_{a,i})/y_{a,i}$ denote the relative error of a prediction, signed so that a positive value means the run was predicted faster than it was actually run. Accuracy is summarized by a robust mean absolute percentage error,
+\begin{equation}
+  \mathrm{MAPE} = \frac{100}{n}\sum_{a,i} \min\!\left(|r_{a,i}|,\; q_{99}\right),
+\end{equation}
+in which $q_{99}$ is the 99th percentile of the absolute relative error, and calibration by the signed bias, the mean of $100\,r_{a,i}$ with the same trimming applied at the 1st and 99th percentiles. Trimming is applied identically to every model. Both measures are needed because they answer different questions: MAPE describes the typical size of an error, whereas bias describes whether a model is systematically optimistic, which is the failure mode that matters on a hot race day. Because activities from the same runner are not independent, all confidence intervals come from a bootstrap resampling runners rather than activities.
+
+Prediction error alone cannot establish whether a heat feature points in the physiologically expected direction, since a flexible tree model can exploit a feature of either sign. We therefore fit a direct affine calibration of the two heat artifacts against the correction the weather-blind prediction requires,
+\begin{equation}
+  \hat{y} = \hat{p}_0\left(1 + \beta + \alpha\,c_{\mathrm{pop}} + \gamma\,d_{\mathrm{pers}}\right),
+\end{equation}
+where $\hat{p}_0$ is the weather-blind prediction, $c_{\mathrm{pop}}$ the population curve evaluated at the run's WBGT, and $d_{\mathrm{pers}}$ the personalized deviation. Two coefficients carry the interpretation: $\alpha$ is the scale of the population curve, with $\alpha \approx 1$ indicating that the curve is already of the right magnitude, and $\gamma$ is the direction of the personalized deviation, with $\gamma > 0$ indicating that a runner assigned a larger predicted slowdown does in fact require a slower prediction.
 
 \section{Results}
 \label{sec:results}
-
-We report the held-out experiment in order: the main model comparison, how the error varies with temperature, how the learned heat curve compares to external references, what the personalization actually is, a sensitivity check under a different baseline, and the complementary acclimation evidence. Table~\ref{tab:mainresult} collects the headline numbers.
-
-Adding the deep-learning heat information to the weather-blind XGBoost improves held-out accuracy, and a negative control confirms that the personalized part is real (Figure~\ref{fig:mape_ladder}). Robust MAPE falls from 7.3381\% for the weather-blind model, to 7.2936\% when the population DL curve is added (a gain of 0.0445 points), to 7.1304\% when the per-runner sensitivity score is added on top (a further 0.1632 points, and 0.2077 points below the weather-blind model). The current-inclusive, prior, and strict-prior versions of the personalized score perform almost identically, so the gain is not an artifact of including the target activity, and the strict-prior version is the appropriate prospective estimate.
-
-The controls behave as they should. The shuffled control, which reassigns each runner's sensitivity score to a random runner, lands at 7.2996\%, essentially tied with the population model, so the personalization gain depends on matching the score to the correct runner. In runner-clustered bootstrap terms, the personalized gain beyond the population curve is 0.1632 points with a 95\% interval of [0.039, 0.308], which excludes zero, while the shuffled control's interval [$-0.051$, 0.034] straddles it. The population curve's own gain over the weather-blind model, 0.0445 points, has an interval of [$-0.009$, 0.101] that narrowly includes zero, so the population feature is a modest and only marginally significant improvement on this cohort.
-
-\begin{figure}[!ht]
-  \centering
-  \includegraphics[width=\linewidth]{figures/fig_mape_ladder.pdf}
-  \caption{Held-out model comparison (15{,}892 activities, 104 runners, three XGB seeds). Panel A: robust MAPE for each model, where lower is better. Panel B: incremental MAPE improvement with runner-clustered 95\% bootstrap intervals. The personalized gain over the population curve excludes zero, while the shuffled control does not, so the personalization depends on matching the score to the correct runner.}
-  \label{fig:mape_ladder}
-\end{figure}
-
-Stratifying the held-out error by WBGT shows where each model helps (Figure~\ref{fig:error_by_temp}). The weather-blind model has the classic pattern: it predicts too slow in cold and mild conditions (a signed bias near $-2\%$) and swings to too fast in the hottest bin (a bias of $+0.75\%$ in the 22 to 25\,\textdegree C band, meaning it over-predicts pace on hot runs). The population DL feature lowers MAPE across the range, including the hottest bin. The personalized model lowers MAPE in every temperature bin and places the signed bias closest to zero throughout. Its bias curve is nearly parallel to the population model's, however, which is the first sign that the personalized gain is a level shift rather than a temperature interaction. The hottest bins hold fewer activities than the mild ones, so those estimates carry more sampling uncertainty.
-
-\begin{figure}[!ht]
-  \centering
-  \includegraphics[width=\linewidth]{figures/fig_error_by_temp.pdf}
-  \caption{Held-out error stratified by WBGT. Panel A: robust MAPE by WBGT bin for the three models; the personalized model is lowest in every bin. Panel B: signed bias by WBGT bin, where positive means predicted too fast. The weather-blind model swings from too slow in the cold to too fast in the hottest bin; the personalized model is closest to zero throughout, with a curve nearly parallel to the population model's.}
-  \label{fig:error_by_temp}
-\end{figure}
-
-The deep model's population heat curve can be compared to the published literature without any shared fitting (Figure~\ref{fig:heateffects}). Expressed as percent slowdown versus a $10\,^{\circ}$C anchor, the published forms fall into two bands: steep slopes for amateur and mass fields (\citealp{ely2007, nikolaidis2019, knechtle2019, vernon2021}, reaching 10 to 16\% by $30\,^{\circ}$C) and shallow slopes for elite fields (\citealp{mantzios2022, martin1999, guy2014}, near 3 to 5\%). Our curve sits at the lower edge of this range, close to the elite and shallow-amateur forms and reaching about 5\% by $28\,^{\circ}$C, which is the expected place for a mixed-effort cohort whose runs are mostly training rather than racing. It also agrees with an independent coaching heuristic, which reaches about 5.6\% at $28\,^{\circ}$C, near the deep model's 72nd percentile.
-
-\begin{figure}[!ht]
-  \centering
-  \includegraphics[width=\linewidth]{figures/fig_heat_effects_lit.pdf}
-  \caption{The deep model's population heat curve (this study, bold) against published marathon heat-slowdown forms, all as percent pace slowdown versus a $10\,^{\circ}$C anchor. Marker shape encodes the study population: diamonds for elite fields, squares for amateur or mass fields. Slopes reported in seconds per degree are converted to percent using a representative finish time (elite 130 min, amateur 240 min), and forms native to air temperature rather than WBGT are drawn on the same axis, so placement above about $18\,^{\circ}$C is approximate.}
-  \label{fig:heateffects}
-\end{figure}
-
-The personalized score clearly improves prediction, but a set of diagnostics shows that its improvement is mostly a runner-level calibration offset rather than a heat-specific interaction, and that its residual direction is in fact reversed. Three pieces of evidence point the same way.
-
-First, the change the personalized score makes to the prediction is nearly flat across WBGT. Relative to the population model, it shifts the prediction by about $-0.4$ to $-0.6\%$ across temperature bins, with essentially no row-level association with WBGT ($r = -0.027$); the change is instead ordered by the runner's DL-score quintile. That is why the temperature-bin curves in Figure~\ref{fig:error_by_temp} are parallel.
-
-Second, forcing the personalization to act through the temperature curve keeps only part of the gain. When personalization is supplied as a percentile-matched deviation of the DL curve, so that its input is zero at and below the $10\,^{\circ}$C anchor, the model reaches 7.2043\% robust MAPE, a gain of 0.0893 points beyond the population curve (95\% interval [0.015, 0.167], which excludes zero) with the shuffled version showing no lift. That is a real, temperature-shaped signal, but it is about 55\% of the 0.1632-point gain of the free runner rank. The remaining advantage of the free rank is consistent with general runner-level calibration information that is not specifically temperature-dependent.
-
-Third, a direct calibration of the DL curves against what the weather-blind model actually needs settles the direction (Figure~\ref{fig:gamma}). The population curve's scale coefficient is $\alpha = 1.078$, with a 95\% interval of [0.823, 1.344] that includes one, so the population curve is already close to the right size. The personalized deviation's coefficient is $\gamma = -1.654$, with a 95\% interval of [$-2.545$, $-0.865$] that is decisively negative. It is nearly identical across the three seeds and stays negative when the calibration is restricted to progressively hotter subsets. Conditional on the population curve, then, runners assigned a larger saved DL slowdown require a correction in the \emph{opposite} direction. The saved personalized curves are therefore not calibrated as a direct, expected-direction multiplicative layer on top of this model, which also explains why a flexible tree model can still use them, since it is free to learn the inverse mapping.
-
-This reversal is a statement about the residual after conditioning on the baseline, not proof that the deep model's physiological ordering is backwards. The weather-blind baseline already includes average heart rate and 30-day fitted pace, and both may already encode the consequences of heat sensitivity. A genuinely heat-sensitive runner may already receive a slower prediction through an elevated heart rate, which leaves an oppositely signed residual for the personalized feature to absorb. The defensible statement is that the population DL curve is well scaled, while the personalized DL deviation is reproducible predictive information whose residual-layer association is reversed, so it should not be applied directly as an expected-direction heat multiplier without reconsidering the baseline features and the mediation structure.
-
-\begin{figure}[!ht]
-  \centering
-  \includegraphics[width=\linewidth]{figures/fig_gamma.pdf}
-  \caption{Affine calibration of the DL curves against the residual the weather-blind model needs. Panel A: the population curve's scale $\alpha$, whose 95\% interval includes one, so the curve is close to the right size. Panel B: the personalized deviation's coefficient $\gamma$ across WBGT subsets, decisively negative in each, meaning the saved personalized deviation points the wrong way as a direct correction on this baseline.}
-  \label{fig:gamma}
-\end{figure}
-
-Because the reversal described above is conditional on a heart-rate-aware baseline, we re-ran the whole progression on a deliberately different baseline that removes current effort: the fixed, independently-trained marathon-fitness estimate plus distance and elevation, with current-run heart rate and trailing pace excluded. This branch is supplementary and cannot be read as an apples-to-apples fitness comparison, since it changes the fitness representation and drops current effort at the same time, which raises its absolute MAPE. Within the branch, the population temperature information remains useful (though its gain interval includes zero), raw WBGT produces a clearer gain, and the strict-prior personalization no longer improves beyond the population curve. The personalized $\gamma$ reversal disappears under this baseline, but the estimate is imprecise and unstable across runner folds. The reading is that the personalized result depends on the conditional baseline, and that this branch does not independently validate the personalized magnitude.
-
-As complementary evidence, the deep model's per-runner sensitivity tracks recent heat exposure in the acclimation-consistent direction: runners with more recent hot training receive a lower sensitivity rank, and an independently curated set of matched hot runs improves after a block of heat exposure on average. These are candidate acclimation episodes, not verified physiological labels, and the held-out cohort is not large or repeatable enough near $28\,^{\circ}$C to validate individual adaptation magnitudes. The signal is consistent with acclimation being a real population-level effect while remaining too noisy to resolve as a per-person tracker.
 
 \begin{table}[!ht]
   \centering
@@ -334,6 +304,68 @@ As complementary evidence, the deep model's per-runner sensitivity tracks recent
     \bottomrule
   \end{tabular}
 \end{table}
+
+\subsection{Predictive performance}
+
+Adding the deep-learning heat information to the weather-blind XGBoost improves held-out accuracy, and a negative control confirms that the personalized part is real (Figure~\ref{fig:mape_ladder}). Robust MAPE falls from 7.3381\% for the weather-blind model, to 7.2936\% when the population DL curve is added (a gain of 0.0445 points), to 7.1304\% when the per-runner sensitivity score is added on top (a further 0.1632 points, and 0.2077 points below the weather-blind model). The current-inclusive, prior, and strict-prior versions of the personalized score perform almost identically, so the gain is not an artifact of including the target activity, and the strict-prior version is the appropriate prospective estimate.
+
+The controls behave as they should. The shuffled control, which reassigns each runner's sensitivity score to a random runner, lands at 7.2996\%, essentially tied with the population model, so the personalization gain depends on matching the score to the correct runner. In runner-clustered bootstrap terms, the personalized gain beyond the population curve is 0.1632 points with a 95\% interval of [0.039, 0.308], which excludes zero, while the shuffled control's interval [$-0.051$, 0.034] straddles it. The population curve's own gain over the weather-blind model, 0.0445 points, has an interval of [$-0.009$, 0.101] that narrowly includes zero, so the population feature is a modest and only marginally significant improvement on this cohort.
+
+\begin{figure}[!ht]
+  \centering
+  \includegraphics[width=\linewidth]{figures/fig_mape_ladder.pdf}
+  \caption{Held-out model comparison (15{,}892 activities, 104 runners, three XGB seeds). Panel A: robust MAPE for each model, where lower is better. Panel B: incremental MAPE improvement with runner-clustered 95\% bootstrap intervals. The personalized gain over the population curve excludes zero, while the shuffled control does not, so the personalization depends on matching the score to the correct runner.}
+  \label{fig:mape_ladder}
+\end{figure}
+
+\subsection{Error by environmental condition}
+
+Stratifying the held-out error by WBGT shows where each model helps (Figure~\ref{fig:error_by_temp}). The weather-blind model has the classic pattern: it predicts too slow in cold and mild conditions (a signed bias near $-2\%$) and swings to too fast in the hottest bin (a bias of $+0.75\%$ in the 22 to 25\,\textdegree C band, meaning it over-predicts pace on hot runs). The population DL feature lowers MAPE across the range, including the hottest bin. The personalized model lowers MAPE in every temperature bin and places the signed bias closest to zero throughout. Its bias curve is nearly parallel to the population model's, however, which is the first sign that the personalized gain is a level shift rather than a temperature interaction. The hottest bins hold fewer activities than the mild ones, so those estimates carry more sampling uncertainty.
+
+\begin{figure}[!ht]
+  \centering
+  \includegraphics[width=\linewidth]{figures/fig_error_by_temp.pdf}
+  \caption{Held-out error stratified by WBGT. Panel A: robust MAPE by WBGT bin for the three models; the personalized model is lowest in every bin. Panel B: signed bias by WBGT bin, where positive means predicted too fast. The weather-blind model swings from too slow in the cold to too fast in the hottest bin; the personalized model is closest to zero throughout, with a curve nearly parallel to the population model's.}
+  \label{fig:error_by_temp}
+\end{figure}
+
+\subsection{Comparison with published heat-response curves}
+
+The deep model's population heat curve can be compared to the published literature without any shared fitting (Figure~\ref{fig:heateffects}). Expressed as percent slowdown versus a $10\,^{\circ}$C anchor, the published forms fall into two bands: steep slopes for amateur and mass fields (\citealp{ely2007, nikolaidis2019, knechtle2019, vernon2021}, reaching 10 to 16\% by $30\,^{\circ}$C) and shallow slopes for elite fields (\citealp{mantzios2022, martin1999, guy2014}, near 3 to 5\%). Our curve sits at the lower edge of this range, close to the elite and shallow-amateur forms and reaching about 5\% by $28\,^{\circ}$C, which is the expected place for a mixed-effort cohort whose runs are mostly training rather than racing. It also agrees with an independent coaching heuristic, which reaches about 5.6\% at $28\,^{\circ}$C, near the deep model's 72nd percentile.
+
+\begin{figure}[!ht]
+  \centering
+  \includegraphics[width=\linewidth]{figures/fig_heat_effects_lit.pdf}
+  \caption{The deep model's population heat curve (this study, bold) against published marathon heat-slowdown forms, all as percent pace slowdown versus a $10\,^{\circ}$C anchor. Marker shape encodes the study population: diamonds for elite fields, squares for amateur or mass fields. Slopes reported in seconds per degree are converted to percent using a representative finish time (elite 130 min, amateur 240 min), and forms native to air temperature rather than WBGT are drawn on the same axis, so placement above about $18\,^{\circ}$C is approximate.}
+  \label{fig:heateffects}
+\end{figure}
+
+\subsection{Nature of the personalized effect}
+
+The personalized score improves prediction, but three diagnostics indicate that its contribution is largely a runner-level calibration offset rather than a heat-specific interaction, and that its residual direction is reversed.
+
+The change the personalized score makes to the prediction is nearly flat across WBGT. Relative to the population model, it shifts the prediction by about $-0.4$ to $-0.6\%$ across temperature bins, with essentially no row-level association with WBGT ($r = -0.027$); the change is instead ordered by the runner's DL-score quintile. That is why the temperature-bin curves in Figure~\ref{fig:error_by_temp} are parallel.
+
+Forcing the personalization to act through the temperature curve keeps only part of the gain. When personalization is supplied as a percentile-matched deviation of the DL curve, so that its input is zero at and below the $10\,^{\circ}$C anchor, the model reaches 7.2043\% robust MAPE, a gain of 0.0893 points beyond the population curve (95\% interval [0.015, 0.167], which excludes zero) with the shuffled version showing no lift. That is a real, temperature-shaped signal, but it is about 55\% of the 0.1632-point gain of the free runner rank. The remaining advantage of the free rank is consistent with general runner-level calibration information that is not specifically temperature-dependent.
+
+A direct calibration of the DL curves against what the weather-blind model actually needs settles the direction (Figure~\ref{fig:gamma}). The population curve's scale coefficient is $\alpha = 1.078$, with a 95\% interval of [0.823, 1.344] that includes one, so the population curve is already close to the right size. The personalized deviation's coefficient is $\gamma = -1.654$, with a 95\% interval of [$-2.545$, $-0.865$] that is decisively negative. It is nearly identical across the three seeds and stays negative when the calibration is restricted to progressively hotter subsets. Conditional on the population curve, then, runners assigned a larger saved DL slowdown require a correction in the \emph{opposite} direction. The saved personalized curves are therefore not calibrated as a direct, expected-direction multiplicative layer on top of this model, which also explains why a flexible tree model can still use them, since it is free to learn the inverse mapping.
+
+\begin{figure}[!ht]
+  \centering
+  \includegraphics[width=\linewidth]{figures/fig_gamma.pdf}
+  \caption{Affine calibration of the DL curves against the residual the weather-blind model needs. Panel A: the population curve's scale $\alpha$, whose 95\% interval includes one, so the curve is close to the right size. Panel B: the personalized deviation's coefficient $\gamma$ across WBGT subsets, decisively negative in each, meaning the saved personalized deviation points the wrong way as a direct correction on this baseline.}
+  \label{fig:gamma}
+\end{figure}
+
+This reversal is a statement about the residual after conditioning on the baseline, not proof that the deep model's physiological ordering is backwards. The weather-blind baseline already includes average heart rate and 30-day fitted pace, and both may already encode the consequences of heat sensitivity. A genuinely heat-sensitive runner may already receive a slower prediction through an elevated heart rate, which leaves an oppositely signed residual for the personalized feature to absorb. The defensible statement is that the population DL curve is well scaled, while the personalized DL deviation is reproducible predictive information whose residual-layer association is reversed, so it should not be applied directly as an expected-direction heat multiplier without reconsidering the baseline features and the mediation structure.
+
+\subsection{Sensitivity to the choice of baseline}
+
+Because the reversal described above is conditional on a heart-rate-aware baseline, we re-ran the whole progression on a deliberately different baseline that removes current effort: the fixed, independently-trained marathon-fitness estimate plus distance and elevation, with current-run heart rate and trailing pace excluded. This branch is supplementary and cannot be read as an apples-to-apples fitness comparison, since it changes the fitness representation and drops current effort at the same time, which raises its absolute MAPE. Within the branch, the population temperature information remains useful (though its gain interval includes zero), raw WBGT produces a clearer gain, and the strict-prior personalization no longer improves beyond the population curve. The personalized $\gamma$ reversal disappears under this baseline, but the estimate is imprecise and unstable across runner folds. The reading is that the personalized result depends on the conditional baseline, and that this branch does not independently validate the personalized magnitude.
+
+\subsection{Acclimation}
+
+As complementary evidence, the deep model's per-runner sensitivity tracks recent heat exposure in the acclimation-consistent direction: runners with more recent hot training receive a lower sensitivity rank, and an independently curated set of matched hot runs improves after a block of heat exposure on average. These are candidate acclimation episodes, not verified physiological labels, and the held-out cohort is not large or repeatable enough near $28\,^{\circ}$C to validate individual adaptation magnitudes. The signal is consistent with acclimation being a real population-level effect while remaining too noisy to resolve as a per-person tracker.
 
 \section{Discussion}
 \label{sec:discussion}
