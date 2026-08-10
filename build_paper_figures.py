@@ -107,36 +107,6 @@ def fig_error_by_temp():
     fig.tight_layout(); finish(fig, "fig_error_by_temp")
 
 # =========================================================================== #
-# FIGURE 3 -- DL heat-penalty curve vs the coaching heuristic and published fits
-# =========================================================================== #
-def fig_dl_vs_coach():
-    a = np.load("/weather/data/heat_percentile_averaged.npz", allow_pickle=True)
-    w = a["wsweep"].astype(float); pc = a["pctl_curves"].astype(float)
-    def anc(r): return r - np.interp(10, w, r)
-    med, p10, p90 = anc(pc[49]), anc(pc[9]), anc(pc[89])
-    # coach benchmark table (deg F -> C), anchored at 10 C
-    cf = np.arange(50.,96.); cp = np.array([0,.1,.1,.2,.3,.4,.4,.5,.6,.7,.7,.9,1,1.2,1.3,1.5,
-        1.6,1.8,1.9,2.1,2.2,2.5,2.7,3,3.3,3.5,3.8,4,4.3,4.6,4.8,5.2,5.5,5.8,6.2,6.5,6.8,7.2,
-        7.5,7.8,8.2,8.6,9.1,9.5,9.9,10.4])
-    cc = (cf-32)*5/9; W = np.linspace(10,28,200)
-    coach = np.interp(W, cc, cp)
-    ely   = 0.64*np.maximum(0, W-10); vernon = 0.56*np.maximum(0, W-12)
-    mantz = 0.20*np.maximum(0, W-15)
-    fig, ax = plt.subplots(figsize=(8.2, 4.8))
-    ax.fill_between(w, p10, p90, color=BLUE, alpha=0.14, lw=0, label="DL runner p10–p90")
-    ax.plot(w, med, color=BLUE, lw=2.8, label="DL population median")
-    ax.plot(W, coach, color=VERM, lw=2.2, ls=(0,(5,2.5)), label="Coach benchmark")
-    ax.plot(W, ely,   color=ORANGE, lw=1.5, label="Ely 2007 (mass)")
-    ax.plot(W, vernon,color=GREEN,  lw=1.5, label="Vernon 2021 (London mass)")
-    ax.plot(W, mantz, color=GREY,   lw=1.5, label="Mantzios 2022 (elite)")
-    ax.axhline(0, color=GREY, lw=0.8)
-    ax.set_xlim(10,28); ax.set_ylim(-0.3, 12)
-    ax.set_xlabel("WBGT (°C)"); ax.set_ylabel("pace slowdown vs 10°C (%)")
-    ax.set_title("Deep-model heat curve, coaching benchmark, and published fits", loc="left")
-    ax.legend(loc="upper left", ncol=1)
-    fig.tight_layout(); finish(fig, "fig_dl_vs_coach")
-
-# =========================================================================== #
 # FIGURE 4 -- affine calibration: population scale (alpha) vs personalized (gamma)
 # =========================================================================== #
 def fig_gamma():
@@ -170,6 +140,5 @@ if __name__ == "__main__":
     print("building 09/10 paper figures ...")
     fig_mape_ladder()
     fig_error_by_temp()
-    fig_dl_vs_coach()
     fig_gamma()
     print("done ->", OUT_PDF)
