@@ -197,26 +197,26 @@ The study estimates whether a heat response learned by a deep-learning model imp
 
 \begin{figure}[!ht]
 \centering
-\resizebox{\linewidth}{!}{%
+\resizebox{0.92\linewidth}{!}{%
 \begin{tikzpicture}[every node/.style={align=center}]
-  \node[io]    (streams) at (0,0)      {Garmin activity\\streams};
-  \node[io]    (weather) at (3.6,0)    {Open-Meteo\\weather};
-  \node[io]    (base)    at (9.0,-1.7) {Baseline features:\\HR, 30-day fitness,\\distance, elevation};
-  \node[proc]  (dl)      at (1.8,-1.7) {Deep-learning model\\(transformer)};
-  \node[headx] (curve)   at (0,-3.6)   {Population heat\\curve $g(\mathrm{WBGT})$};
-  \node[headx] (score)   at (3.6,-3.6) {Per-runner\\sensitivity score};
-  \node[proc]  (xgb)     at (4.2,-5.5) {Weather-blind XGBoost\\pace model $+$ DL features};
-  \node[out]   (pred)    at (4.2,-7.2) {Held-out\\pace prediction};
-  \draw[flow] (streams) -- (dl);
-  \draw[flow] (weather) -- (dl);
-  \draw[flow] (dl) -- (curve);
-  \draw[flow] (dl) -- (score);
-  \draw[flow] (curve) -- (xgb);
-  \draw[flow] (score) -- (xgb);
-  \draw[flow] (base) |- (xgb);
-  \draw[flow] (xgb) -- (pred);
+  \node[io]    (all)   at (3.5, 0)    {259{,}262 activities from 1{,}628 runners};
+  \node[proc]  (split) at (3.5,-1.5)  {Partition by runner identity};
+  \node[io]    (fit)   at (0.5,-3.2)  {Fitting runners};
+  \node[io]    (hold)  at (6.8,-3.2)  {Holdout runners\\15{,}892 activities, 104 runners};
+  \node[headx] (dl)    at (0.5,-5.3)  {Deep-learning heat artifacts:\\population curve,\\per-runner percentile};
+  \node[proc]  (prog)  at (0.5,-7.9)  {Pace models\\\textbf{1.} weather-blind\\\textbf{2.} $+$ population curve\\\textbf{3.} $+$ per-runner percentile};
+  \node[io]    (ctl)   at (6.8,-7.9)  {Controls:\\shuffled percentile,\\curve-constrained deviation};
+  \node[out]   (eval)  at (3.5,-10.4) {Held-out MAPE and bias,\\calibration of $\alpha$ and $\gamma$};
+  \draw[flow] (all) -- (split);
+  \draw[flow] (split) -| (fit);
+  \draw[flow] (split) -| (hold);
+  \draw[flow] (fit) -- (dl);
+  \draw[flow] (dl) -- (prog);
+  \draw[flow] (ctl) -- (prog);
+  \draw[flow] (prog.south) |- (eval.west);
+  \draw[flow] (hold.east) -- (10.2,-3.2) -- (10.2,-10.4) -- (eval.east);
 \end{tikzpicture}}
-\caption{The experiment. A deep-learning model trained on each runner's recent training streams produces two heat artifacts: a population heat curve and a per-runner sensitivity score. These are added as features to a weather-blind XGBoost pace model that already uses heart rate, fitness, distance, and elevation. Every comparison is on the same runner-disjoint held-out set.}
+\caption{The experimental design. Runners are partitioned by a hash of their identifier, so the 104 holdout runners contribute to no fitting stage: neither the deep-learning model, nor the population heat curve and percentile scale derived from it, nor the pace models themselves. Heat information is added to a weather-blind pace model in two steps, first as a population curve that depends only on the conditions of a run and then as a percentile score that depends on the runner. Two controls test whether the second step is genuinely runner-specific: one reassigns each percentile to a different runner, the other forces personalization to act through the temperature curve. All models share the same holdout, hyperparameters and three random seeds.}
 \label{fig:pipeline}
 \end{figure}
 
@@ -236,33 +236,11 @@ Rather than the value at the start line, each run is characterized by $\bar{W}_{
 
 \subsection{Deep-learning heat model}
 
-The heat features come from a transformer trained on each runner's recent training streams, a factored-attention network adapted from an existing fitness-prediction architecture. Its input is a window of the 30 most recent activities, each resampled to 128 points and represented by eleven channels: date, latitude, altitude, cadence, cumulative elevation, distance, heart rate, power, activity type, outdoor WBGT, and pace. Each channel is tokenized and embedded separately, the embeddings are summed with a $1/\sqrt{C}$ scale and layer-normalized, and the result passes through attention that mixes information both within an activity and across the runner's recent activities. The model predicts pace directly (Figure~\ref{fig:dlarch}). Two heat artifacts are then read off the trained model by counterfactual WBGT sweeps that hold every other channel fixed.
+The heat features come from a transformer trained on each runner's recent training streams, a factored-attention network adapted from an existing fitness-prediction architecture. Its input is a window of the 30 most recent activities, each resampled to 128 points and represented by eleven channels: date, latitude, altitude, cadence, cumulative elevation, distance, heart rate, power, activity type, outdoor WBGT, and pace. Each channel is tokenized and embedded separately, the embeddings are summed with a $1/\sqrt{C}$ scale and layer-normalized, and the result passes through attention that mixes information both within an activity and across the runner's recent activities. The model predicts pace directly. Two heat artifacts are then read off the trained model by counterfactual WBGT sweeps that hold every other channel fixed.
 
 The \emph{population heat curve} describes the average pace penalty as a function of conditions alone. Each fitting runner's swept response is anchored at $10\,^{\circ}$C and normalized by that runner's own value at $28\,^{\circ}$C, so that the curve captures the shape of the response rather than its magnitude; the median of these normalized shapes is taken across runners, constrained to be non-decreasing, and rescaled by the median $28\,^{\circ}$C sensitivity of the fitting cohort. The resulting curve predicts a slowdown of 5.02\% at $28\,^{\circ}$C relative to $10\,^{\circ}$C.
 
 The \emph{per-runner sensitivity score} is each runner's percentile rank of DL-predicted slowdown at $28\,^{\circ}$C relative to $10\,^{\circ}$C, $\mathrm{slowdown}_{28} = 100\,(\mathrm{DL}_{28^\circ}/\mathrm{DL}_{10^\circ} - 1)$. The primary, prospective version uses a strict prior of exactly 15 preceding windows and excludes the target activity, so it is fully prospective.
-
-\begin{figure}[!ht]
-\centering
-\resizebox{0.82\linewidth}{!}{%
-\begin{tikzpicture}[every node/.style={align=center}]
-  \node[io]    (ch)   at (0,0)      {11 channels x 30 recent activities:\\pace, HR, power, cadence, distance,\\altitude, elevation, lat, date, type, WBGT};
-  \node[proc]  (tok)  at (0,-1.5)   {Tokenize $+$ embed each channel};
-  \node[proc]  (sum)  at (0,-3.0)   {Sum $/\sqrt{C}$ $+$ LayerNorm $+$ positional};
-  \node[proc]  (attn) at (0,-4.5)   {Factored attention\\(within-run and cross-run history)};
-  \node[proc]  (head) at (0,-6.0)   {Pace head};
-  \node[out]   (pred) at (0,-7.5)   {Predicted pace};
-  \node[headx] (read) at (5.6,-6.75){Population heat curve\\$+$ per-runner sensitivity\\(counterfactual WBGT sweep)};
-  \draw[flow] (ch) -- (tok);
-  \draw[flow] (tok) -- (sum);
-  \draw[flow] (sum) -- (attn);
-  \draw[flow] (attn) -- (head);
-  \draw[flow] (head) -- (pred);
-  \draw[flow] (pred.east) to[out=0,in=180] (read.west);
-\end{tikzpicture}}
-\caption{The deep-learning model. The model reads a window of the 30 most recent activities, each resampled to 128 points across eleven channels. Each channel is tokenized and embedded separately, the embeddings are summed with a $1/\sqrt{C}$ scale and layer-normalized, and the result passes through factored attention that mixes information within an activity and across the runner's recent activities. The pace head predicts pace. The two heat artifacts used as features (the population curve and the per-runner sensitivity score) are read off the trained model by sweeping WBGT counterfactually.}
-\label{fig:dlarch}
-\end{figure}
 
 \subsection{Baseline model and feature progression}
 
@@ -300,7 +278,7 @@ where $\hat{p}_0$ is the weather-blind prediction, $c_{\mathrm{pop}}$ the popula
     $+$ population DL curve          & 7.2936 & $-1.57$ & $+0.045$ vs blind [$-0.009$, 0.101] \\
     $+$ personalized DL score        & 7.1304 & $-1.09$ & $+0.163$ vs population [0.039, 0.308] \\
     \quad shuffled control          & 7.2996 & $-1.31$ & $-0.006$ vs population [$-0.051$, 0.034] \\
-    \quad constrained (curve delta) & 7.2043 & ---     & $+0.089$ vs population [0.015, 0.167] \\
+    \quad constrained (curve delta) & 7.2043 & $-1.16$ & $+0.089$ vs population [0.015, 0.167] \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -374,17 +352,17 @@ This section draws out the implications of the results for heat-adjusted pace pr
 
 \subsection{Implications}
 
-A weather-adjusted pace prediction lets a runner see how a given day's heat is likely to change the finish time they would otherwise expect from their fitness, and lets them explore how a warmer or cooler forecast would move that expectation. The results show that the population component of this correction is ready for such use. The deep model's population heat curve is well scaled, since its calibration coefficient is compatible with one, it modestly improves held-out prediction, and it agrees with an independent coaching heuristic and with the published literature. Individualized heat correction is a harder problem. The per-runner sensitivity score carries reproducible predictive information, but on a heart-rate-aware baseline its residual direction is reversed, so it cannot yet be applied as a direct, expected-direction adjustment. The honest reading is that a population heat adjustment can be applied to finish-time predictions now, while a validated per-runner heat adjustment awaits further work.
+A weather-adjusted pace prediction lets a runner see how a given day's heat is likely to change the finish time they would otherwise expect from their fitness, and lets them explore how a warmer or cooler forecast would move that expectation. The results show that the population component of this correction is ready for such use. The deep model's population heat curve is well scaled, since its calibration coefficient is compatible with one, it modestly improves held-out prediction, and it agrees with an independent coaching heuristic and with the published literature. That agreement holds in direction and in hot-end magnitude; the two curves differ in shape at moderate temperatures, where the heuristic rises earlier. Individualized heat correction is a harder problem. The per-runner sensitivity score carries reproducible predictive information, but on a heart-rate-aware baseline its residual direction is reversed, so it cannot yet be applied as a direct, expected-direction adjustment. The honest reading is that a population heat adjustment can be applied to finish-time predictions now, while a validated per-runner heat adjustment awaits further work.
 
-Several additions would sharpen the picture. A labeled race set is the most valuable, because the corpus is training runs and the experiment can only measure held-out prediction, not race-day calibration directly. A baseline whose mediation structure is explicit enough to interpret the personalized direction would resolve whether the reversed coefficient reflects heart rate already carrying heat sensitivity or a genuine problem with the score. Denser sampling of genuinely hot runs would tighten the hot-end estimates, which are thin by design because hot races are canceled or postponed. A few variables the literature flags are absent from raw GPX files but would plausibly improve prediction: body mass, since heat production scales with body mass and smaller runners are advantaged in heat \citep{marino2008, maughan2010}; biological sex, an established performance differential under heat \citep{llewellyn2025, vihma2010, kelly2023, weiss2022b}; and resting heart rate, one of the most validated acclimation markers \citep{periard2015, tyler2016, pryor2019}. Lab-only variables such as plasma volume or sweat sodium concentration cannot be obtained from consumer devices and are outside the scope of this approach. Throughout, the appropriate accuracy metric is calibration and signed bias on hot runs rather than average error over the full distribution, because most days are temperate and the heat effect is small next to run-to-run variation.
+Several additions would sharpen the picture. A labeled race set is the most valuable, because the corpus is training runs and the experiment can only measure held-out prediction, not race-day calibration directly. A baseline whose mediation structure is explicit enough to interpret the personalized direction would resolve whether the reversed coefficient reflects heart rate already carrying heat sensitivity or a genuine problem with the score. Denser sampling of genuinely hot runs would tighten the hot-end estimates, which are thin because hot days are a minority of any training year and because the analysis caps WBGT at $25\,^{\circ}$C. A few variables the literature flags are absent from raw GPX files but would plausibly improve prediction: body mass, since heat production scales with body mass and smaller runners are advantaged in heat \citep{marino2008, maughan2010}; biological sex, an established performance differential under heat \citep{llewellyn2025, vihma2010, kelly2023, weiss2022b}; and resting heart rate, one of the most validated acclimation markers \citep{periard2015, tyler2016, pryor2019}. Lab-only variables such as plasma volume or sweat sodium concentration cannot be obtained from consumer devices and are outside the scope of this approach. Throughout, the appropriate accuracy metric is calibration and signed bias on hot runs rather than average error over the full distribution, because most days are temperate and the heat effect is small next to run-to-run variation.
 
 \subsection{Limitations}
 
-The headline caveat is that this is runner-disjoint held-out prediction, not a causal estimate of heat's physiological effect. The corpus is training runs, so every number describes how well one model predicts held-out pace, and the improvements are calibration and accuracy gains rather than measured heat responses. The held-out cohort also spans WBGT only to about $25\,^{\circ}$C, and the hottest bins hold fewer activities than the mild ones, so the hot-end estimates carry the most sampling uncertainty. The reported robust MAPE and bias are clipped at the 99th (and 1st) percentiles precisely because a few large-error rows would otherwise dominate.
+The headline caveat is that this is runner-disjoint held-out prediction, not a causal estimate of heat's physiological effect. The corpus is training runs, so every number describes how well one model predicts held-out pace, and the improvements are calibration and accuracy gains rather than measured heat responses. The held-out cohort is bounded above at $25\,^{\circ}$C by the ceiling imposed in Section~\ref{sec:methods}, and even below it the warm bins hold fewer activities than the mild ones, so the hot-end estimates carry the most sampling uncertainty and nothing is estimated above that bound. The reported robust MAPE and bias are clipped at the 99th (and 1st) percentiles precisely because a few large-error rows would otherwise dominate.
 
 The personalized result is real but narrow. A runner-matched deep-learning score improves held-out prediction, and a shuffled control removes the gain, but in this specification the incremental effect is mostly temperature-independent, only about 55\% of it survives when forced through the temperature curve, and its residual-layer coefficient is reversed. Whether that reversal reflects mediation through the heart-rate and pace features in the baseline, rather than a backwards physiological ordering, cannot be settled here, because the sensitivity branch that removes current effort loses the reversal but is too imprecise to be decisive. The personalized DL score should therefore be treated as predictive runner-level information, not as a validated, directly applicable heat multiplier.
 
-The acclimation evidence is complementary and suggestive rather than confirmatory. Recent exposure predicts lower DL sensitivity and curated hot runs improve after exposure, but the data cannot validate individual adaptation magnitudes near race-relevant heat. This document will be revised as a labeled race set becomes available and as the mediation structure of the baseline is made explicit enough to interpret the personalized calibration direction.
+The acclimation evidence is complementary and suggestive rather than confirmatory. Recent exposure predicts lower DL sensitivity and curated hot runs improve after exposure, but the data cannot validate individual adaptation magnitudes near race-relevant heat.
 
 \bibliographystyle{apalike}
 \bibliography{references}
