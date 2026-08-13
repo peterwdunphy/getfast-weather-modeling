@@ -1,26 +1,28 @@
 % ===========================================================================
 % tommy_appendix.tex -- the biophysical account of why the heat penalty is
 % convex. Kept in its own file so it can be edited without conflicting with
-% appendix.tex.
-%
-% This SUPERSEDES the former "Compensability and the Convexity of the Response"
-% section, which was removed from appendix.tex on this branch. It takes over
-% \label{app:physics}, so the two existing \ref{app:physics} in the main text
-% resolve without any main-text edit.
+% appendix.tex. It owns \label{app:physics}, which the main text references
+% twice.
 %
 % Every number here is reproduced by verify_heat_convexity.py (stdlib only,
-% self-checking, prints ok/FAIL per line). Where it differs from the superseded
-% version, the difference is deliberate:
+% self-checking, prints ok/FAIL per line, currently ALL CHECKS PASSED). The
+% three figures are built by build_compensability_figures.py.
 %
-%   * Mean skin temperature is 31 C, not 35 C. Aylwin et al. (2023), already
-%     cited, MEASURED 29.8 -> 28.9 C through the men's marathon at Doha, below
-%     air temperature, because running-speed airflow cools wet skin. At 35 C
-%     the prediction misses the observation; at 31 C it brackets it.
-%   * The flat band is no longer attributed to the thermal ceiling meeting the
-%     aerobic one. That crossing is at WBGT 25.7-27.1 C for this runner, some
-%     eleven degrees too warm to explain a 16 C breakpoint.
-%   * Convexity is proved rather than swept, and the curvature prediction is
-%     framed as a lower bound.
+% Structure of the argument, so an editor can see the spine at a glance:
+%
+%   F.1  Heat balance at steady state is one equation in one unknown, the
+%        runner's speed. That is why pace is the variable that gives.
+%   F.2  The whole environment enters through one scalar, the thermal head
+%        Phi, which is decreasing and CONCAVE in wet-bulb temperature.
+%   F.3  A concave speed limit makes a convex pace penalty. Theorem, not a
+%        parameter sweep. But the hard ceiling binds only in the mid-20s.
+%   F.4  So the response below the ceiling is graded, and w_req -- the
+%        wettedness measure -- is convex for the same Clausius-Clapeyron
+%        reason. The wettedness result is a corollary, not a separate fact.
+%   F.5  The same balance read as a demand on cardiac output, which carries
+%        the same curvature. Not a rival account; the next link in the chain.
+%   F.6  Duration.  F.7  The measured curvature.  F.8  The dry-bulb axis.
+%   F.9  What this does and does not establish.
 %
 % THREE MAIN-TEXT EDITS ARE STILL OUTSTANDING (not made here, to keep this
 % branch off getfast-weather-modeling.tex):
@@ -36,8 +38,14 @@
 \section{Compensability and the Convexity of the Response}
 \label{app:physics}
 
-This appendix supports the physical argument in Section~\ref{sec:results}. All
-coefficients are those reported by \citet{taylor2006} and already used in
+This appendix supports the physical argument in Section~\ref{sec:results}. It
+makes one claim in several places: the acceleration in the measured heat
+penalty is not a fitted shape but a consequence of the heat balance, and it
+traces to a single term, the curvature of saturation vapour pressure with
+temperature. Everything else in the calculation moves the size of the effect
+without touching its shape.
+
+All coefficients are those reported by \citet{taylor2006} and already used in
 Section~\ref{sec:literature}: convective exchange $8.3\,(T_{sk}-T_a)\sqrt{v}$,
 radiant $5.2\,(T_{sk}-T_{mrt})$ and evaporative $124\,(P_{sk}-P_a)\sqrt{v}$ per
 square metre. Calculations assume a $70\,\mathrm{kg}$ runner with
@@ -49,25 +57,91 @@ Mean skin temperature is taken as $31\,^{\circ}$C rather than the
 $35\,^{\circ}$C typical of laboratory treadmill work. \citet{aylwin2023}
 measured it falling from $29.8$ to $28.9\,^{\circ}$C through the men's marathon
 at the 2019 World Championships, below air temperature, because airflow at
-running speed cools wet skin. As shown below, this is the single most
-consequential input in the calculation.
+running speed cools wet skin. As shown in Section~\ref{app:physics:curvature}, this is
+the single most consequential input in the calculation.
 
-\subsection{Wet-bulb temperature as a sufficient statistic}
+\subsection{The heat balance is a speed limit}
+\label{app:physics:limit}
 
-For fully wetted skin the total capacity to shed heat is the sum of a dry and an
-evaporative term,
+Section~\ref{sec:literature} gives heat balance as an accounting identity,
+\begin{equation}
+  S \;=\; M \;-\; W \;-\; (R + C + K) \;-\; E,
+  \label{eq:balance}
+\end{equation}
+with $S$ the rate of heat storage in body tissue, $M$ metabolic heat
+production, $W$ the external mechanical work leaving the body, and $R$, $C$,
+$K$ and $E$ the radiative, convective, conductive and evaporative exchanges.
+Written this way it is a bookkeeping statement. It becomes a statement about
+pace once one notices which of its terms a runner actually controls.
+
+Only one. Running economy is close to constant in energy per unit distance
+rather than per unit time, so metabolic rate is proportional to speed,
+$M \approx c\,m\,v$ with $c$ near $4.2\,\mathrm{kJ\,kg^{-1}\,km^{-1}}$. The
+work term is not an independent lever either: at a given speed the mechanical
+work of running is fixed by the mechanics of running at that speed. A runner
+in difficulty cannot buy thermal relief by doing less external work while
+holding pace. Taking the conventional $20$ to $25\%$ of turnover as work,
+production and work both scale with $v$, and so does their difference,
+\begin{equation}
+  H \;=\; M - W \;=\; \kappa\,v, \qquad
+  \kappa \;\approx\; 231\,\mathrm{J\,m^{-1}}
+  \label{eq:production}
+\end{equation}
+for the reference runner. Two remarks on $\kappa$. It is conservative: in level
+running almost no work is done on the environment beyond overcoming air
+resistance, so the mechanical work the convention credits is dissipated inside
+the body within the stride cycle and reappears as heat, which means
+\eqref{eq:production} understates heat production rather than overstating it.
+And whatever residual drift heat imposes on $\kappa$ runs against the runner
+rather than for them, since the added ventilatory and cardiac work of
+thermoregulating is itself metabolic and therefore itself a heat source.
+
+Now impose the two conditions that describe a runner racing. The first is that
+effort is already maximal, so the runner is not holding anything back. The
+second is that heat storage has stopped, $S = 0$: core temperature is no
+longer rising, either because the runner has reached the ceiling they can
+tolerate or because the race is long enough that a sustained imbalance is not
+available. Under those two conditions \eqref{eq:balance} loses its slack and
+becomes an equation in the single unknown $v$,
+\begin{equation}
+  \kappa\,v \;=\; R + C + E .
+  \label{eq:pinned}
+\end{equation}
+This is the sense in which heat sets a speed limit. The right-hand side is what
+the environment will accept, and it does not care how much the runner wants to
+run. If the runner's chosen $v$ makes the left-hand side larger, the equality
+fails in the only way it can, through $S > 0$: core temperature climbs. That is
+survivable, but only for a while and only by a bounded amount, which is why the
+constraint tightens with race duration (Section~\ref{app:physics:duration}). Once the
+tolerable rise is spent, balance must be restored, and the only term left to
+move is $v$. The runner slows.
+
+\subsection{The environment enters through a single number}
+\label{app:physics:head}
+
+Write the right-hand side of \eqref{eq:pinned} at its maximum. With skin fully
+wetted, the capacity to shed heat is the sum of a dry and an evaporative term,
 \begin{equation}
   Q_{\max} \;=\; h_c\,(T_{sk} - T_a) \;+\; h_e\,\bigl(P_s(T_{sk}) - P_a\bigr),
   \label{eq:qmax-raw}
 \end{equation}
-with $P_s(\cdot)$ the saturation vapour pressure and $h_e = \mathrm{LR}\cdot h_c$.
+with $P_s(\cdot)$ the saturation vapour pressure and $h_e = \mathrm{LR}\cdot
+h_c$.\footnote{Longwave radiant exchange is omitted from the dry term here and
+solar load is carried separately, as in Table~\ref{tab:wbtradeoff} and the
+sweeps below. With $T_{mrt} = T_a$, radiation adds a further term proportional
+to $T_{sk} - T_a$, which raises the effective dry coefficient and so lowers the
+ratio $h_e/h_c$. That perturbs the wet-bulb equivalence in \eqref{eq:qmax-wb}
+slightly, but leaves $\Phi$ decreasing and concave, which is all the argument
+uses.}
 The environment enters only through the combination $h_c T_a + h_e P_a$, so the
 two environmental variables are not separately identified. The wet-bulb
 temperature is defined as the value a wetted surface reaches when it exchanges
 no net heat with the air, that is $h_c T_a + h_e P_a = h_c T_{wb} + h_e
 P_s(T_{wb})$, and substituting names that combination:
 \begin{equation}
-  Q_{\max} \;=\; h_c\,(T_{sk} - T_{wb}) \;+\; h_e\,\bigl(P_s(T_{sk}) - P_s(T_{wb})\bigr).
+  Q_{\max} \;=\; h_c\Bigl[\underbrace{(T_{sk} - T_{wb}) \;+\; \mathrm{LR}\,
+    \bigl(P_s(T_{sk}) - P_s(T_{wb})\bigr)}_{\textstyle \Phi}\Bigr]
+  \;=\; h_c\,\Phi(T_{wb}).
   \label{eq:qmax-wb}
 \end{equation}
 The step does not assert that air is at its wet-bulb temperature. It says that
@@ -83,19 +157,63 @@ which the two definitions separate by about $0.15\,^{\circ}$C. The argument is
 unaffected, but \eqref{eq:qmax-wb} is exact only under a single consistent
 choice.}
 
-Table~\ref{tab:wbtradeoff} walks one wet-bulb isopleth. Every row sits at
-$T_{wb} = 22\,^{\circ}$C and is therefore the same thermal environment by
-\eqref{eq:qmax-wb}, though assembled quite differently: the first is a cool
-morning at $92\%$ humidity, the last desert heat at $18\%$. As air temperature
-rises the dry route degrades from shedding $121$ to \emph{gaining}
-$152\,\mathrm{W\,m^{-2}}$, reversing sign at $31\,^{\circ}$C where air and skin
-are equal, while the drier air widens the skin-to-air vapour-pressure gradient
-and evaporative capacity rises by exactly as much. The trade is exact rather
-than approximate: along a line of constant wet-bulb temperature $h_e\,
-\mathrm{d}P_a = -h_c\,\mathrm{d}T_a$ by definition, so the two terms move by
-equal and opposite amounts and their sum cannot shift. The heavy weight on the
-wet-bulb term in the definition of WBGT is therefore recoverable from the heat
-balance rather than merely calibrated against outcomes.
+The bracketed quantity $\Phi$ is worth naming, because everything below is a
+statement about it. It is the \emph{thermal head}: the entire environment
+reduced to one number, carried in kelvin-equivalents, which multiplies the
+transfer coefficient to give the dissipation ceiling. It runs from about $80$
+in cool conditions to zero, and it has two properties that do all the work:
+\begin{equation}
+  \Phi'(T_{wb}) \;=\; -\bigl(1 + \mathrm{LR}\,P_s'(T_{wb})\bigr) \;<\; 0,
+  \qquad
+  \Phi''(T_{wb}) \;=\; -\,\mathrm{LR}\,P_s''(T_{wb}) \;<\; 0 .
+  \label{eq:phi-derivs}
+\end{equation}
+The head falls as conditions warm, and it falls at an accelerating rate. The
+second statement is the whole of the curvature in this appendix and it comes
+from one place: saturation vapour pressure is convex in temperature. By the
+Clausius--Clapeyron relation $\mathrm{d}P_s/\mathrm{d}T$ rises from $0.09$ to
+$0.22\,\mathrm{kPa\,K^{-1}}$ between $12$ and $28\,^{\circ}$C, so $P_s$ more
+than doubles across that span.\footnote{The \emph{fractional} rate falls
+slightly over the same interval, from $6.6$ to $5.8\%$ per kelvin. It is the
+absolute slope that governs the argument.} Figure~\ref{fig:heat_ceiling}(a)
+draws the resulting ceiling and its two components against wet-bulb
+temperature. The head reaches zero, and with it the capacity to shed any heat
+at all, exactly where $T_{wb} = T_{sk}$.
+
+\begin{figure}[!ht]
+  \centering
+  \includegraphics[width=\linewidth]{figures/fig_heat_ceiling.pdf}
+  \caption{The heat balance read as a constraint on pace, for the reference
+  runner. (a)~The dissipation ceiling $Q_{\max}$ against wet-bulb temperature,
+  split into its dry and evaporative parts; the dashed line is the heat the
+  runner produces at $5{:}00\,\mathrm{min\,km^{-1}}$. Where the two cross,
+  steady-state balance at that pace is no longer available. On this axis the
+  dry term never reverses sign, since wetted skin cannot be cooler than the
+  wet-bulb temperature. (b)~The speed the balance permits, $v_{\max} \propto
+  \Phi^2$, against the runner's own aerobic ceiling. The sustainable speed is
+  the lower of the two, so it is flat while the aerobic limit binds and then
+  falls steeply. Note that the thermal ceiling takes over only at
+  $T_{wb} = 24.6\,^{\circ}$C, roughly WBGT $25$ to $29\,^{\circ}$C depending on
+  humidity and solar load, which is far too warm to produce the breakpoint near
+  $16\,^{\circ}$C that the learned curve shows; Section~\ref{app:physics:graded}
+  takes up what does.}
+  \label{fig:heat_ceiling}
+\end{figure}
+
+Table~\ref{tab:wbtradeoff} and Figure~\ref{fig:wetbulb_isopleth} walk one
+wet-bulb isopleth. Every row sits at $T_{wb} = 22\,^{\circ}$C and is therefore
+the same thermal environment by \eqref{eq:qmax-wb}, though assembled quite
+differently: the first is a cool morning at $92\%$ humidity, the last desert
+heat at $18\%$. As air temperature rises the dry route degrades from shedding
+$121$ to \emph{gaining} $152\,\mathrm{W\,m^{-2}}$, reversing sign at
+$31\,^{\circ}$C where air and skin are equal, while the drier air widens the
+skin-to-air vapour-pressure gradient and evaporative capacity rises by exactly
+as much. The trade is exact rather than approximate: along a line of constant
+wet-bulb temperature $h_e\,\mathrm{d}P_a = -h_c\,\mathrm{d}T_a$ by definition,
+so the two terms move by equal and opposite amounts and their sum cannot shift.
+The heavy weight on the wet-bulb term in the definition of WBGT is therefore
+recoverable from the heat balance rather than merely calibrated against
+outcomes.
 
 \begin{table}[!ht]
 \centering\small
@@ -103,7 +221,8 @@ balance rather than merely calibrated against outcomes.
 runner, with no solar load. Dry and evaporative capacity trade off exactly and
 their sum $Q_{\max}$ does not move. The two right-hand columns show what that
 invariance does \emph{not} cover: the strain the runner carries, and the fluid
-it costs, both rise along the same line.}
+it costs, both rise along the same line. Figure~\ref{fig:wetbulb_isopleth}
+draws the same five conditions.}
 \label{tab:wbtradeoff}
 \begin{tabular}{@{}rrrrrrr@{}}
 \toprule
@@ -124,42 +243,110 @@ Air temp. & Rel.\ hum. & Dry & Evaporative & Total
 \end{tabular}
 \end{table}
 
-The invariance is narrower than it first appears, and the last two columns say
-how. Wet-bulb temperature is a sufficient statistic for the dissipation
-\emph{ceiling}, exactly, but not for the \emph{strain}. Because the runner is a
-heat source of fixed output, $E_{req} = H_{prod} - C$ moves with the dry term,
-so $w_{req} = (H_{prod} - C)/(Q_{\max} - C)$ is invariant only in the degenerate
-case $H_{prod} = Q_{\max}$. Along this isopleth it climbs from $0.68$ to $0.80$,
-approaching ISO's unacclimatised limit of $0.85$, while the sweat rate needed to
-hold pace nearly doubles from $0.81$ to $1.56\,\mathrm{L\,h^{-1}}$. At matched
-wet-bulb, hot and dry is therefore harder on a runner than cool and humid,
-because the dry route turning from ally to adversary costs more than the widened
-vapour-pressure gradient returns. This bears on the index rather than on the
-argument below, but it is one principled reason to expect a model conditioned on
-WBGT alone to leave residual variance.
+\begin{figure}[!ht]
+  \centering
+  \includegraphics[width=\linewidth]{figures/fig_wetbulb_isopleth.pdf}
+  \caption{What a wet-bulb temperature summarizes. (a)~Lines of constant
+  $T_{wb}$ on the air-temperature and humidity plane. Any two points on one
+  line present the runner with the same dissipation ceiling, which is why a
+  single number can stand in for two. The highlighted line carries the five
+  conditions of Table~\ref{tab:wbtradeoff}, from a cool humid morning to desert
+  heat. (b)~Walking that line: the dry and evaporative routes trade off exactly,
+  so their total does not move, but the required wettedness rises anyway. The
+  invariance covers the ceiling, not the strain, which is one principled reason
+  to expect a model conditioned on WBGT alone to leave residual variance.}
+  \label{fig:wetbulb_isopleth}
+\end{figure}
 
-\subsection{Why the required fraction accelerates}
+The invariance is narrower than it first appears, and the last two columns of
+Table~\ref{tab:wbtradeoff} say how. Wet-bulb temperature is a sufficient
+statistic for the dissipation \emph{ceiling}, exactly, but not for the
+\emph{strain}. Because the runner is a heat source of fixed output, $E_{req} =
+H_{prod} - C$ moves with the dry term, so $w_{req} = (H_{prod} - C)/(Q_{\max} -
+C)$ is invariant only in the degenerate case $H_{prod} = Q_{\max}$. Along this
+isopleth it climbs from $0.68$ to $0.80$, approaching ISO's unacclimatised
+limit of $0.85$, while the sweat rate needed to hold pace nearly doubles from
+$0.81$ to $1.56\,\mathrm{L\,h^{-1}}$. At matched wet-bulb, hot and dry is
+therefore harder on a runner than cool and humid, because the dry route turning
+from ally to adversary costs more than the widened vapour-pressure gradient
+returns.
 
-Thermal compensability is $w_{req} = E_{req}/E_{\max}$, where $E_{req} =
-H_{prod} - (C + R)$ is the evaporation needed for balance and $E_{\max}$ the
-maximum the environment will accept \citep{taylor2006, belding1955}. Because
-evaporation scales with wetted area, $w_{req}$ is also the fraction of the skin
-that must be covered in sweat, which is what makes it a graded measure of strain
-rather than a bare ratio.
+\subsection{A concave speed limit makes a convex penalty}
+\label{app:physics:convex}
 
-Its numerator rises exactly linearly in air temperature, since dry exchange is
+Combining \eqref{eq:pinned} and \eqref{eq:qmax-wb} gives the speed limit
+explicitly. Because the transfer coefficients scale with the square root of
+running speed, the balance $\kappa v = A\,h_c(v)\,\Phi$ solves in closed form,
+\begin{equation}
+  v_{\max}(T_{wb}) \;=\; \left(\frac{8.3\,A}{\kappa}\right)^{\!2}\Phi(T_{wb})^{2}
+  \;=\; 0.0044\;\Phi(T_{wb})^{2}\ \mathrm{m\,s^{-1}} .
+  \label{eq:vmax}
+\end{equation}
+The pace penalty relative to a cool reference is then
+$v_{ref}/v_{\max} - 1$, which is proportional to $\Phi^{-2}$. Differentiating
+twice, for any power $p > 0$,
+\begin{equation}
+  \frac{\mathrm{d}^2}{\mathrm{d}T_{wb}^2}\,\Phi^{-p}
+  \;=\; p\,\Phi^{-p-2}\Bigl[(p+1)\,\Phi'^{\,2} \;-\; \Phi\,\Phi''\Bigr]
+  \;>\; 0,
+  \label{eq:convex-ceiling}
+\end{equation}
+in which both bracketed terms are positive, the first because it is a square
+and the second because $\Phi > 0$ and $\Phi'' < 0$ by \eqref{eq:phi-derivs}.
+The pace penalty implied by the ceiling is therefore strictly convex in
+wet-bulb temperature. The result does not depend on the constants, on how the
+transfer coefficients scale with speed (any $p$ will do, and $p=1$ is the
+constant-coefficient case), or on the runner. It requires only that saturation
+vapour pressure be increasing and convex, which is thermodynamics rather than
+physiology.
+
+Two features of \eqref{eq:vmax} are worth reading off directly.
+Figure~\ref{fig:heat_ceiling}(b) draws it. First, the sustainable speed is the
+lesser of this thermal limit and the runner's aerobic limit, so the predicted
+shape is flat and then falling, which is the qualitative signature the learned
+curve shows. Second, the fall has an asymptote rather than a slope: $v_{\max}$
+reaches zero at $T_{wb} = T_{sk}$, because at that point the head is zero and
+no heat leaves at all. For a runner whose skin sits at $31\,^{\circ}$C that
+wall is at a wet-bulb temperature of $31\,^{\circ}$C. It is the running
+counterpart of the wet-bulb limit discussed for resting humans, and it is lower
+for the same reason skin is cooler: running-speed airflow over wet skin holds
+the surface below air temperature, and the wall follows the surface down. The
+runner's own heat production then ends compensable racing some six degrees
+below even that wall. This is why a convex response is the physically expected
+one: the constraint does not saturate as conditions worsen, it tightens toward
+a vertical asymptote.
+
+Against that, one thing the ceiling argument cannot do is explain the flat band
+in the measured curve. For the reference runner the thermal limit overtakes the
+aerobic limit only at $T_{wb} = 24.6\,^{\circ}$C, which corresponds to WBGT
+between about $25$ and $29\,^{\circ}$C depending on humidity and solar load, and
+reading it through required wettedness instead puts the crossing at WBGT $25.7$
+to $27.1\,^{\circ}$C depending on whether $w_{\max}$ is taken as ISO's
+unacclimatised $0.85$ or an acclimatised $1.0$. Either route is some ten
+degrees too warm to account for a breakpoint near $16\,^{\circ}$C. A runner who
+held pace until the hard limit bound would show almost no penalty and then a
+collapse, which resembles no measured curve. The hard ceiling supplies the
+shape of the response but not its onset.
+
+\subsection{Below the ceiling, the same curvature acts on a graded strain}
+\label{app:physics:graded}
+
+Runners evidently concede pace long before balance becomes impossible, so the
+operative quantity is a graded measure of strain rather than a threshold.
+Thermal compensability supplies one. It is $w_{req} = E_{req}/E_{\max}$, where
+$E_{req} = H_{prod} - (C + R)$ is the evaporation needed for balance and
+$E_{\max}$ the maximum the environment will accept \citep{taylor2006,
+belding1955}. Because evaporation scales with wetted area, $w_{req}$ is also
+the fraction of the skin that must be covered in sweat, which is what makes it
+a graded measure of strain rather than a bare ratio.
+
+Its convexity is the same fact in different clothing, and it is worth being
+explicit that this is a corollary rather than an independent finding. The
+numerator rises exactly linearly in air temperature, since dry exchange is
 proportional to the skin-to-air gradient and simply reverses sign once air
-passes skin temperature. Its denominator falls at an accelerating rate, because
-saturation vapour pressure is convex in temperature: by the Clausius--Clapeyron
-relation $\mathrm{d}P_s/\mathrm{d}T$ rises from $0.09$ to
-$0.22\,\mathrm{kPa\,K^{-1}}$ between $12$ and $28\,^{\circ}$C, so $P_s$ more
-than doubles across that span.\footnote{The \emph{fractional} rate falls
-slightly over the same interval, from $6.6$ to $5.8\%$ per kelvin. It is the
-absolute slope that governs the argument.}
-
-That $w_{req}$ is convex then follows from the two rates rather than from any
-choice of constants. Writing $w_{req} = N/D$, the numerator $N$ is affine and
-increasing while the denominator $D$ is positive, decreasing and concave, so
+passes skin temperature. The denominator falls at an accelerating rate, for the
+one reason given in \eqref{eq:phi-derivs}. Writing $w_{req} = N/D$ with $N$
+affine and increasing and $D$ positive, decreasing and concave,
 \begin{equation}
   w_{req}'' \;=\; \frac{-\,N D'' D \;-\; 2 N' D' D \;+\; 2 N D'^{2}}{D^{3}},
   \label{eq:convex}
@@ -173,28 +360,15 @@ $10$ to $38\,^{\circ}$C of air temperature, the property carries to the axis of
 Figure~\ref{fig:heat_cost}, which we confirm numerically at relative humidities
 from $30$ to $90\%$.
 
-Where $w_{req}$ would exceed the maximum sustainable wettedness $w_{\max}$, heat
-stress is uncompensable at that speed: the ceiling caps sustainable metabolic
-rate and the runner concedes pace until balance is restored. Nothing diverges,
-and the consequence is a steep but finite decline.
-
-\subsection{One convex response explains both the flat band and the curvature}
-
-A proportional response to $w_{req}$ does not quite describe the measured curve.
-Rescaled to match the learned penalty at its endpoints, $w_{req}$ predicts a
-$0.9\%$ slowdown at $16\,^{\circ}$C WBGT where the learned curve shows $0.3\%$:
-strain rises perceptibly in the cool range while measured pace does not. Nor can
-a hard ceiling supply the missing flatness. For the reference runner the ceiling
-is reached only at WBGT $25.7$ to $27.1\,^{\circ}$C, depending on whether
-$w_{\max}$ is taken as ISO's unacclimatised $0.85$ or an acclimatised $1.0$,
-which is some eleven degrees too warm to account for a breakpoint near
-$16\,^{\circ}$C.
-
-What reconciles them is a single convex map from strain to conceded pace.
-Fitting $\text{penalty} = c\,w_{req}^{\,k}$ over the $16$ to $28\,^{\circ}$C
-range returns $k \approx 1.9$, and that one exponent does both jobs at once: it
-suppresses the response at low strain, producing the flat band without a
-threshold, and it steepens the response at high strain.
+A proportional response to $w_{req}$ still does not quite describe the measured
+curve. Rescaled to match the learned penalty at its endpoints, $w_{req}$
+predicts a $0.9\%$ slowdown at $16\,^{\circ}$C WBGT where the learned curve
+shows $0.3\%$: strain rises perceptibly in the cool range while measured pace
+does not. What reconciles them is a single convex map from strain to conceded
+pace. Fitting $\text{penalty} = c\,w_{req}^{\,k}$ over the $16$ to
+$28\,^{\circ}$C range returns $k \approx 1.9$, and that one exponent does both
+jobs at once: it suppresses the response at low strain, producing the flat band
+without a threshold, and it steepens the response at high strain.
 
 The exponent is fitted rather than derived, but it is not unconstrained, and the
 bound is the more useful statement. Consider the two natural candidates for what
@@ -215,7 +389,57 @@ a derivation, and one caveat attaches at the hot end: $w_{req}$ exceeds unity at
 $28\,^{\circ}$C for this runner, so both efficiency relations are there being
 read beyond the range over which they were established.
 
+\subsection{The same balance, read as a demand on the circulation}
+\label{app:physics:circulation}
+
+Nothing above says how heat reaches the skin, and the answer supplies both a
+second constraint and a check on the first. Heat is generated in working muscle
+and lost at the surface, and the only transport of consequence between them is
+convection by blood. That imposes a second balance alongside
+\eqref{eq:pinned}: the skin blood flow $\dot{Q}_{sk}$ must carry the whole
+production across the core-to-skin temperature gradient,
+\begin{equation}
+  H \;=\; \rho c_b\,\dot{Q}_{sk}\,\bigl(T_{core} - T_{sk}\bigr)
+  \qquad\Longrightarrow\qquad
+  \dot{Q}_{sk} \;=\; \frac{H}{\rho c_b\,(T_{core} - T_{sk})},
+  \label{eq:skbf}
+\end{equation}
+with $\rho c_b \approx 3.8\,\mathrm{kJ\,L^{-1}\,K^{-1}}$ the volumetric heat
+capacity of blood. For the reference runner holding a core temperature of
+$39\,^{\circ}$C, this requires at least $1.5\,\mathrm{L\,min^{-1}}$ to the skin
+when skin sits at $31\,^{\circ}$C, and at least $3.1$ when it sits at
+$35\,^{\circ}$C. Those are lower bounds. They credit the skin with the whole
+production, which overstates it by the small respiratory share, but they also
+assume blood returns from the skin fully cooled to skin temperature, which
+countercurrent exchange prevents and which understates the requirement by a
+good deal more.
+
+Two things follow. The first is the competition the main text refers to. Cardiac
+output is finite, and blood directed to the cutaneous beds for cooling is not
+available to working muscle, nor does it all return promptly, so a rising
+cutaneous demand shows up as some combination of reduced muscle perfusion,
+reduced stroke volume with a compensating heart rate, and a compressed
+$\dot{V}\mathrm{O}_2$max reserve at unchanged pace. This is the axis
+\citet{cheuvront2010} identify, and it is why the strain arrives as
+cardiovascular before it arrives as thermal.
+
+The second is structural, and it matters for how the competing accounts in
+Section~\ref{app:physics:limits} should be read. The right-hand side of
+\eqref{eq:skbf} is a reciprocal of the core-to-skin gradient, so it is convex in
+skin temperature for the same elementary reason that $\Phi^{-p}$ is convex in
+\eqref{eq:convex-ceiling}: the demand does not rise steadily as the gradient
+closes, it accelerates, and it diverges as skin temperature approaches core
+temperature. The cardiovascular route therefore carries the same curvature as
+the evaporative one, and it must, because the two are consecutive links in one
+chain rather than rival mechanisms. Heat that cannot leave the skin raises skin
+temperature, which narrows the gradient, which raises the flow required to
+deliver the next joule. A convex response is what a chain of this shape
+produces regardless of which link is measured, which is a reason to hold the
+convexity finding more confidently than any particular mechanism attributed to
+it.
+
 \subsection{Why duration matters}
+\label{app:physics:duration}
 
 Balance need not hold instantaneously, since heat can be stored as a rise in
 core temperature. That allowance is a rate, however, and it scales inversely
@@ -238,6 +462,7 @@ storage term dominates. \citet{taylor2006} list duration of competition among
 the determinants of compensability for the same reason.
 
 \subsection{Does it predict the curvature we measured?}
+\label{app:physics:curvature}
 
 Between the $20$--$24$ and $24$--$28\,^{\circ}$C WBGT bands the learned curve of
 Section~\ref{sec:results} steepens by a factor of $2.18$. Evaluated over the
@@ -268,25 +493,122 @@ $33\,^{\circ}$C, which no plausible weighting of these measurements reaches. The
 agreement is therefore correct in sign and order of magnitude but not sharp, and
 the width of the band is dominated by a quantity the corpus does not observe.
 
+\subsection{Does the penalty survive on the thermometer's axis?}
+\label{app:physics:drybulb}
+
+Everything so far is stated on a humidity-weighted axis, which invites the
+objection that the finding is a property of the index rather than of the
+weather. It is not, and separating the two yields the sharpest prediction in
+this appendix.
+
+Hold relative humidity fixed and vary air temperature. The head becomes
+$\Phi(T_a) = (T_{sk} - T_a) + \mathrm{LR}\,(P_s(T_{sk}) - \mathrm{RH}\cdot
+P_s(T_a))$, so
+\begin{equation}
+  \Phi''(T_a) \;=\; -\,\mathrm{LR}\cdot\mathrm{RH}\cdot P_s''(T_a).
+  \label{eq:phi-rh}
+\end{equation}
+The curvature is not merely humidity-sensitive; it is exactly proportional to
+relative humidity, and it vanishes identically in perfectly dry air. The
+consequence for the graded measure is stark and is drawn in
+Figure~\ref{fig:drybulb_axis}(a): $w_{req}$ is a strictly convex function of air
+temperature at every humidity we can race in, and an exactly linear one at
+$\mathrm{RH} = 0$, where its denominator stops depending on air temperature
+altogether. All of the acceleration in the strain measure is a humidity effect
+wearing a temperature label.
+
+The two measures part company here, which makes the dry end a discriminating
+test rather than a curiosity. The ceiling penalty retains a residual convexity
+even in dry air, because a reciprocal of an affine function is still convex, so
+it predicts a mild bend where $w_{req}$ predicts none: at $25\,^{\circ}$C and
+zero humidity the penalty's second derivative is $1.6\times10^{-4}$ against
+$5.3\times10^{-3}$ at $50\%$ and $7.3\times10^{-2}$ at $90\%$. A corpus with
+enough genuinely hot and dry racing would separate the two accounts. Ours does
+not contain it.
+
+Finally, the practical question. Because the model was shown wet-bulb globe
+temperature and nothing else, it cannot be asked directly what an extra degree
+of dry-bulb heat costs; but the learned curve can be composed with the map from
+$(T_a, \mathrm{RH})$ to WBGT and read on the thermometer's axis, which is
+Figure~\ref{fig:drybulb_axis}(b) and Table~\ref{tab:drybulb}. The slowdown does
+not depend on the index for its existence. At $50\%$ humidity and a solar load
+of $200\,\mathrm{W\,m^{-2}}$, warming from $10$ to $25\,^{\circ}$C of air
+temperature costs $1.7\%$ of pace, and warming to $30\,^{\circ}$C costs $3.7\%$;
+the same $25\,^{\circ}$C day costs $1.0\%$ at $30\%$ humidity and $3.5\%$ at
+$90\%$. The penalty rises monotonically along every constant-humidity line, and
+it accelerates along each of them, so the shape reported in
+Section~\ref{sec:results} is a property of the weather rather than of the
+weighting. What the composition also shows is how much the thermometer alone
+conceals: a single air temperature spans a threefold range of cost depending on
+the humidity attached to it, which is the practical case for carrying the
+composite index rather than the raw reading.
+
+\begin{figure}[!ht]
+  \centering
+  \includegraphics[width=\linewidth]{figures/fig_drybulb_axis.pdf}
+  \caption{The response on the dry-bulb axis, at fixed relative humidity.
+  (a)~Required wettedness against air temperature. The curvature is exactly
+  proportional to humidity by \eqref{eq:phi-rh}, so the dry-air case is a
+  straight line and every other case bends; the acceleration in the strain
+  measure is entirely a humidity effect. (b)~The learned population curve of
+  Figure~\ref{fig:heat_cost} composed with the map from air temperature and
+  humidity to WBGT, at a solar load of $200\,\mathrm{W\,m^{-2}}$ and
+  $1\,\mathrm{m\,s^{-1}}$ of wind. Each line stops where WBGT leaves the range
+  over which the model was evaluated. Drawn by linear interpolation of the
+  anchor values reported in Section~\ref{sec:results}, which is the source of
+  the visible kinks.}
+  \label{fig:drybulb_axis}
+\end{figure}
+
+\begin{table}[!ht]
+\centering\small
+\caption{The learned penalty re-expressed on the dry-bulb axis: percent pace
+slowdown relative to $10\,^{\circ}$C of air temperature at the same humidity,
+with a solar load of $200\,\mathrm{W\,m^{-2}}$ and $1\,\mathrm{m\,s^{-1}}$ of
+wind. Dashes mark conditions whose WBGT exceeds $28\,^{\circ}$C, beyond the
+range the model was evaluated over. Reading across a row isolates the cost of
+humidity at fixed temperature; reading down a column isolates the cost of
+temperature at fixed humidity.}
+\label{tab:drybulb}
+\begin{tabular}{@{}rrrrr@{}}
+\toprule
+Air temp. & \multicolumn{4}{c}{Relative humidity} \\
+\cmidrule(lr){2-5}
+(\textdegree C) & 30\% & 50\% & 70\% & 90\% \\
+\midrule
+10 & 0.00 & 0.00 & 0.00 & 0.03 \\
+15 & 0.03 & 0.10 & 0.18 & 0.29 \\
+20 & 0.24 & 0.59 & 1.00 & 1.45 \\
+25 & 1.03 & 1.70 & 2.34 & 3.53 \\
+30 & 2.17 & 3.74 & --- & --- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 \subsection{What this does and does not establish}
+\label{app:physics:limits}
 
 The argument constrains shape, not magnitude: nothing here derives the $5.0\%$
-penalty of Section~\ref{sec:results}. A model in which runners hold pace until
-they strike the biophysical ceiling predicts almost no penalty until the high
-$20$s and a collapse thereafter, which resembles no measured curve. Runners
-evidently respond to graded strain long before the hard limit binds, and
-$w_{req}$ is that graded quantity rather than a threshold.
+penalty of Section~\ref{sec:results}. What it does establish is narrower and
+more durable. Convexity in the response is a theorem about the heat balance
+rather than a feature fitted to the data, it holds on the ceiling and on the
+graded strain measure alike, it survives the change of axis from wet-bulb to
+WBGT and to dry-bulb at fixed humidity, and it traces in every case to one
+term, $P_s''$. A linear penalty is not a simplification of this physics; it is
+inconsistent with it.
 
 Two competing explanations for the same curvature deserve naming, since neither
 is excluded by our data. \citet{cheuvront2010} attribute an exponential decline
-in aerobic performance to the cardiovascular axis: high skin temperature
-compresses $\dot{V}\mathrm{O}_2$max reserve, so a fixed pace becomes a rising
-relative intensity. \citet{wang2024} attribute more than half the marathon heat
-effect to reduced atmospheric oxygen partial density, since warm air expands and
-rising vapour pressure displaces oxygen, a mechanism that also scales with
-vapour pressure and therefore mimics the humidity signature of the evaporative
-account while fitting a piecewise-\emph{linear} form. Distinguishing the three
-requires measurements this corpus does not contain.
+in aerobic performance to the cardiovascular axis; as
+Section~\ref{app:physics:circulation} argues, that account shares the structure rather than
+competing with it, but the two make different predictions about which
+intervention helps and cannot be separated here. \citet{wang2024} attribute more
+than half the marathon heat effect to reduced atmospheric oxygen partial
+density, since warm air expands and rising vapour pressure displaces oxygen, a
+mechanism that also scales with vapour pressure and therefore mimics the
+humidity signature of the evaporative account while fitting a
+piecewise-\emph{linear} form. Distinguishing the three requires measurements
+this corpus does not contain.
 
 A statistical objection applies to any pooled curve. Because the penalty is
 strongly ability-dependent \citep{ely2007}, differential slopes combined with
@@ -305,9 +627,13 @@ $\dot{V}\mathrm{O}_2$max, about $163\,\mathrm{W\,m^{-2}}$, while a marathon runs
 above $400\,\mathrm{W\,m^{-2}}$. Occupational limit curves extrapolated that far
 give $22\,^{\circ}$C WBGT (ACGIH) or $18\,^{\circ}$C (NIOSH), far below
 conditions marathons are routinely held in, which suggests those curves do not
-transfer to self-paced athletic work. The gap is worth naming as a target for
-measurement rather than filled by extrapolation here.
+transfer to self-paced athletic work. Equation~\eqref{eq:vmax} makes the same
+point from the other direction: it places an absolute wall at $T_{wb} = T_{sk}$
+and, for the reference runner, an end to compensable racing some six degrees
+below it. Neither number has been measured in runners. The gap is worth naming
+as a target for measurement rather than filled by extrapolation here.
 
 The calculations in this appendix are reproduced by
-\texttt{verify\_heat\_convexity.py}, which is self-checking and prints a
-pass or fail line for every number quoted above.
+\texttt{verify\_heat\_convexity.py}, which is self-checking and prints a pass or
+fail line for every number quoted above; the figures are built by
+\texttt{build\_compensability\_figures.py}.
