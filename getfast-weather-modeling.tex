@@ -45,7 +45,7 @@
                 align=center, inner sep=5pt, font=\footnotesize},
   headx/.style={rectangle, rounded corners=2pt, draw=gfgray, fill=green!8, line width=0.7pt,
                 align=center, inner sep=5pt, font=\footnotesize},
-  out/.style  ={rectangle, rounded corners=2pt, draw=gfgray, fill=orange!10, line width=0.9pt,
+  outbox/.style={rectangle, rounded corners=2pt, draw=gfgray, fill=orange!10, line width=0.9pt,
                 align=center, inner sep=5pt, font=\footnotesize\bfseries},
   flow/.style ={-{Latex[length=2.4mm]}, draw=gfgray, line width=0.7pt},
   lbl/.style  ={font=\scriptsize\itshape, text=gfgray},
@@ -221,7 +221,7 @@ The study estimates whether a heat response learned by a deep-learning model imp
   \node[headx] (dl)    at (0.5,-5.3)  {Deep-learning heat artifacts:\\population curve,\\per-runner percentile};
   \node[proc]  (prog)  at (0.5,-7.9)  {Pace models\\\textbf{1.} weather-blind\\\textbf{2.} $+$ population curve\\\textbf{3.} $+$ per-runner percentile};
   \node[io]    (ctl)   at (6.8,-7.9)  {Controls:\\shuffled percentile,\\curve-constrained deviation};
-  \node[out]   (eval)  at (3.5,-10.4) {Held-out MAPE and bias,\\calibration of $\alpha$ and $\gamma$};
+  \node[outbox](eval)  at (3.5,-10.4) {Held-out MAPE and bias,\\calibration of $\alpha$ and $\gamma$};
   \draw[flow] (all) -- (split);
   \draw[flow] (split) -| (fit);
   \draw[flow] (split) -| (hold);
@@ -421,13 +421,14 @@ Finally, some of what the literature flags as relevant is simply absent from the
 
 \clearpage
 \bibliographystyle{apalike}
-\bibliography{references}
+\bibliography{references,tommy_refs}
 \clearpage
-%% create appendix 
+%% create appendix
 \appendix
 \renewcommand{\thetable}{A\arabic{table}}
 \setcounter{table}{0} % This resets the table counter
-\input{appendix} 
+\input{appendix}
+\input{tommy_appendix}
 
 
 \end{document}
