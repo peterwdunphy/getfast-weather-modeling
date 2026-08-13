@@ -60,6 +60,22 @@ def fig_heat_effects_lit():
     tf = T*9/5+32; wt = 148.51 - 0.713*tf + 0.00657*tf**2
     martin = wt/np.interp(50.0, tf, wt)*100 - 100
 
+    # --- published NON-LINEAR forms -----------------------------------------
+    # Gasparetto & Nesseler (2020) fit finish time (s) = a*W + b*W^2 per performance
+    # cluster. Converted to % vs the 10C anchor using each cluster's implied baseline
+    # (reported slowdown / reported %). Verified: the computed 8->20C change reproduces
+    # their reported 1376/1942/569 s for clusters 1, 2 and 4.
+    # These are drawn ONLY over their fitted support (8-20C): a positive quadratic term
+    # diverges outside it, and extrapolating cluster 2 to 28C would imply a 59% slowdown.
+    GAS = {1: (-141.7, 9.16, 1376, 16.89), 2: (-202.9, 13.03, 1942, 21.89),
+           4: (-58.75, 3.79, 569, 5.44)}
+    Wg = np.linspace(10, 20, 60)
+    gas = []
+    for k, (a_, b_, rep, pct) in GAS.items():
+        f = lambda w: a_ * w + b_ * w ** 2
+        base = rep / (pct / 100.0)
+        gas.append((f"Gasparetto 2020 (cl.{k})", (f(Wg) - f(10.0)) / base * 100.0))
+
     # (label, curve, %/degC note).  Slopes: %/degC directly, or s/degC / finish time.
     elite = [
         ("Martin 1999",            martin),
@@ -88,6 +104,22 @@ def fig_heat_effects_lit():
             ends.append([y[-1], lab, color, "normal"])
     draw(elite, ELITE_C, "D")           # diamonds = elite
     draw(amateur, AMATEUR_C, "s")       # squares  = amateur
+    # published quadratics, dashed, over their fitted range only. Two of the three
+    # leave the top of the frame well before 20C; that divergence is the point, so
+    # clip the drawn line at the frame and annotate in place rather than off-axis.
+    YMAX = 16.5
+    for lab, y in gas:
+        vis = y <= YMAX
+        ax.plot(Wg[vis], y[vis], color="#7a5195", lw=1.3, ls=(0, (5, 2)),
+                alpha=0.85, zorder=2)
+        if vis.all():                                   # stays in frame: label at the end
+            ax.plot(Wg[-1], y[-1], "^", ms=6, mfc="#7a5195", mec="white", mew=0.5, zorder=3)
+            ends.append([y[-1], lab, "#7a5195", "normal"])
+        else:                                           # exits: mark where, note the value at 20C
+            xe = Wg[vis][-1]
+            ax.annotate(f"{lab}\n({y[-1]:.0f}% at 20\u00b0C)", (xe, YMAX),
+                        xytext=(3, -12), textcoords="offset points", fontsize=6.9,
+                        color="#7a5195", ha="left", va="top")
     # our curve (bold, distinct)
     ax.plot(w, dl, color=OURS_C, lw=3.2, zorder=5)
     ax.plot(w[-1], dl[-1], "o", color=OURS_C, ms=7, mec="white", mew=0.8, zorder=6)
@@ -111,6 +143,9 @@ def fig_heat_effects_lit():
     ax.set_title("Marathon heat-slowdown: this study versus published forms", loc="left")
     handles = [Line2D([0],[0], color=ELITE_C, lw=1.6, marker="D", mfc=ELITE_C, mec="white", ms=7, label="Elite field"),
                Line2D([0],[0], color=AMATEUR_C, lw=1.6, marker="s", mfc=AMATEUR_C, mec="white", ms=7, label="Amateur / mass field"),
+               Line2D([0],[0], color="#7a5195", lw=1.6, ls=(0,(5,2)), marker="^",
+                      mfc="#7a5195", mec="white", ms=7,
+                      label="Published quadratic (over fitted range only)"),
                Line2D([0],[0], color=OURS_C, lw=3.0, label="This study (deep-model median)")]
     ax.legend(handles=handles, loc="upper left")
     fig.subplots_adjust(right=0.75)

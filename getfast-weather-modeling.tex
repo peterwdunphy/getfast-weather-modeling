@@ -112,7 +112,19 @@ Heat degrades endurance running performance through a chain that begins with a p
 
 Running is thermally expensive. Roughly 75\% to 80\% of metabolic energy turnover during exercise appears as heat rather than as mechanical work. That heat must either be dissipated or stored in body tissue \citep{maughan2007}. Storage raises core temperature, and the margin available is narrow, since enzymatic function is near optimal around 39\,\textdegree C while deterioration sets in above roughly 40.5\,\textdegree C \citep{martin2007}. Competitive runners operate close to that ceiling in the heat. Among finishers of the 2019 World Athletics road races, held at WBGT between 23.5 and 30.6\,\textdegree C, 16\% completed their event with a core temperature above 40\,\textdegree C, with a peak recorded value of 40.7\,\textdegree C \citep{aylwin2023}.
 
-The body sheds this heat mainly by evaporating sweat (I THINK IT IS THROUGH CONVECTION HEAT TRANSFER, BUT SHOULD DOUBLE CHECK, AND MAYBE SOME HEAT TRANSFER THOUGH LOSS OF MASS WITH EVAPORATION; ALSO RADIATION BUT IS MINOR). Environmental conditions create the ceiling on how much evaporation is possible. Dry exchange through radiation and convection depends on the gradient between skin and air. That gradient reverses once air temperature exceeds skin temperature at roughly 36\,\textdegree C, beyond which the runner gains heat from the environment rather than losing it \citep{cheuvront2001}. Humidity constrains the evaporative route directly (IT ALSO AFFECTS THE COEFFICIENT OF CONVECTION I THINK). Modeling world-record performances at 33\,\textdegree C and 50\% relative humidity, \citet{taylor2006} calculated an average required evaporation of about 4{,}200\,kJ against a maximum achievable evaporation of only 1{,}100\,kJ, so barely a quarter of the sweat needed for thermal balance could actually evaporate. Sweat produced beyond that ceiling drips rather than cools, and represents fluid lost for no thermal return. Radiation adds a load that air temperature does not capture at all. The difference of about 73\,W\,m$^{-2}$ that \citet{cheuvront2021} measured between early and late Boston Marathon start windows is equivalent to roughly one metabolic equivalent of extra heat production for a four-hour finisher.
+Heat balance is an accounting identity, and writing it out locates the constraint. The rate at which heat accumulates in body tissue is whatever metabolic production leaves once the exchange routes have acted,
+\begin{equation}
+  S \;=\; M \;-\; W \;-\; (R + C + K) \;-\; E,
+\end{equation}
+with $M$ metabolic heat production, $W$ external work, $R$, $C$ and $K$ radiative, convective and conductive exchange, and $E$ evaporative cooling. In running $W$ is small against $M$ and $K$ is negligible, so storage rises whenever production outruns the sum of the other three. Human tissue has a heat capacity near $3.47\,\mathrm{kJ}$ per \textdegree C, so a sustained imbalance translates quickly into rising core temperature \citep{maughan2010}.
+
+The routes do not contribute equally, and their shares move with conditions. Using the coefficients in \citet{taylor2006}, where convective loss scales as $8.3\,(T_{sk}-T_a)\sqrt{v}$, radiant loss as $5.2\,(T_{sk}-T_{mrt})$ and evaporative loss as $124\,(P_{sk}-P_a)\sqrt{v}$ per square metre, a runner at $5\,\mathrm{m\,s^{-1}}$ with skin at $35\,^{\circ}$C sheds roughly 83\% of its capacity evaporatively at $25\,^{\circ}$C and 50\% humidity, against 14\% by convection and 4\% by radiation. In cool conditions convection matters considerably more, near 24\% at $10\,^{\circ}$C, because the skin-to-air gradient is wide. In genuinely hot conditions it nearly vanishes: at $33\,^{\circ}$C the gradient is only two degrees and convection falls to about 4\%, which is why \citet{taylor2006} sets the dry terms aside entirely in that case.
+
+So evaporation dominates in the conditions this paper is about, and the dry routes matter most exactly where heat is not a problem. Both dry routes also reverse once air temperature exceeds skin temperature, near $36\,^{\circ}$C, beyond which the runner gains heat from the environment rather than losing it \citep{cheuvront2001}. Humidity acts almost entirely through the evaporative term, since it enters the vapour-pressure gradient $P_{sk}-P_a$ directly; its effect on the convective coefficient runs through air density and conductivity, which differ by around one percent between dry and saturated air, and is not material.
+
+Evaporation is capped not by how hard a runner sweats but by how much vapour the air will accept. Modeling world-record performances at $33\,^{\circ}$C and 50\% relative humidity, \citet{taylor2006} calculated a required evaporation of about $4{,}200\,\mathrm{kJ}$ against a maximum achievable evaporation of $1{,}100\,\mathrm{kJ}$, so barely a quarter of the sweat needed for balance could evaporate at all. Sweat beyond that ceiling drips rather than cools, and is fluid lost for no thermal return. Radiation adds a load air temperature does not register: the $73\,\mathrm{W\,m^{-2}}$ difference \citet{cheuvront2021} measured between early and late Boston Marathon start windows is worth roughly one metabolic equivalent of extra heat production for a four-hour finisher.
+
+This is why the performance response to heat is a threshold rather than a gradient. While maximum evaporation exceeds what balance requires, the runner is in compensable conditions, storage stays near zero and warming costs little. Once the requirement exceeds the ceiling the conditions are uncompensable, storage is necessarily positive, and core temperature climbs until the runner slows enough to bring production down. Which regime a given day falls in depends on humidity and radiation as much as on air temperature, which is the physical reason a composite index outperforms the thermometer.
 
 The strain this imposes is cardiovascular before it is thermal, as skin blood flow directed to the surface for cooling competes with muscle for a finite cardiac output. Dehydration compounds the problem: beyond a 2\% loss of body weight, each further 1\% is associated with roughly a 0.4\,\textdegree C rise in rectal temperature during prolonged running. Sweat rates scale with conditions as well, averaging 0.83\,L\,h$^{-1}$ in marathons below 15\,\textdegree C against 1.2\,L\,h$^{-1}$ above it \citep{cheuvront2001}.
 
@@ -124,7 +136,7 @@ Sports scientists have converged on wet-bulb globe temperature as the most accur
 \begin{equation}
   \mathrm{WBGT} = 0.7\,T_{\mathrm{nwb}} + 0.2\,T_{\mathrm{bg}} + 0.1\,T_{\mathrm{db}},
 \end{equation}
-where $T_{\mathrm{nwb}}$ is the natural wet-bulb temperature, measured by a thermometer with a wet cloth wick ventilated by ambient wind and so capturing humidity and air movement together, $T_{\mathrm{bg}}$ is the black-globe temperature, measured inside a matte-black copper sphere and so capturing radiant load, and $T_{\mathrm{db}}$ is ambient air temperature \citep{cheuvront2021}. This weighting follows the physiology of heat's effect on performance described above. The most weight corresponds to the humidity-sensitive term, as evaporative capacity is the binding constraint, while dry heat alone is comparatively benign. WBGT has been found to outperform raw air temperature in cross-event comparison \citep{mantzios2022, ely2007, aylwin2023}.  
+where $T_{\mathrm{nwb}}$ is the natural wet-bulb temperature, measured by a thermometer with a wet cloth wick ventilated by ambient wind and so capturing humidity and air movement together, $T_{\mathrm{bg}}$ is the black-globe temperature, measured inside a matte-black copper sphere and so capturing radiant load, and $T_{\mathrm{db}}$ is ambient air temperature \citep{cheuvront2021}. This weighting follows the physiology of heat's effect on performance described above. It is also recoverable from the heat balance rather than merely calibrated to it. For a runner with wetted skin, the coefficients in \citet{taylor2006} imply a ratio of evaporative to convective transfer of 14.9\,\textdegree C\,kPa$^{-1}$, which is the standard psychrometric constant. Substituting the definition of the wet-bulb temperature into the sum of the dry and evaporative terms removes air temperature and humidity as separate quantities and leaves total heat-loss capacity a function of skin and wet-bulb temperature alone. Along a line of constant wet-bulb temperature the dry and evaporative shares trade off exactly while their sum does not move, so the heavy weight on the wet-bulb term reflects that it carries the information the two variables jointly hold. Appendix~\ref{app:physics} gives the derivation. The most weight corresponds to the humidity-sensitive term, as evaporative capacity is the binding constraint, while dry heat alone is comparatively benign. WBGT has been found to outperform raw air temperature in cross-event comparison \citep{mantzios2022, ely2007, aylwin2023}.  
 
 The exact functional form of the heat penalty remains contested, and Table~\ref{tab:forms} collects those that have been published. Linear models dominate the literature and adequately describe the moderate ranges observed at most major marathons \citep{ely2007, knechtle2019, nikolaidis2019, vernon2021}.\footnote{These moderate ranges are partly an artifact of major marathons being canceled once heat passes a threshold.} A linear form cannot capture the acceleration of the penalty at the hot end, however, and several designs recover it. Quadratic fits appear across single-race and multi-race designs \citep{martin1999, elhelou2012, gasparetto2020}, while the largest synthesis is explicitly piecewise: across 1{,}258 elite races, \citet{mantzios2022} reported a flat band up to 15\,\textdegree C WBGT with performance declining by $0.4 \pm 0.4\%$ per \textdegree C above it. Table~\ref{tab:forms} collects these forms.
 
@@ -155,6 +167,16 @@ The exact functional form of the heat penalty remains contested, and Table~\ref{
 Practitioner rules & Coaching heuristics, reviewed in \citet{montain2007} & Air temp.\ (\textdegree C) & Finishing time & Frederick $\approx 2\%$ per 5\,\textdegree C above 12\,\textdegree C; Daniels $1.6\%$ per 5\,\textdegree C to 32\,\textdegree C; Brown 7--8\% in warm conditions \\
 \bottomrule
 \end{tabular}
+
+\vspace{2pt}
+\begin{minipage}{0.92\linewidth}\footnotesize
+$^{a}$ Tested bundled with the longer window rather than alone, and stopped once it was clearly
+behind at matched steps, so no completed run exists; the rejection rests on that trajectory and on
+the interference argument given below.\\
+$^{b}$ Measured in an earlier round on a 261-window panel, against a contemporaneous baseline of
+0.84 and 6.20 on that same panel. The comparison within that round is valid, but the numbers are not
+on the same scale as the other rows.
+\end{minipage}
 \end{table}
 
 The estimated optimal temperature for endurance running performance is also a source of scholarly contention. Optimal air temperature estimates range from about 3.8 to 9.9\,\textdegree C \citep{elhelou2012} and 5 to 10\,\textdegree C \citep{llewellyn2025} through 10 to 12\,\textdegree C \citep{maughan2010} to 12 to 15\,\textdegree C \citep{martin1999, martin2007}. On WBGT, \citet{mantzios2022} place the marathon optimum at 7.5\,\textdegree C. \citet{gasparetto2020} locate a tipping point near 8\,\textdegree C. This wide span reflects, in part, the vast individual-level differences among runners that together constitute heat tolerance.
@@ -227,7 +249,7 @@ Weather was sampled from Open-Meteo along each run: once at the start, once at t
 
 Heat features come from a transformer trained on each runner's recent training streams, a factored-attention network adapted from an existing fitness-prediction architecture. Its input is a window of the 30 most recent activities, each resampled to 128 points and represented by eleven channels: date, latitude, altitude, cadence, cumulative elevation, distance, heart rate, power, activity type, outdoor WBGT, and pace. Each channel is tokenized and embedded separately; the embeddings are summed with a $1/\sqrt{C}$ scale and layer-normalized, and the result passes through attention that mixes information both within an activity and across the runner's recent activities. The model predicts pace directly. Two heat artifacts are then read off the trained model by counterfactual WBGT sweeps that hold every other channel fixed.
 
-The \emph{population heat curve} gives the average pace penalty as a function of conditions alone. Each fitting runner's swept response is anchored at $10\,^{\circ}$C and divided by that runner's own value at $28\,^{\circ}$C, isolating the shape of the response from its size. The median of these shapes across the 1{,}186 fitting runners with a positive heat response is held non-decreasing, then rescaled by the median sensitivity of a 750-runner reference sample.
+The \emph{population heat curve} gives the average pace penalty as a function of conditions alone. Each fitting runner's swept response is anchored at $10\,^{\circ}$C and divided by that runner's own value at $28\,^{\circ}$C, isolating the shape of the response from its size. The median of these shapes is taken across the 1{,}186 fitting runners with a positive heat response, then rescaled by the median sensitivity of a 750-runner reference sample. The model is given no monotonicity constraint, so the shape of the response is whatever the network produces. A monotone projection is applied to the median shape when the published curve is assembled, but it is immaterial: it alters 8 of 37 grid points, by at most 0.13 percentage points of pace against a total curve range of 5.04. Every individual runner's estimated curve decreases somewhere, yet their median is already non-decreasing to within that tolerance, so the monotone shape is a property the model recovered rather than one assumed. Appendix~\ref{app:curve} gives the construction in full.
 
 The \emph{per-runner sensitivity score} is each runner's percentile rank of DL-predicted slowdown at $28\,^{\circ}$C relative to $10\,^{\circ}$C, $\mathrm{slowdown}_{28} = 100\,(\mathrm{DL}_{28^\circ}/\mathrm{DL}_{10^\circ} - 1)$. The primary, prospective version uses a strict prior of exactly 15 preceding windows and excludes the target activity, so it is fully prospective.
 
@@ -303,6 +325,16 @@ Because the curve is estimated without reference to any published result, it can
   \label{fig:heateffects}
 \end{figure}
 
+The shape the model settles on is the one the physiology predicts, and it is a shape neither of the two dominant published forms can produce. Below roughly $16\,^{\circ}$C the curve is nearly flat: evaporative capacity exceeds what the runner needs to shed, heat balance holds, and warming costs almost nothing. Above it the curve steepens as the environment's capacity to remove heat falls below the rate of production, so storage accumulates and pace must be conceded. A threshold followed by acceleration is exactly the signature of a constraint that is slack and then binds.
+
+The curvature has a specific physical source, and it is worth stating because it predicts a shape independently of anything the model was shown. The quantity a runner is graded against is the ratio of the evaporation required for heat balance to the maximum the environment will accept, which \citet{taylor2006} term thermal compensability. Its numerator rises close to linearly as conditions warm, because dry exchange is proportional to the skin-to-air gradient and simply reverses sign near $36\,^{\circ}$C. Its denominator falls, and falls at an accelerating rate, because saturation vapor pressure is convex in temperature: it gains between 6 and 7\% of its own value per degree, so the evaporative ceiling sheds about 22\,W\,m$^{-2}$ per degree at a wet-bulb temperature of $12\,^{\circ}$C but about 46 at $26\,^{\circ}$C. A near-linear numerator over a concave denominator is convex, so the physiologically binding quantity must accelerate even though neither of its parts does. For a 70\,kg runner at three-and-a-half-hour marathon effort the required fraction of maximal evaporation rises from 0.12 at a wet-bulb temperature of $15\,^{\circ}$C to 0.82 at $28\,^{\circ}$C, and its increment per degree more than triples across that span. \citet{taylor2006} further note that strain rises gradually as the ratio approaches unity rather than only at the point where it is reached, which matters here: a runner who held pace until the hard limit bound would show almost no penalty and then a collapse, which is not the behavior any measured curve displays.
+
+That argument constrains the shape of the response and not its size, so it can be checked against the learned curve without either one being used to fit the other. Between the 20 to $24\,^{\circ}$C and 24 to $28\,^{\circ}$C bands the learned curve steepens from 0.31 to 0.66\% per degree, a factor of 2.12. The compensability ratio steepens by a factor between 1.64 and 1.87 over the same interval, depending on the humidity and solar load assumed. The two agree in sign and in order of magnitude, with the measured curvature the larger of the two. A gap in that direction is expected rather than troubling, since the pace penalty should be convex in the ratio rather than proportional to it: as the requirement approaches the ceiling, sweat that cannot evaporate drips instead, so the fluid cost compounds on precisely the days evaporation is least effective \citep{taylor2006}. The physics predicts that the curve should bend and roughly how sharply, not that the penalty should reach 5\% at $28\,^{\circ}$C. Appendix~\ref{app:physics} gives the calculation.
+
+A linear form cannot represent that threshold at all. It must either overstate the penalty in mild conditions or understate it in hot ones, and the published linear fits do the former, which is visible in Figure~\ref{fig:heateffects} as slopes that rise steadily from $10\,^{\circ}$C where the measured response is flat. A quadratic can bend, but it bends without limit. Fitted over the 8 to $20\,^{\circ}$C range their data spans, the cluster-specific quadratics of \citet{gasparetto2020} already reach 16 and 21\% at $20\,^{\circ}$C for their two fastest clusters, and extrapolating them to $28\,^{\circ}$C would imply slowdowns near 50\%. No runner in the corpus behaves that way. The divergence is a property of the functional form rather than of the data it was fitted to, which is why those curves are drawn here only over the range in which they were estimated.
+
+The learned curve avoids both failures because nothing constrains it to a polynomial. It is flat where the constraint is slack, steepens where the constraint binds, and flattens again at the top of the observed range rather than accelerating without bound, which is the behavior a physically limited process should show.
+
 \subsection{Whether weather information improves prediction}
 
 Both heat features lower held-out error (Figure~\ref{fig:mape_ladder}). Robust MAPE falls from 7.34\% for the weather-blind model to 7.29\% with the population curve, and to 7.13\% once the personalized score is added, a total of 0.21 points. On a 3:30 marathon the whole progression is worth about 26 seconds, and on a four-hour marathon about 30. This small magnitude is expected: the effect of heat is a small piece of daily training pace variation, where training intent, terrain and fatigue all have larger effects. Average error over a mostly temperate corpus is therefore a weak instrument for detecting it.
@@ -346,9 +378,11 @@ Its effect is nearly independent of temperature. Relative to the population mode
 
 Forcing it to act through the temperature curve retains only part of its value. Supplied as a percentile-matched deviation of the curve, so that its input is zero at and below the $10\,^{\circ}$C anchor, it yields 7.20\% robust MAPE, a gain of 0.089 points beyond the population curve with a 95\% interval of [0.015, 0.167]. That is a genuine temperature-shaped signal, but it is about 55\% of the 0.1632-point gain the unconstrained score achieves. The remainder is runner-level information that is not specific to heat.
 
-Calibrating both features against the correction the weather-blind model requires reveals a sign problem (Figure~\ref{fig:gamma}). The population curve's scale is $\alpha = 1.078$, with a 95\% interval of [0.823, 1.344] that includes one, so the magnitude the deep model learned agrees with the correction the pace model independently requires. The personalized deviation's coefficient is $\gamma = -1.654$, with a 95\% interval of [$-2.545$, $-0.865$] that is decisively negative, and it stays negative when the calibration is restricted to progressively hotter subsets. Conditional on the population curve, in other words, runners the model marks as more heat-sensitive require their predictions adjusted in the opposite direction. The score cannot therefore be applied as a direct heat multiplier, although a tree model can still exploit it because it is free to learn the inverted relationship. The estimate is stable across the three seeds but varies considerably across runner folds, so its magnitude should be read as approximate.
+Calibrating both features against the correction the weather-blind model requires is best read as a sensitivity test rather than as a measurement, because the result depends on the specification. Fitted on the manuscript's baseline, the population curve's scale is $\alpha = 1.10$, with a 95\% interval of [0.86, 1.35] that includes one, so the magnitude the deep model learned agrees with the correction the pace model independently requires. The personalized deviation's coefficient is $\gamma = -1.56$ [$-2.43$, $-0.75$], decisively negative: conditional on the population curve, runners the model marks as more heat-sensitive would require their predictions adjusted in the opposite direction.
 
-This reversal describes the residual left after conditioning on the baseline, not the deep model's physiological ordering. The weather-blind baseline already contains average heart rate and trailing pace, and both plausibly encode the consequences of heat sensitivity: a runner who suffers in heat may already receive a slower prediction through an elevated heart rate, leaving an oppositely signed residual for the personalized feature to absorb. The defensible reading is that the population curve is well scaled while the personalized score is reproducible predictive information whose direction, on this baseline, is inverted.
+Refitting that calibration while varying only how much runner-level information the baseline carries shows the coefficient is a property of the specification. With no runner-level features at all, $\gamma = -5.08$ [$-7.74$, $-2.79$]. With the manuscript's baseline, $-1.56$. Adding runner fixed effects moves it to $+0.31$ [$-0.18$, $1.05$], and a per-runner intercept estimated from each runner's earlier activities gives $+0.26$ [$-0.26$, $1.01$]. Both intervals include zero. The population scale $\alpha$ is comparatively stable across the same ladder.
+
+The mechanism is a confound between runner identity and training climate. Across fitting runners, a runner's mean prediction error correlates with the wet-bulb globe temperature they habitually train in at $r = +0.158$, a slope of $+0.153$ percentage points per \textdegree C; the hottest habitual quartile carries a mean error of $+1.96$ points against $+0.54$ for the coolest. Any runner-level term therefore absorbs part of the heat signal without being shown a temperature, and a personalized heat feature estimated alongside one is left explaining a residual whose sign is not stable. Once runner identity is supplied directly, the personalized deviation adds nothing, which is the cleanest statement of what it was carrying.
 
 \subsection{Robustness to the choice of baseline}
 
@@ -384,6 +418,352 @@ Second, runs at the extreme hot end are sparse. The held-out cohort is bounded a
 Third, the per-runner result is narrower than it first appears. The score carries genuine individual information, since matching it to the correct runner improves held-out prediction and scrambling the assignment removes the gain. But the diagnostics in Section~\ref{sec:results} show that information is not heat sensitivity specifically: the effect is roughly constant across temperature, only about half survives when constrained to act through the temperature curve, and the direct calibration returns the wrong sign. Either the baseline's heart rate has already slowed heat-sensitive runners on the same evidence, leaving the score to push back against a correction already made, or the deep model has the ordering wrong. Removing heart rate eliminates the reversal, favoring the first explanation, but too imprecisely to settle it. Until a baseline exists in which it is clear what each feature stands in for, the score is usable as evidence that a runner tends to be over- or under-predicted, not as a measurement of how much heat costs them.
 
 Finally, some of what the literature flags as relevant is simply absent from the data. Raw GPX files carry no body mass, though heat production scales with it and smaller runners are advantaged in heat \citep{marino2008, maughan2010}; no biological sex, an established performance differential under heat \citep{llewellyn2025, vihma2010, kelly2023, weiss2022b}; and no resting heart rate, one of the most validated acclimation markers \citep{periard2015, tyler2016, pryor2019}. Each would plausibly improve prediction. Laboratory variables such as plasma volume or sweat sodium concentration are further out of reach, since they cannot be obtained from consumer devices at all.
+
+\clearpage
+\appendix
+\section{Model and Training Specification}
+\label{app:model}
+
+This appendix states the deep-learning model in full. Section~\ref{sec:methods} describes what the
+model is for; what follows is what it is.
+
+\subsection{Input representation}
+
+One training example is a window of a single runner's $T = 30$ most recent activities, ordered in
+time, with the activity to be predicted last. Each activity is resampled to $R = 128$ points spaced
+equally in distance rather than in time, so that a point index refers to the same fraction of the
+run regardless of its duration. An example is therefore a tensor
+\begin{equation}
+  X \in \mathbb{R}^{T \times R \times C}, \qquad T = 30,\; R = 128,\; C = 11,
+\end{equation}
+with channels in fixed order: date, latitude, altitude, cadence, cumulative elevation, distance,
+heart rate, power, activity type, outdoor WBGT, and pace. Pace occupies the final index by
+construction, since the loss and the readout both address the target channel positionally.
+
+Runners with fewer than 30 recorded activities are retained by padding the window at the front. Pad
+slots are exactly zero in every channel, and a per-activity key mask excludes them from
+cross-activity attention, so a short history is treated as short rather than as a sequence of
+zero-valued runs. Establishing that contract required care: the date channel is centered by
+subtracting the window maximum, which is applied after padding and would otherwise leave pad slots
+with a nonzero date and defeat the mask. The centering is therefore recorded before the shift and
+the pad slots reset after it.
+
+Two channels are masked on the target activity only: pace, which is the prediction target, and
+power, which is close to a deterministic function of pace and would otherwise leak it. Both remain
+visible on all preceding activities. Weather channels are never masked, since race-day conditions
+are known in advance from a forecast at the moment a prediction would be used.
+
+Pace is smoothed along the distance axis with a trailing 10-point moving average. A centered filter
+was used initially and is wrong for this purpose: zero-padding at the window edges biases the first
+and last points toward zero, which reports the end of a run as faster than it was. Since the late
+stages of a hot run are where the effect under study appears, the label was biased against the
+hypothesis. The trailing filter costs a phase lag of roughly five points, uniform across all runs
+and therefore incapable of confounding a weather comparison.
+
+\subsection{Tokenization and embedding}
+
+Every channel is discretized and embedded rather than consumed as a real number. Channel $c$ carries
+a fixed edge vector $e^{(c)}$, and a value $v$ maps to the token index $\mathrm{digitize}(v,
+e^{(c)})$, which indexes a learned table $E^{(c)} \in \mathbb{R}^{B_c \times d}$ with $d = 64$. Edges
+are fixed at initialization: the index enters an integer lookup, so no gradient reaches the edges
+and their placement is a design choice rather than a learned quantity.
+
+Most channels use $B_c = 500$ bins. Placement is per-channel. Sensor channels use quantile edges;
+pace uses uniform edges over $[0, 40]\,\mathrm{min\,km^{-1}}$, which matters because the loss reads
+its bin grid from the pace row and uniform spacing makes that grid a linear pace axis. WBGT uses 100
+quantile edges. The asymmetry is deliberate. For sensor channels, quantile placement concentrates
+resolution in the dense middle and starves the sparse tails, where long runs and hard efforts carry
+the fitness signal; substituting quantile edges for sensors cost 0.07 in $R^2$ in a direct test. For
+WBGT the binding constraint is the number of hot runs available, which no bin placement can change,
+so placing 100 bins where the observations actually are is the better use of them.
+
+An absent sensor is a distinct token rather than a zero. Heart rate and power are frequently missing,
+and mapping a missing reading to zero collides with a genuine reading of zero. Missing values survive
+tokenization as \texttt{NaN} and map to index $B_c$, an extra row in the embedding table.
+
+The channel embeddings at each point are summed and scaled, then combined with learned positional
+embeddings over both axes and layer-normalized:
+\begin{equation}
+  z_{t,r} \;=\; \mathrm{LayerNorm}\!\left(\frac{1}{\sqrt{C}}\sum_{c=1}^{C} E^{(c)}\!\left[k^{(c)}_{t,r}\right]
+                \;+\; P^{\mathrm{act}}_{t} \;+\; P^{\mathrm{pt}}_{r}\right).
+\end{equation}
+The $1/\sqrt{C}$ scale and the normalization are not cosmetic. A plain sum has standard deviation
+growing as $\sqrt{C}$, which overwhelms the fixed-scale positional term and destabilizes the first
+pre-normalization block. Introducing both raised held-out $R^2$ from 0.673 to 0.710 and lowered
+error from 6.99\% to 6.60\% at a cost of 128 parameters.
+
+\subsection{Factored attention}
+
+Attention is factored over the two axes instead of applied to the flattened $T \times R = 3{,}840$
+sequence, whose quadratic cost would be prohibitive. Each of the $L = 5$ layers applies attention
+within an activity, across the $R$ points, and then attention across activities at matched point
+index. The within-activity pass reads the shape of a single run; the cross-activity pass is where a
+runner's recent training history, and therefore the fitness estimate and any conditioning context,
+is assembled. The cross-activity block uses a low-rank projection, and the padding mask enters here
+as a key mask so that padded slots cannot be attended.
+
+Attention is bidirectional. No causal mask is applied along the point axis, since the whole of each
+preceding activity is legitimately available and only the target activity's pace is withheld.
+
+Hyperparameters: $L = 5$ layers, 8 heads, feed-forward width 256, embedding width 64, dropout 0.1.
+Total parameters 5{,}950{,}251.
+
+\subsection{Objective}
+
+The model does not regress pace. It predicts a distribution over the 500 pace bins at each point and
+is trained by cross-entropy against the bin containing the observed pace,
+\begin{equation}
+  \mathcal{L} \;=\; -\frac{1}{R}\sum_{r=1}^{R} \log \pi_{r}\!\left[\,b(y_{r})\,\right],
+  \qquad b(y) = \mathrm{digitize}\!\left(y, e^{(\mathrm{pace})}\right),
+\end{equation}
+where $\pi_r$ is the predicted distribution at point $r$ of the target activity and $y_r$ the
+observed pace there. The loss is computed on the target activity only.
+
+A classification head over a continuous quantity is an unusual choice and is made for two reasons.
+It imposes no parametric error distribution, so a skewed or multimodal pace at a given point is
+representable; and it yields a predictive distribution at no extra cost, from which an interval
+follows directly. Point predictions are read off as the expectation $\hat{y}_r = \sum_j \pi_{r,j}
+m_j$ over bin midpoints $m_j$, and an activity-level prediction is the mean over the $R$ points.
+
+Because the loss addresses the pace grid positionally, the bin edges must be stacked in numeric
+channel order. Sorting them lexicographically, as a naive traversal of the parameter tree does,
+places channel 9 after channel 10 and silently scores pace against another channel's grid. The
+signature is diagnostic and worth recording: training loss falls normally while held-out error
+remains pinned near 132\%, the value obtained by predicting the center of the bin range.
+
+\subsection{Optimization}
+
+Adam with global-norm gradient clipping at 1.0. The learning rate warms linearly from 0 to
+$1\times10^{-4}$ over 1{,}000 steps, then follows a cosine decay to $1\times10^{-5}$ over 200{,}000
+steps. Batch size 64, data-parallel across two GPUs. Training runs 200{,}000 steps, roughly 20 hours.
+
+Checkpoints are written whenever held-out $R^2$ or error improves. These two criteria do not peak
+together: $R^2$ peaks near 115{,}000 steps while error continues to improve to roughly 190{,}000.
+Both checkpoints are therefore evaluated and reported, since selecting on $R^2$ alone overstates
+error by about 0.2 percentage points. The artifacts in this paper come from the error-selected
+checkpoint.
+
+\section{Construction of the Heat Artifacts}
+\label{app:curve}
+
+Both heat artifacts are read off the trained model by counterfactual sweeps. For a runner's window,
+the WBGT channel of the target activity is overwritten with a constant $w$ while every other channel
+is held fixed, and the model is re-evaluated. The difference between two such evaluations is
+attributable to WBGT alone, since nothing else in the input has changed. The sweep covers 5 to
+30\,\textdegree C in 0.5\,\textdegree C steps; artifacts are truncated to $[10, 28]$, a 37-point
+grid, because the evaluation panel contains no held-out target above 29.8\,\textdegree C and the
+region beyond it cannot be checked.
+
+Write $D_a(w)$ for runner $a$'s swept prediction. The runner's sensitivity is the percentage
+slowdown at 28\,\textdegree C relative to 10\,\textdegree C,
+\begin{equation}
+  s_a \;=\; 100\left(\frac{D_a(28)}{D_a(10)} - 1\right),
+\end{equation}
+and the runner's normalized shape is $\phi_a(w) = \left(D_a(w)/D_a(10) - 1\right)\big/ (s_a/100)$,
+which equals 0 at 10\,\textdegree C and 1 at 28\,\textdegree C by construction. Separating shape
+from scale is what makes the median meaningful: runners differ mostly in the steepness of the
+response, so averaging unnormalized curves would confound the two.
+
+The population curve is $g(w) = \bar{s}\,\cdot\,\mathrm{med}_a\,\phi_a(w)$, the median shape rescaled
+by the median sensitivity of the reference sample. The monotone projection $\max$-accumulate is
+applied to the median shape at this point; as reported in Section~\ref{sec:methods} it moves 8 of 37
+grid points by at most 0.13 percentage points.
+
+A single window's sensitivity is dominated by noise, with test-retest reliability near 0.34, so
+roughly three-quarters of the observed spread in $s_a$ across windows is measurement error rather
+than a difference between runners. Averaging the 15 most recent windows raises reliability to
+approximately 0.8. The per-runner score is therefore the percentile rank of a runner's window-averaged
+sensitivity against the distribution of window-averaged sensitivities, not against the noise-inflated
+single-window distribution. The prospective version uses exactly 15 preceding windows and excludes
+the target activity.
+
+\section{Compensability and the Convexity of the Response}
+\label{app:physics}
+
+This appendix supports the physical argument in Section~\ref{sec:results}. All coefficients are those
+reported by \citet{taylor2006} and already used in Section~\ref{sec:literature}: convective exchange
+$8.3\,(T_{sk}-T_a)\sqrt{v}$, radiant $5.2\,(T_{sk}-T_{mrt})$ and evaporative $124\,(P_{sk}-P_a)\sqrt{v}$
+per square metre. Calculations assume a 70\,kg runner with $1.85\,\mathrm{m^2}$ of body surface at
+three-and-a-half-hour marathon speed, $3.35\,\mathrm{m\,s^{-1}}$, with skin at $35\,^{\circ}$C.
+
+\subsection{Wet-bulb temperature as a sufficient statistic}
+
+For fully wetted skin the total capacity to shed heat is the sum of a dry and an evaporative term,
+\begin{equation}
+  Q_{\max} \;=\; h_c\,(T_{sk} - T_a) \;+\; h_e\,\bigl(P_s(T_{sk}) - P_a\bigr),
+\end{equation}
+with $P_s(\cdot)$ the saturation vapor pressure. The wet-bulb temperature is defined as the value a
+wetted surface reaches when it exchanges no net heat with the air, so that $h_c T_a + h_e P_a = h_c
+T_{wb} + h_e P_s(T_{wb})$. Substituting removes air temperature and humidity as separate quantities:
+\begin{equation}
+  Q_{\max} \;=\; h_c\,(T_{sk} - T_{wb}) \;+\; h_e\,\bigl(P_s(T_{sk}) - P_s(T_{wb})\bigr).
+\end{equation}
+This is an identity rather than an approximation. The ratio $h_e/h_c$ implied by the coefficients above
+is $124/8.3 = 14.9\,^{\circ}\mathrm{C\,kPa^{-1}}$, whose reciprocal, $0.067\,\mathrm{kPa}\,^{\circ}
+\mathrm{C}^{-1}$, is the standard sea-level psychrometric constant, so the two are mutually consistent.
+
+Table~\ref{tab:isopleth} walks one wet-bulb isopleth. Across an 18-degree span of air temperature the
+dry term falls from shedding $182\,\mathrm{W\,m^{-2}}$ to gaining $91$, the evaporative term compensates
+exactly, and the total does not move.
+
+\begin{table}[!ht]
+\centering\small
+\caption{Heat-loss capacity along the $22\,^{\circ}$C wet-bulb isopleth. Dry exchange and evaporation
+trade off; their sum is invariant.}
+\label{tab:isopleth}
+\begin{tabular}{@{}rrrrr@{}}
+\toprule
+Air temp (\textdegree C) & Rel. humidity (\%) & Dry (W\,m$^{-2}$) & Evaporative & Total \\
+\midrule
+23 & 91.7 & $+182.3$ & 691.2 & 873.5 \\
+29 & 54.3 & $+91.1$  & 782.4 & 873.5 \\
+35 & 31.5 & $0.0$    & 873.5 & 873.5 \\
+41 & 17.6 & $-91.1$  & 964.7 & 873.5 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Why the required fraction accelerates}
+
+Thermal compensability is $w_{\mathrm{req}} = E_{\mathrm{req}}/E_{\max}$, where $E_{\mathrm{req}} =
+H_{\mathrm{prod}} - (C + R)$ is the evaporation needed for balance and $E_{\max}$ the maximum the
+environment will accept \citep{taylor2006}. Metabolic heat production for the runner specified above is
+$424\,\mathrm{W\,m^{-2}}$. Table~\ref{tab:wreq} evaluates both parts. The numerator rises nearly
+linearly; the denominator falls at an accelerating rate, because saturation vapor pressure gains 6.6\%
+of its own value per degree at $12\,^{\circ}$C and 5.9\% at $26\,^{\circ}$C, on a base that has itself
+nearly doubled. The ratio therefore accelerates: its increment per degree grows from 0.025 to 0.083
+across the range.
+
+\begin{table}[!ht]
+\centering\small
+\caption{Required fraction of maximal evaporation against wet-bulb temperature, at 60\% relative
+humidity and no solar load.}
+\label{tab:wreq}
+\begin{tabular}{@{}rrrrr@{}}
+\toprule
+$T_{wb}$ (\textdegree C) & Air temp (\textdegree C) & $E_{\max}$ (W\,m$^{-2}$) & $w_{\mathrm{req}}$ & $\Delta w_{\mathrm{req}}$ per \textdegree C \\
+\midrule
+10.7 & 14.8 & 1047 & 0.012 & --- \\
+15.0 & 19.8 & 962  & 0.118 & 0.0248 \\
+19.3 & 24.8 & 851  & 0.253 & 0.0313 \\
+23.7 & 29.8 & 704  & 0.453 & 0.0453 \\
+28.1 & 34.9 & 516  & 0.817 & 0.0827 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Comparing curvature over the same two bands used in Section~\ref{sec:results}, the learned curve steepens
+by a factor of 2.12, from 0.31 to 0.66\% per degree. The compensability ratio steepens by 1.64 at 40\%
+relative humidity with no sun, 1.85 at 70\% with $200\,\mathrm{W\,m^{-2}}$ of solar load, and 1.87 at
+85\% with no sun. The prediction is of shape only: nothing in this calculation fixes the size of the
+pace penalty, which depends on how much a runner concedes per unit of strain and is not derivable from
+the heat balance.
+
+\subsection{Why duration matters}
+
+Balance need not hold instantaneously, since heat can be stored as a rise in core temperature. That
+allowance is a rate, however, and it scales inversely with the duration over which it is spent. A
+2.5\,\textdegree C rise in a 70\,kg runner represents about 607\,kJ, which is worth
+$60{,}725\,\mathrm{W}$ over ten seconds but only $56\,\mathrm{W}$ over three hours, against a metabolic
+production of $424\,\mathrm{W\,m^{-2}}$. A sprinter can therefore bank the entire thermal debt and never
+pay it, which is consistent with \citet{guy2014} reporting faster sprint performances in the heat
+alongside slower marathons, and it gives a reason beyond exposure time why the same conditions cost a
+slower finisher more. \citet{taylor2006} list duration of competition among the determinants of
+compensability for the same reason.
+
+The calculations in this appendix are reproduced by \texttt{compute\_wettedness.py}.
+
+\section{Baseline Specification}
+\label{app:baseline}
+
+The weather-blind baseline is gradient-boosted trees (XGBoost) on four feature groups: current-run
+mean heart rate; trailing 30-day fitted pace; current-run distance; and elevation, entered as both
+total gain and gain per kilometer. Settings: 400 trees, maximum depth 6, learning rate 0.04, subsample
+0.8, column subsample 0.8, minimum child weight 20, histogram tree method. Three seeds (100, 200,
+300) are averaged.
+
+The target is $\log$ pace, with predictions returned to the pace scale by exponentiation. Fitting on
+the log scale matches the multiplicative structure of the effect: heat is estimated and applied as a
+percentage, so estimating it in the space in which it is applied avoids a scale mismatch. Note that
+exponentiating a conditional mean of logs returns a conditional median rather than a mean, a
+retransformation gap of order $\exp(\sigma^2/2)$. A smearing correction was tested and moved the
+reported figures in the wrong direction, so no retransformation adjustment is applied; the level is
+instead handled by the intercept in the calibration of Section~\ref{sec:methods}.
+
+The supplementary branch replaces heart rate and trailing pace with a fixed, independently trained
+marathon-fitness estimate together with distance and elevation. That baseline is available before a
+run starts, whereas mean heart rate is not, so it tests whether the findings depend on conditioning
+on a variable realized during the run being predicted.
+
+\section{Architecture Search}
+\label{app:ablation}
+
+The architecture was not chosen a priori. Table~\ref{tab:ablations} records the modifications tested
+against the accepted configuration of the moment, each as a separate 200{,}000-step run judged on the
+same held-out panel of 1{,}349 windows from 158 runners. Changes were applied one at a time, since
+bundling them makes attribution impossible.
+
+\begin{table}[!ht]
+\centering
+\small
+\caption{Architecture modifications tested. Each row was run against the accepted configuration at
+the time it was tested, so entries are not all mutually comparable; the outcome column records the
+decision. Unmarked rows are complete 200{,}000-step runs scored on the 1{,}349-window held-out panel.}
+\label{tab:ablations}
+\begin{tabular}{@{}llcc l@{}}
+\toprule
+Modification & Rationale & $R^2$ & Error (\%) & Outcome \\
+\midrule
+Trailing pace filter        & label bias at the finish   & 0.673 & 6.99 & kept \\
+$1/\sqrt{C}$ scale $+$ norm & input scale grows with $C$ & 0.710 & 6.60 & kept \\
+Padding mask $+$ missing token & pad and absence are not zero & 0.704 & 6.66 & kept \\
+WBGT channel, 100 quantile bins & weather as input       & 0.710 & 6.61 & kept \\
+Batch 32 $\rightarrow$ 64   & gradient variance          & 0.730 & 6.29 & kept \\[2pt]
+Cross-block feed-forward restored & apparent missing capacity & 0.635 & 7.55 & rejected \\
+Quantile bins for sensors   & bins wasted on outliers    & 0.635 & 7.08 & rejected \\
+Window $T = 30 \rightarrow 60$ & longer history          & 0.693 & 6.83 & rejected \\
+Live date channel$^{a}$     & recency is unencoded       & ---   & ---  & rejected \\
+Random Fourier WBGT encoding & smooth encoding           & 0.709 & 6.52 & rejected \\
+Embedding width 64 $\rightarrow$ 128$^{b}$ & capacity    & 0.802 & 6.74 & rejected \\
+Acclimation channel         & carry exposure history     & 0.683 & 6.82 & rejected \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Several outcomes are informative beyond the selection they drove. Added capacity was consistently
+harmful: restoring a feed-forward sublayer in the cross-activity block, and doubling embedding width,
+both degraded every metric, which places the useful operating point well below the capacity the data
+will support. Lengthening the history window also lost, and the diagnostic was that training loss was
+worse as well, indicating a harder optimization rather than an overfitting gap; roughly half the
+runners have fewer than 60 activities, so the additional slots are padding for them. Restoring the
+dead date channel was the clearest failure, plausibly because slot position within a window is
+already carried by the positional embedding and a second, noisier copy competes with it.
+
+One negative result is methodological. The padding mask was implemented, smoke-tested against
+synthetic all-zero slots, and shipped, but never fired in training: the date-centering step described
+in Appendix~\ref{app:model} ran after padding and left every pad slot nonzero, so the detection test
+that identified pad slots always returned false. The defect was silent, since a mask that never
+activates produces a model that trains and evaluates normally. It was found only by testing the mask
+on real pipeline output rather than on constructed input, and the accuracy gain previously credited
+to the mask belongs to the missing-value token instead.
+
+\section{Literature Conversions for Figure~\ref{fig:heateffects}}
+\label{app:conversions}
+
+Published heat effects are reported in incompatible units, and Figure~\ref{fig:heateffects} places them
+on one axis. The conversions are as follows. Slopes given in seconds per degree are divided by a
+representative finish time for the population studied, 130 minutes for elite fields and 240 minutes
+for mass fields, giving a percentage per degree. Effects reported as a percentage over an interval,
+such as a change per 5\,\textdegree C, are divided by the interval width. All curves are anchored at
+10\,\textdegree C, so each shows slowdown relative to that reference rather than an absolute time.
+
+Two limitations apply. Studies native to air temperature are drawn on the same axis as studies native
+to WBGT, which are not interchangeable: the offset between them depends on humidity, radiation and
+wind, so placement above roughly 18\,\textdegree C is approximate. And the published quadratics are
+drawn only across the range over which they were fitted. A quadratic with a positive second-order
+term diverges outside its support, and extrapolating one of the fitted clusters to 28\,\textdegree C
+would imply a slowdown near 50\%, which is an artifact of the functional form rather than a claim
+made by its authors.
 
 \bibliographystyle{apalike}
 \bibliography{references}
