@@ -1,3 +1,21 @@
+\section{Literature Conversions for Figure~\ref{fig:heateffects}}
+\label{app:conversions}
+
+Published heat effects are reported in incompatible units, and Figure~\ref{fig:heateffects} places them
+on one axis. The conversions are as follows. Slopes given in seconds per degree are divided by a
+representative finish time for the population studied, 130 minutes for elite fields and 240 minutes
+for mass fields, giving a percentage per degree. Effects reported as a percentage over an interval,
+such as a change per 5\,\textdegree C, are divided by the interval width. All curves are anchored at
+10\,\textdegree C, so each shows slowdown relative to that reference rather than an absolute time.
+
+Two limitations apply. Studies native to air temperature are drawn on the same axis as studies native
+to WBGT, which are not interchangeable: the offset between them depends on humidity, radiation and
+wind, so placement above roughly 18\,\textdegree C is approximate. And the published quadratics are
+drawn only across the range over which they were fitted. A quadratic with a positive second-order
+term diverges outside its support, and extrapolating one of the fitted clusters to 28\,\textdegree C
+would imply a slowdown near 50\%, which is an artifact of the functional form rather than a claim
+made by its authors.
+
 % ===========================================================================
 % tommy_appendix.tex -- the biophysical account of why the heat penalty is
 % convex. Kept in its own file so it can be edited without conflicting with
@@ -24,19 +42,21 @@
 %   F.6  Duration.  F.7  The measured curvature.  F.8  The dry-bulb axis.
 %   F.9  What this does and does not establish.
 %
-% THREE MAIN-TEXT EDITS ARE STILL OUTSTANDING (not made here, to keep this
-% branch off getfast-weather-modeling.tex):
-%   1. Sec. 2 uses T_sk = 35 C, says dry exchange reverses "near 36 C", and
-%      gives evaporation shares of 83/14/4. At T_sk = 31 C the reversal is at
-%      31 C and those shares change.
-%   2. Sec. 4 reports the learned steepening as 2.12 and the predicted range as
-%      1.64-1.87. This appendix uses 2.18 and 1.5-2.7. Settle which is current.
-%   3. Sec. 4 says the measured curvature is "the larger of the two" and
-%      explains the gap. With T_sk = 31 C there is no gap to explain.
+% REQUIRES THREE EDITS ELSEWHERE IN THE MANUSCRIPT (see handoff notes):
+%  * Section 2 currently uses T_sk = 35 C and says dry exchange reverses "near
+%    36 C". Adopting 31 C moves the reversal to 31 C and changes the 83/14/4
+%    evaporation shares. These must agree or a referee will catch it.
+%  * Appendix C's isopleth table (\label{tab:isopleth}) is computed at
+%    T_sk = 35 C, total 873.5. Table \ref{tab:wbtradeoff} below supersedes it at
+%    T_sk = 31 C, total 555.1, so DELETE the appendix one rather than keeping
+%    two isopleths at different skin temperatures. The labels differ, so
+%    nothing breaks if you leave it in place -- it will just contradict.
+%  * Appendix C reports the learned steepening as 2.12; this insert uses 2.18.
+%    Settle which is current.
 % ===========================================================================
 
-\section{Compensability and the Convexity of the Response}
-\label{app:physics}
+\subsection{Why the penalty accelerates: a biophysical account}
+\label{sec:convexity}
 
 This appendix supports the physical argument in Section~\ref{sec:results}. It
 makes one claim in several places: the acceleration in the measured heat
@@ -122,7 +142,7 @@ move is $v$. The runner slows.
 Write the right-hand side of \eqref{eq:pinned} at its maximum. With skin fully
 wetted, the capacity to shed heat is the sum of a dry and an evaporative term,
 \begin{equation}
-  Q_{\max} \;=\; h_c\,(T_{sk} - T_a) \;+\; h_e\,\bigl(P_s(T_{sk}) - P_a\bigr),
+  Q_{\max} = h_c\,(T_{sk} - T_a) \;+\; h_e\,\bigl(P_{s}(T_{sk}) - P_a\bigr),
   \label{eq:qmax-raw}
 \end{equation}
 with $P_s(\cdot)$ the saturation vapour pressure and $h_e = \mathrm{LR}\cdot
@@ -353,12 +373,12 @@ affine and increasing and $D$ positive, decreasing and concave,
 \end{equation}
 in which all three numerator terms are positive, since $D'' < 0$, $N' > 0$ and
 $D' < 0$. Convexity is therefore a property of the heat balance and not an
-artifact of the parameters. It is established here on the air-temperature axis;
+artifact of the constants chosen. It is stated here on the air-temperature axis;
 because wet-bulb globe temperature is very nearly affine in wet-bulb temperature
-over the range plotted, its slope moving only from $1.047$ to $1.042$ across
-$10$ to $38\,^{\circ}$C of air temperature, the property carries to the axis of
-Figure~\ref{fig:heat_cost}, which we confirm numerically at relative humidities
-from $30$ to $90\%$.
+over the range plotted---its slope moves only from $1.047$ to $1.042$ across
+$10$ to $38\,^{\circ}$C of air temperature---the property carries over to the
+axis of Figure~\ref{fig:heat_cost}, which we confirm numerically at relative
+humidities from 30 to 90\%.
 
 A proportional response to $w_{req}$ still does not quite describe the measured
 curve. Rescaled to match the learned penalty at its endpoints, $w_{req}$
@@ -479,16 +499,19 @@ $1.4$--$2.8$; varying metabolic rate from a $60\,\mathrm{kg}$ runner at
 $5{:}00\,\mathrm{min\,km^{-1}}$ to a $70\,\mathrm{kg}$ runner at $4{:}00$ moves
 it to $1.5$--$2.8$. Mean skin temperature dominates instead. At the
 laboratory-running value of $35\,^{\circ}$C the prediction falls to $1.3$--$1.8$
-and misses the observation entirely; at $29\,^{\circ}$C it widens to
-$1.6$--$4.3$.
+and misses the observation; at $29\,^{\circ}$C it widens to $1.6$--$4.3$. We
+adopt $31\,^{\circ}$C because \citet{aylwin2023} measured mean skin temperature
+falling from $29.8$ to $28.9\,^{\circ}$C through the men's marathon at the 2019
+World Championships, below air temperature and well below laboratory treadmill
+values, with running-speed airflow over wet skin the reason.
 
-The measurement adopted carries a caveat which cuts against us and is worth
-stating. Aylwin's thermography covers exposed skin, some $64\%$ of body surface
-area, whereas the heat balance wants a whole-body mean that includes covered
-skin, which runs warmer. Weighting the covered remainder at anything from $32$
-to $38\,^{\circ}$C puts the whole-body mean between $30.3$ and
-$32.5\,^{\circ}$C, over which range the predicted factor spans $1.4$ to $3.1$
-and continues to bracket the observation; the prediction fails only above about
+That measurement carries a caveat which cuts against us and is worth stating.
+Aylwin's thermography covers exposed skin, some $64\%$ of body surface area,
+while the heat balance wants a whole-body mean that includes covered skin, which
+runs warmer. Weighting the covered remainder at anything from $32$ to
+$38\,^{\circ}$C puts the whole-body mean between $30.3$ and $32.5\,^{\circ}$C,
+over which range the predicted factor spans $1.4$ to $3.1$ and continues to
+bracket the observation; the prediction fails only above about
 $33\,^{\circ}$C, which no plausible weighting of these measurements reaches. The
 agreement is therefore correct in sign and order of magnitude but not sharp, and
 the width of the band is dominated by a quantity the corpus does not observe.
