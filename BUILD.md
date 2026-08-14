@@ -49,7 +49,23 @@ script that prints an ok/FAIL line per claim and a summary:
 python3 verify_heat_convexity.py
 ```
 
-It is stdlib-only and needs no arguments.
+It is stdlib-only and needs no arguments. The expected last line is
+`ALL CHECKS PASSED`.
+
+## Rebuilding the appendix figures
+
+The three figures in the compensability appendix are generated from the same
+constants as the verification script, so a change to the physics must be made
+in both and checked in both:
+
+```sh
+python3 build_compensability_figures.py
+```
+
+This needs `matplotlib` and `numpy`, and writes vector PDFs straight into
+`figures/`. The other figure scripts in the repo (`build_paper_figures.py`,
+`build_headline_figures.py`, `build_lit_comparison.py`) read model artifacts
+that live on the training box and will not run here.
 
 ## A portability note
 

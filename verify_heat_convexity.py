@@ -1,41 +1,66 @@
-"""Verification for the v3 heat-convexity insert.
+"""Verification for the compensability appendix (Appendix F, tommy_appendix.tex).
 
-v3 changes from v2:
-  * one coefficient convention throughout: Taylor (2006), h_c = 8.3*sqrt(v),
-    h_e = 124*sqrt(v), so LR = 124/8.3 = 14.9 K/kPa. This matches the
-    manuscript's Appendix C AND makes the wet-bulb substitution essentially
-    exact (the psychrometric constant is 15.0), removing the v2 footnote.
-  * convexity stated as a theorem on the air-temperature axis, with the
-    axis transfer to WBGT checked numerically rather than asserted.
-  * flat-band paragraph rebuilt: the aerobic/thermal crossing lands near
-    28 C WBGT, NOT 16 C, so it cannot explain the observed breakpoint.
-  * curvature reported as a LOWER bound, with sensitivity to h_c and to
-    metabolic rate reported alongside the (dominant) sensitivity to T_sk.
+Stdlib only, no arguments, self-checking: every claim prints an ok/FAIL line and
+the script ends with a pass/fail summary. Every number quoted in the appendix
+text appears here.
 
-Run: python verify_heat_convexity_v3.py    (stdlib only, self-checking)
+The argument the script follows, in the order the appendix makes it:
+
+  1. Heat balance at steady state is one equation in one unknown, the runner's
+     speed. Its solution is the thermal speed ceiling.
+  2. The whole environment enters through one scalar, the thermal head Phi, and
+     Phi is decreasing and CONCAVE in wet-bulb temperature. That concavity is
+     Clausius-Clapeyron and nothing else.
+  3. The speed ceiling goes as Phi^2 (because the transfer coefficients scale as
+     sqrt(v)), so the pace penalty goes as Phi^-2, which is strictly convex for
+     any positive power. Convexity is a theorem, not a parameter sweep.
+  4. The hard ceiling binds only in the mid-20s, far too warm to explain a 16 C
+     breakpoint, so runners must respond to graded strain below it. Required
+     wettedness w_req is that graded measure, and it is convex for the same
+     Clausius-Clapeyron reason.
+  5. On the dry-bulb axis at fixed humidity, the curvature is proportional to
+     RH. In perfectly dry air w_req is exactly linear.
+
+Run: python3 verify_heat_convexity.py
 """
 import math
 
 T_SKIN = 31.0      # C, mean skin temp in outdoor competition (Aylwin 2023)
 A_BODY = 1.85      # m2
-MASS   = 70.0
-C_BODY = 3500.0    # J/kg/K
+MASS   = 70.0      # kg
+C_BODY = 3474.0    # J/kg/K, Burton (1935); the quoted 3500 has no primary source
 ECON   = 4184.0    # J/kg/km
-EFF    = 0.79
+EFF    = 0.79      # fraction of metabolic turnover appearing as heat
 V_REF  = 3.33      # m/s = 5:00/km  (a 3:31 marathon, not 3:30)
 LR     = 124.0/8.3 # 14.9 K/kPa, Taylor (2006) coefficients
 LR_PSY = 15.04     # reciprocal psychrometric constant
+KAPPA  = EFF*ECON*MASS/1000.0      # J of heat produced per metre travelled
+RHO_CB = 3770.0    # J/L/K, volumetric heat capacity of blood
+T_CORE = 39.0      # C, core temperature held during a hot marathon
 
 def psat(T):
     """Buck (1981), kPa."""
     return 0.61121*math.exp((18.678 - T/234.5)*(T/(257.14+T)))
 
 def hc(v):   return 8.3*math.sqrt(v)      # Taylor (2006)
+def he(v):   return LR*hc(v)
 def H_prod(v=V_REF, m=MASS): return EFF*ECON*m*(v/1000.0)
+
+def head_wb(Twb, T_sk=T_SKIN):
+    """Thermal head Phi on the wet-bulb axis, in kelvin-equivalents."""
+    return (T_sk - Twb) + LR*(psat(T_sk) - psat(Twb))
+
+def head_ta(Ta, rh, T_sk=T_SKIN):
+    """Thermal head on the dry-bulb axis at fixed relative humidity."""
+    return (T_sk - Ta) + LR*(psat(T_sk) - rh*psat(Ta))
+
+def v_thermal(head):
+    """kappa*v = A*8.3*sqrt(v)*Phi  =>  v = (8.3*A/kappa)^2 * Phi^2."""
+    return (8.3*A_BODY/KAPPA)**2 * max(head, 0.0)**2
 
 def twb(Ta, rh, lewis=LR_PSY):
     lo, hi = -40.0, Ta
-    for _ in range(120):
+    for _ in range(200):
         m = (lo+hi)/2
         if (m-Ta) + lewis*(psat(m)-rh*psat(Ta)) < 0: lo = m
         else: hi = m
@@ -47,7 +72,7 @@ def wbgt(Ta, rh, solar, wind=1.0):
 
 def Ta_for_wbgt(tgt, rh, solar):
     lo, hi = -20.0, 60.0
-    for _ in range(100):
+    for _ in range(200):
         m = (lo+hi)/2
         if wbgt(m,rh,solar) < tgt: lo = m
         else: hi = m
@@ -81,10 +106,96 @@ def check(label, got, want, tol):
 
 OBS = ((5.02-2.4)/4)/((2.4-1.2)/4)
 print(f"reference runner: {H_prod():.0f} W total, {H_prod()/A_BODY:.0f} W/m2; "
-      f"h_c = {hc(V_REF):.1f} W/m2K; LR = {LR:.1f} K/kPa")
+      f"h_c = {hc(V_REF):.1f} W/m2K; LR = {LR:.1f} K/kPa; "
+      f"kappa = {KAPPA:.0f} J/m")
 check("observed steepening of the learned curve", OBS, 2.18, 0.02)
 
-print("\nCLAIM 1: wet-bulb is a sufficient statistic; the substitution is exact.")
+# ------------------------------------------------------------------ CLAIM 1
+print("\nCLAIM 1: heat balance at S=0 is one equation in one unknown, the speed.")
+print("    production kappa*v must equal capacity A*8.3*sqrt(v)*Phi, so")
+print(f"    v_max = (8.3*A/kappa)^2 * Phi^2 = {(8.3*A_BODY/KAPPA)**2:.6f} * Phi^2")
+v_check = v_thermal(head_wb(22.0))
+lo, hi = 0.001, 20.0
+for _ in range(200):                       # independent bisection of the balance
+    m = (lo+hi)/2
+    cap = A_BODY*(hc(m)*(T_SKIN-22.0) + he(m)*(psat(T_SKIN)-psat(22.0)))
+    if cap > KAPPA*m: lo = m
+    else: hi = m
+check("closed form matches a direct solve of the balance at T_wb=22 (m/s)",
+      v_check, lo, 0.01)
+print(f"    at T_wb = 22 C the balance permits {v_check:.2f} m/s "
+      f"= {1000/v_check/60:.2f} min/km")
+
+# ------------------------------------------------------------------ CLAIM 2
+print("\nCLAIM 2: the head Phi is decreasing and CONCAVE in wet-bulb temperature.")
+print("    Phi'  = -(1 + LR*Ps'(T_wb))   < 0")
+print("    Phi'' = -LR*Ps''(T_wb)        < 0   <- Clausius-Clapeyron, nothing else")
+print(f"    {'T_wb':>5} {'Phi':>8} {'Q_max':>9} {'Phi_1':>8} {'Phi_2':>8}")
+conc = True
+for T in (5,10,15,20,25,30):
+    p  = head_wb(T)
+    d1 = (head_wb(T+.05)-head_wb(T-.05))/0.1
+    d2 = (head_wb(T+.05)-2*head_wb(T)+head_wb(T-.05))/0.0025
+    conc &= (d1 < 0 and d2 < 0)
+    print(f"    {T:5d} {p:8.2f} {hc(V_REF)*p:9.1f} {d1:8.3f} {d2:8.4f}")
+check("Phi decreasing and concave at every tabulated point", 1.0 if conc else 0.0, 1.0, 0.0)
+check("Q_max vanishes exactly at T_wb = T_sk", hc(V_REF)*head_wb(T_SKIN), 0.0, 1e-9)
+
+# ------------------------------------------------------------------ CLAIM 3
+print("\nCLAIM 3: the pace penalty at the ceiling is convex. THEOREM, not a sweep.")
+print("    penalty = v_ref/v_max - 1 proportional to Phi^-p with p = 2, and")
+print("    d2/dx2 [Phi^-p] = p*Phi^(-p-2) * [ (p+1)*Phi'^2 - Phi*Phi'' ]")
+print("    both bracketed terms are positive, so the penalty is strictly convex")
+print("    for ANY p > 0 -- it does not depend on how h scales with speed.")
+allpos = True
+for p in (1.0, 2.0):
+    for T in (10,15,20,25,29):
+        phi  = head_wb(T)
+        d1   = (head_wb(T+.05)-head_wb(T-.05))/0.1
+        d2   = (head_wb(T+.05)-2*head_wb(T)+head_wb(T-.05))/0.0025
+        term = (p+1)*d1**2 - phi*d2
+        f2   = (head_wb(T+.05)**-p - 2*head_wb(T)**-p + head_wb(T-.05)**-p)/0.0025
+        allpos &= (term > 0 and f2 > 0)
+    print(f"    p = {p:.0f}: bracket positive and f'' > 0 at every T_wb checked")
+check("penalty strictly convex on the wet-bulb axis for p = 1 and 2",
+      1.0 if allpos else 0.0, 1.0, 0.0)
+
+# ------------------------------------------------------------------ CLAIM 4
+print("\nCLAIM 4: the hard ceiling binds too late to explain the flat band.")
+phi_bind = math.sqrt(V_REF/((8.3*A_BODY/KAPPA)**2))
+lo, hi = 0.0, T_SKIN
+for _ in range(200):
+    m = (lo+hi)/2
+    if head_wb(m) > phi_bind: lo = m
+    else: hi = m
+print(f"    reference runner needs Phi >= {phi_bind:.2f} K-equivalents to hold pace")
+check("wet-bulb temperature at which the thermal ceiling takes over (C)", lo, 24.6, 0.15)
+for rh in (0.40, 0.60, 0.85):
+    for solar in (0.0, 200.0):
+        ta = 0.0
+        loT, hiT = -20.0, 60.0
+        for _ in range(200):
+            m = (loT+hiT)/2
+            if twb(m, rh) < lo: loT = m
+            else: hiT = m
+        ta = loT
+        print(f"      RH {rh:.0%}, solar {solar:3.0f} W/m2 -> T_a = {ta:.1f} C, "
+              f"WBGT = {wbgt(ta,rh,solar):.1f} C")
+print("    -> the crossing sits in the mid-to-high 20s on the WBGT axis, roughly")
+print("       ten degrees too warm to produce a breakpoint near 16 C. A pure")
+print("       min(aerobic, thermal) account is therefore not the explanation.")
+for T_sk in (29.0,31.0,35.0):
+    for w_max in (0.85,1.0):
+        cross=None
+        for t10 in range(100,400):
+            t=t10/10.0
+            if wreq(Ta_for_wbgt(t,0.60,200.0),0.60,T_sk,solar=50.0) >= w_max:
+                cross=t; break
+        print(f"      w_req route: T_sk={T_sk} w_max={w_max} -> WBGT "
+              f"{cross if cross else '>40'} C")
+
+# ------------------------------------------------------------------ CLAIM 5
+print("\nCLAIM 5: wet-bulb is a sufficient statistic; the substitution is exact.")
 tot = []
 for Ta in (23,29,35,41):
     Pa = psat(22.0) + (22.0-Ta)/LR
@@ -97,9 +208,10 @@ check("invariance of the total along the isopleth", max(tot)-min(tot), 0.0, 1e-6
 gap = twb(30.0,0.60,LR) - twb(30.0,0.60,LR_PSY)
 check("T_wb gap between body LR and psychrometric LR (C)", abs(gap), 0.02, 0.02)
 print("    -> with Taylor's coefficients the two definitions agree to ~0.02 C,")
-print("       so Eq.(2) is exact for practical purposes and needs no caveat.")
+print("       so the wet-bulb form is exact for practical purposes.")
 
-print("\nCLAIM 2: Clausius-Clapeyron. Report the ABSOLUTE slope, not the fraction.")
+# ------------------------------------------------------------------ CLAIM 6
+print("\nCLAIM 6: Clausius-Clapeyron. Report the ABSOLUTE slope, not the fraction.")
 for T in (12,20,28):
     d = (psat(T+.01)-psat(T-.01))/0.02
     print(f"    {T} C: dPs/dT = {d:.3f} kPa/K   ({100*d/psat(T):.1f} %/K)")
@@ -107,7 +219,9 @@ check("Ps(28)/Ps(15) -- 'more than doubles'", psat(28)/psat(15), 2.22, 0.02)
 print("    NB the FRACTIONAL rate FALLS (6.6 -> 5.8 %/K); only the absolute")
 print("       slope rises. Quote the absolute one or the argument reads backwards.")
 
-print("\nCLAIM 3: convexity is a theorem on the air-temperature axis.")
+# ------------------------------------------------------------------ CLAIM 7
+print("\nCLAIM 7: w_req, the graded sub-ceiling measure, is convex for the")
+print("         same reason. N affine increasing over D positive decreasing concave.")
 h_c = hc(V_REF)
 for rh in (0.3,0.6,0.9):
     N  = lambda T: H_prod() - h_c*(T_SKIN-T)*A_BODY
@@ -116,9 +230,6 @@ for rh in (0.3,0.6,0.9):
     d2D = (D(20+.1)-2*D(20)+D(20-.1))/0.01
     print(f"    RH {rh:.0%}: N''={d2N:+.1e} (linear)  D''={d2D:+.2f} (<0)  D>0 {D(20)>0}")
 print("    f'' = [-N D''D - 2N'D'D + 2N D'^2]/D^3, all three terms positive.")
-print("    Convexity therefore does not depend on a parameter sweep.")
-
-print("\nCLAIM 3b: it survives the change of axis (checked, not assumed).")
 def conv_on(axis, rng, rh, solar=200.0):
     d2 = []
     for x in rng:
@@ -140,31 +251,61 @@ for axis,rng in (('Ta',range(8,34,2)),('twb',range(6,28,2)),('wbgt',range(8,29,2
     res = [conv_on(axis,rng,rh) for rh in (0.3,0.5,0.7,0.9)]
     allok &= all(res)
     print(f"    axis {axis:4s}: convex at RH 30/50/70/90%? {res}")
-check("convex on every axis at every humidity", 1.0 if allok else 0.0, 1.0, 0.0)
+check("w_req convex on every axis at every humidity", 1.0 if allok else 0.0, 1.0, 0.0)
 print("    (T_a is NOT exactly convex in T_wb, so the composition shortcut fails;")
 print("     the axis is near-affine instead, which is why this is checked.)")
 
-print("\nCLAIM 4: storage scales as 1/duration.")
-for label,t,want in (("marathon 3:00",10800,57),("marathon 4:30",16200,38)):
+# ------------------------------------------------------------------ CLAIM 8
+print("\nCLAIM 8: on the dry-bulb axis the curvature is PROPORTIONAL to humidity.")
+print("    Phi''(T_a) = -LR*RH*Ps''(T_a), so it vanishes identically at RH = 0.")
+for rh in (0.0,0.25,0.50,0.75,1.0):
+    d2 = (head_ta(25+.05,rh)-2*head_ta(25,rh)+head_ta(25-.05,rh))/0.0025
+    print(f"    RH {rh:4.0%}: Phi(25 C) = {head_ta(25,rh):6.2f}   Phi'' = {d2:+7.4f}")
+d2_dry = (head_ta(25+.05,0.0)-2*head_ta(25,0.0)+head_ta(25-.05,0.0))/0.0025
+d2_wet = (head_ta(25+.05,1.0)-2*head_ta(25,1.0)+head_ta(25-.05,1.0))/0.0025
+check("Phi'' is exactly zero in dry air", abs(d2_dry), 0.0, 1e-6)
+check("ratio of Phi'' at RH 100% to RH 50%",
+      d2_wet/((head_ta(25+.05,0.5)-2*head_ta(25,0.5)+head_ta(25-.05,0.5))/0.0025),
+      2.0, 1e-6)
+ws = {T: wreq(float(T),0.0) for T in range(10,33)}
+lin = max(abs(ws[T+1]-2*ws[T]+ws[T-1]) for T in range(11,32))
+check("w_req is EXACTLY linear in air temperature at RH = 0", lin, 0.0, 1e-12)
+print("    but the penalty keeps a residual convexity even in dry air, because")
+print("    a reciprocal of an affine function is still convex:")
+for rh in (0.0, 0.5, 0.9):
+    pen = lambda T: (V_REF/v_thermal(head_ta(T,rh)) - 1)
+    d2 = (pen(25+.5)-2*pen(25)+pen(25-.5))/0.25
+    print(f"      RH {rh:4.0%}: penalty'' at 25 C = {d2:+.5f}")
+print("    -> so the two measures make different predictions in dry air, which")
+print("       is a discriminating test the corpus does not yet contain.")
+
+# ------------------------------------------------------------------ CLAIM 9
+print("\nCLAIM 9: storage scales as 1/duration.")
+check("stored energy in a 2.5 C rise (kJ)", MASS*C_BODY*2.5/1000.0, 608, 1.0)
+for label,t,want in (("marathon 3:00",10800,56),("marathon 4:30",16200,38)):
     check(f"{label} (W)", MASS*C_BODY*2.5/t, want, 1.0)
 print(f"    against {H_prod():.0f} W of heat production: the storage term buys"
       f" {100*MASS*C_BODY*2.5/10800/H_prod():.0f}% at 3:00.")
-print("    (compare W with W, not W with W/m2 -- the v2 text mixed them.)")
+print("    (compare W with W, not W with W/m2.)")
 
-print("\nCLAIM 5: the aerobic/thermal crossing CANNOT explain the 16 C breakpoint.")
-for T_sk in (29.0,31.0,35.0):
-    for w_max in (0.85,1.0):
-        cross=None
-        for t10 in range(100,400):
-            t=t10/10.0
-            if wreq(Ta_for_wbgt(t,0.60,200.0),0.60,T_sk,solar=50.0) >= w_max:
-                cross=t; break
-        print(f"    T_sk={T_sk} w_max={w_max}: ceiling reached at WBGT "
-              f"{cross if cross else '>40'} C")
-print("    -> the crossing sits in the mid-to-high 20s. A min(aerobic, thermal)")
-print("       account predicts a flat band roughly 12 C too long. Drop it.")
+# ------------------------------------------------------------------ CLAIM 10
+print("\nCLAIM 10: the same balance read as a demand on the circulation.")
+print("    Heat reaches the skin only by blood: SkBF = H / (rho*c * (T_core - T_sk))")
+print(f"    with rho*c = {RHO_CB:.0f} J/L/K and T_core = {T_CORE:.0f} C.")
+for T_sk in (25.0, 28.0, 31.0, 33.0, 35.0):
+    flow = H_prod()/(RHO_CB*(T_CORE-T_sk))*60.0
+    print(f"    T_sk = {T_sk:4.1f} C: gradient {T_CORE-T_sk:4.1f} K -> "
+          f"minimum skin blood flow {flow:4.2f} L/min")
+check("minimum skin blood flow at T_sk = 31 C (L/min)",
+      H_prod()/(RHO_CB*(T_CORE-31.0))*60.0, 1.53, 0.05)
+check("and at T_sk = 35 C (L/min)",
+      H_prod()/(RHO_CB*(T_CORE-35.0))*60.0, 3.07, 0.05)
+print("    1/(T_core - T_sk) is convex in T_sk, so the circulatory route carries")
+print("    the same curvature as the evaporative one. These are two links in one")
+print("    chain, not two rival explanations.")
 
-print("\nCLAIM 6: the flat band and the curvature need ONE convex strain->pace map.")
+# ------------------------------------------------------------------ CLAIM 11
+print("\nCLAIM 11: one convex strain->pace map does both jobs.")
 learned = {10:0.0,12:0.05,14:0.15,16:0.30,20:1.20,24:2.40,28:5.02}
 w = {t: wreq(Ta_for_wbgt(t,0.60,200.0),0.60,solar=50.0) for t in learned}
 best=None
@@ -180,13 +321,15 @@ print("    WBGT   w_req    c*w^k   learned")
 for t in sorted(learned):
     print(f"    {t:4d}  {w[t]:6.3f}   {c*w[t]**k:6.2f}%   {learned[t]:5.2f}%")
 r_w = (w[28]-w[24])/(w[24]-w[20])
-print(f"    steepening of w_req alone: {r_w:.2f};  of the penalty: {OBS:.2f}")
-print("    -> k>1 lifts the former to the latter AND flattens the cool end.")
-print("       The physics therefore predicts a LOWER BOUND on curvature.")
+check("steepening of w_req alone over the two bands", r_w, 1.80, 0.02)
+print(f"    against {OBS:.2f} for the penalty: k>1 lifts the former to the latter")
+print("    AND flattens the cool end. The physics predicts a LOWER BOUND.")
 
-print("\nCLAIM 7: what the prediction is, and is not, sensitive to.")
-lo,hi = curvature()
-print(f"    baseline (T_sk=31, RH 40-85%, solar 0-500): {lo:.2f} to {hi:.2f}")
+# ------------------------------------------------------------------ CLAIM 12
+print("\nCLAIM 12: what the curvature prediction is, and is not, sensitive to.")
+lo_c,hi_c = curvature()
+print(f"    baseline (T_sk=31, RH 40-85%, solar 0-500): {lo_c:.2f} to {hi_c:.2f}")
+check("baseline band brackets the observation", 1.0 if lo_c<=OBS<=hi_c else 0.0, 1.0, 0.0)
 print("    varying h_c across the full published span at 3.3 m/s:")
 for h_v in (10.4, hc(V_REF), 17.1, 33.7):
     l,hh = curvature(h_c=h_v)
@@ -203,9 +346,9 @@ for T_sk in (29,30,31,32,33,35):
           f"   {'brackets' if l<=OBS<=hh else 'MISSES'}")
 print("    -> h_c and metabolic rate barely move it; T_sk dominates entirely.")
 
-print("\nCLAIM 8: the exposed-skin caveat, quantified.")
+# ------------------------------------------------------------------ CLAIM 13
+print("\nCLAIM 13: the exposed-skin caveat, quantified.")
 print("    Aylwin measured EXPOSED skin by IR thermography, 64% of BSA.")
-print("    A whole-body mean must weight in the covered 36%, which runs warmer:")
 for cov in (32,34,36,38):
     tsk = 0.64*29.35 + 0.36*cov
     l,hh = curvature(T_sk=tsk)
@@ -213,5 +356,31 @@ for cov in (32,34,36,38):
           f"   {'brackets' if l<=OBS<=hh else 'MISSES'}")
 print("    -> the band still brackets even on the least favourable weighting.")
 print("       It fails only above T_sk ~ 33 C, which no weighting of Aylwin reaches.")
+
+# ------------------------------------------------------------------ CLAIM 14
+print("\nCLAIM 14: the response re-expressed on the dry-bulb axis.")
+SOLAR = 200.0
+xs = sorted(learned)
+def g(wv):
+    if wv <= xs[0]: return 0.0
+    if wv > 28.0:   return None
+    for a,b in zip(xs, xs[1:]):
+        if a <= wv <= b:
+            return learned[a] + (wv-a)/(b-a)*(learned[b]-learned[a])
+    return None
+print("    learned penalty (%) at fixed relative humidity, solar 200 W/m2:")
+print(f"    {'T_a':>5}" + "".join(f"{int(r*100):>9}%" for r in (0.3,0.5,0.7,0.9)))
+for Ta in (10,15,20,25,30):
+    row=f"    {Ta:5d}"
+    for rh in (0.3,0.5,0.7,0.9):
+        p = g(wbgt(float(Ta),rh,SOLAR))
+        row += ("      n/a" if p is None else f"{p:10.2f}")
+    print(row)
+check("penalty at 25 C air, 50% RH (%)", g(wbgt(25.0,0.5,SOLAR)), 1.70, 0.05)
+check("penalty at 25 C air, 90% RH (%)", g(wbgt(25.0,0.9,SOLAR)), 3.53, 0.05)
+check("penalty at 30 C air, 30% RH (%)", g(wbgt(30.0,0.3,SOLAR)), 2.17, 0.05)
+print("    -> raising air temperature at FIXED humidity raises the penalty")
+print("       monotonically, so the finding is not an artifact of the index;")
+print("       'n/a' marks cells whose WBGT leaves the evaluated range.")
 
 print("\n" + ("ALL CHECKS PASSED" if not fails else f"{len(fails)} FAILED: {fails}"))
