@@ -237,7 +237,7 @@ The study estimates whether a heat response learned by a deep-learning model imp
 
 \subsection{Data}
 
-The corpus consists of outdoor running activities recorded on Garmin devices by athletes who consented to the research use of their data. Activities were kept only if pace, WBGT and every baseline feature were present. Mean heart rate had to fall between 60 and 210\,bpm and mean pace between 2.5 and 11.5\,min\,km$^{-1}$, which removes sensor dropouts and GPS artifacts without reference to the weather. Runs above 25\,\textdegree C WBGT were excluded, since the corpus thins sharply beyond that point. The resulting frame holds 259{,}262 activities from 1{,}628 runners across roughly 140 countries.
+The corpus consists of outdoor running activities recorded on wrist wearable devices by athletes who consented to the research use of their data. Activities were kept only if pace, WBGT and every baseline feature were present. Mean heart rate had to fall between 60 and 210\,bpm and mean pace between 2.5 and 11.5\,min\,km$^{-1}$, which removes sensor dropouts and GPS artifacts without reference to the weather. Runs above 25\,\textdegree C WBGT were excluded, since the corpus thins sharply beyond that point. The resulting frame holds 259{,}262 activities from 1{,}628 runners across over one hundred countries.
 
 The target variable, $y_{a,i}$, is the mean pace of activity $i$ for runner $a$, in minutes per kilometer. Runners were split by identity rather than by activity, so no runner contributes to both fitting and evaluation. One runner in ten was held out, leaving 15{,}892 activities from 104 runners for evaluation once the prior-history requirement described below is applied.
 
