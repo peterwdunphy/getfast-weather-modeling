@@ -227,21 +227,3 @@ that identified pad slots always returned false. The defect was silent, since a 
 activates produces a model that trains and evaluates normally. It was found only by testing the mask
 on real pipeline output rather than on constructed input, and the accuracy gain previously credited
 to the mask belongs to the missing-value token instead.
-
-\section{Literature Conversions for Figure~\ref{fig:heateffects}}
-\label{app:conversions}
-
-Published heat effects are reported in incompatible units, and Figure~\ref{fig:heateffects} places them
-on one axis. The conversions are as follows. Slopes given in seconds per degree are divided by a
-representative finish time for the population studied, 130 minutes for elite fields and 240 minutes
-for mass fields, giving a percentage per degree. Effects reported as a percentage over an interval,
-such as a change per 5\,\textdegree C, are divided by the interval width. All curves are anchored at
-10\,\textdegree C, so each shows slowdown relative to that reference rather than an absolute time.
-
-Two limitations apply. Studies native to air temperature are drawn on the same axis as studies native
-to WBGT, which are not interchangeable: the offset between them depends on humidity, radiation and
-wind, so placement above roughly 18\,\textdegree C is approximate. And the published quadratics are
-drawn only across the range over which they were fitted. A quadratic with a positive second-order
-term diverges outside its support, and extrapolating one of the fitted clusters to 28\,\textdegree C
-would imply a slowdown near 50\%, which is an artifact of the functional form rather than a claim
-made by its authors.
