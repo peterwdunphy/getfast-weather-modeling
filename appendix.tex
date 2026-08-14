@@ -154,6 +154,46 @@ sensitivity against the distribution of window-averaged sensitivities, not again
 single-window distribution. The prospective version uses exactly 15 preceding windows and excludes
 the target activity.
 
+\section{Why Curves Stop at 28\,\textdegree C}
+\label{app:ceiling}
+
+Every curve in this paper is truncated at 28\,\textdegree C WBGT. The model returns values above that,
+and the counterfactual sweep was run to 30, but the estimates there rest on too little data to report.
+
+\begin{table}[!ht]
+\centering\small
+\caption{Observations available above each WBGT threshold, whole corpus ($n=278{,}853$).}
+\label{tab:ceiling}
+\begin{tabular}{@{}rrrr@{}}
+\toprule
+WBGT above & Runs & Share of corpus & Runners \\
+\midrule
+24\,\textdegree C & 22{,}293 & 7.995\% & 1{,}005 \\
+26\,\textdegree C & 8{,}659 & 3.105\% & 657 \\
+28\,\textdegree C & 1{,}880 & 0.674\% & 300 \\
+30\,\textdegree C & 189 & 0.068\% & 71 \\
+32\,\textdegree C & 9 & 0.003\% & 7 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Support falls by roughly an order of magnitude every two degrees above 26. At 28\,\textdegree C there
+remain 1{,}880 runs from 300 runners, enough that a median across runners is anchored by more than a
+handful of individuals. At 30 there are 189 runs from 71 runners, several contributing a single run. At
+32 the quantity is meaningless.
+
+The held-out panel binds tighter still: no evaluated window has a target run above 29.8\,\textdegree C,
+so nothing beyond that could be checked against a held-out outcome even in principle. Two further
+considerations point the same way. The upper hinge in the calibration spans only the interval between
+its knot and the ceiling, so a ceiling set too close to that knot leaves the coefficient weakly
+identified. And the flattening the model shows in its top few degrees is precisely where a sparse-data
+artifact and a genuine physiological plateau are least distinguishable, so reporting it would invite an
+interpretation the data cannot support.
+
+Twenty-eight degrees is therefore the point where per-runner estimates still rest on hundreds of runners
+rather than dozens. It is a reporting limit, not a claim that the response ends there; several published
+forms continue to steepen well beyond it (Section~\ref{sec:benchmark}).
+
 \section{Baseline Specification}
 \label{app:baseline}
 

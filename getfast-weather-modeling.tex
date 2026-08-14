@@ -103,7 +103,7 @@ Those conditions confound an already difficult prediction problem. An accurate m
 
 What every one of these approaches shares, including the predictors now shipped with consumer running platforms \citep{garmin_race_predictor, strava_performance_predictions}, is that it is weather-blind. The literature that does quantify weather effects sits on the other side of the same gap, describing races already run rather than forecasting ones still to come. \citet{vernon2021} documented the cost directly: at the warm 2018 London Marathon (24\,\textdegree C maximum), mass-participation runners finished roughly 47 minutes slower than their pre-race expectations on average, about 14\% off target. A predictor that ignores race-day conditions is therefore systematically optimistic on precisely the days when a runner most needs a dependable estimate.
 
-This paper asks whether that missing weather term can be learned from passively collected training data. We assemble an observational corpus of roughly a quarter of a million training runs, each matched to the weather in which it was run, and train a transformer on each runner's recent training streams to predict pace. Sweeping temperature counterfactually through the trained model yields two quantities: a population heat curve, describing the pace penalty the average runner incurs as conditions warm, and a per-runner sensitivity score, placing an individual within that distribution. We then test whether either improves a weather-blind pace model on runners held out entirely from fitting, and calibrate both against the correction that model actually requires. The population curve proves well scaled and removes the systematic optimism the weather-blind model shows on hot days; the curve also is consistent within existing literature, but demonstrates a novel non-linear heat adjustment learned directly from data; the per-runner score is reproducibly predictive but does not behave as a direct heat adjustment (IS THIS TRUE? CONCERNED THAT IT SOUNDS LIKE THE GLOBAL MODEL IS A HEAT ADJUSTMENT BUT THE PERSONAL ONE IS NOT.). Section~\ref{sec:literature} synthesizes the evidence on heat effects and acclimation that motivates this design, Section~\ref{sec:methods} describes the data and the held-out experiment, Section~\ref{sec:results} reports the results, and Section~\ref{sec:discussion} draws out their implications and what remains open.
+This paper asks whether that missing weather term can be learned from passively collected training data. We assemble an observational corpus of roughly a quarter of a million training runs, each matched to the weather in which it was run, and train a transformer on each runner's recent training streams to predict pace. Sweeping temperature counterfactually through the trained model yields two quantities: a population heat curve, describing the pace penalty the average runner incurs as conditions warm, and a per-runner sensitivity score, placing an individual within that distribution. We then test whether either improves a weather-blind pace model on runners held out entirely from fitting, and calibrate both against the correction that model actually requires. The population curve proves well scaled and removes the systematic optimism the weather-blind model shows on hot days; the curve also is consistent within existing literature, but demonstrates a novel non-linear heat adjustment learned directly from data; the per-runner score is reproducibly predictive, and its effect does grow with temperature, but it does not survive conditioning on the physiological signals the baseline already observes. \textit{\textbf{REVISED:} the earlier wording implied the population curve was a heat adjustment and the per-runner score was not; the distinction is actually between a term that is heat-specific and one that is heat-specific but not separable from its own downstream consequences.} Section~\ref{sec:literature} synthesizes the evidence on heat effects and acclimation that motivates this design, Section~\ref{sec:methods} describes the data and the held-out experiment, Section~\ref{sec:results} reports the results, and Section~\ref{sec:discussion} draws out their implications and what remains open.
 
 \section{How Heat Affects Endurance Running Performance}
 \label{sec:literature}
@@ -187,7 +187,7 @@ Why slower runners should lose remains unsettled. The simplest explanation is ex
 
 Other individual-level variables regarding heat sensitivity have produced mixed results. \citet{elhelou2012} found the performance gap between men and women stable across temperatures and \citet{knechtle2021b} found no significant temperature-by-sex interaction, while \citet{roach2012} and \citet{llewellyn2025} report women finishing further from their predicted times than men in warm conditions. For age, the largest heat effects appear in middle-aged rather than the oldest runners \citep{knechtle2021b, weiss2022a}, a pattern that plausibly reflects racing intensity rather than age itself.
 
-Heat imposes the same thermodynamic constraint (IDK IF THIS IS TRUE BECAUSE OF SWEAT?) on every runner yet the cost it exacts varies widely. Finishing position, body composition, sex, and age each capture part of that variation---each an observable correlates of a latent heat tolerance. This unobserved quality motivates our approach of inferring heat tolerance from a runner's own history of running in varied conditions rather than using demographic proxies.
+Heat imposes the same thermodynamic accounting on every runner, but not the same constraint: the balance in Equation~1 holds universally while its terms do not, since sweat capacity, body surface area and the mass over which heat is stored all differ between individuals, and two runners in identical conditions can therefore sit on opposite sides of the compensable threshold (Appendix~\ref{app:physics}). The cost heat exacts consequently varies widely. \textit{\textbf{CORRECTED:} the constraint is not identical across runners; sweat rate and body size enter $E_{\max}$ and $E_{\mathrm{req}}$ directly.} Finishing position, body composition, sex, and age each capture part of that variation---each an observable correlates of a latent heat tolerance. This unobserved quality motivates our approach of inferring heat tolerance from a runner's own history of running in varied conditions rather than using demographic proxies.
 
 \subsection{Heat Acclimation}
 
@@ -249,7 +249,7 @@ Weather was sampled from Open-Meteo along each run: once at the start, once at t
 
 Heat features come from a transformer trained on each runner's recent training streams, a factored-attention network adapted from an existing fitness-prediction architecture. Its input is a window of the 30 most recent activities, each resampled to 128 points and represented by eleven channels: date, latitude, altitude, cadence, cumulative elevation, distance, heart rate, power, activity type, outdoor WBGT, and pace. Each channel is tokenized and embedded separately; the embeddings are summed with a $1/\sqrt{C}$ scale and layer-normalized, and the result passes through attention that mixes information both within an activity and across the runner's recent activities. The model predicts pace directly. Two heat artifacts are then read off the trained model by counterfactual WBGT sweeps that hold every other channel fixed.
 
-The \emph{population heat curve} gives the average pace penalty as a function of conditions alone. Each fitting runner's swept response is anchored at $10\,^{\circ}$C and divided by that runner's own value at $28\,^{\circ}$C, isolating the shape of the response from its size. The median of these shapes is taken across the 1{,}186 fitting runners with a positive heat response, then rescaled by the median sensitivity of a 750-runner reference sample. The model is given no monotonicity constraint, so the shape of the response is whatever the network produces. A monotone projection is applied to the median shape when the published curve is assembled, but it is immaterial: it alters 8 of 37 grid points, by at most 0.13 percentage points of pace against a total curve range of 5.04. Every individual runner's estimated curve decreases somewhere, yet their median is already non-decreasing to within that tolerance, so the monotone shape is a property the model recovered rather than one assumed. Appendix~\ref{app:curve} gives the construction in full.
+The \emph{population heat curve} gives the average pace penalty as a function of conditions alone. Each fitting runner's swept response is anchored at $10\,^{\circ}$C and divided by that runner's own value at $28\,^{\circ}$C, isolating the shape of the response from its size. The median of these shapes is taken across the 1{,}186 fitting runners with a positive heat response, then rescaled by the median sensitivity of a 750-runner reference sample. The model is given no monotonicity constraint, so the shape of the response is whatever the network produces. A monotone projection is applied to the median shape when the published curve is assembled, but it is immaterial: it alters 8 of 37 grid points, by at most 0.13 percentage points of pace against a total curve range of 5.04. Every individual runner's estimated curve decreases somewhere, yet their median is already non-decreasing to within that tolerance, so the monotone shape is a property the model recovered rather than one assumed. All reported curves are truncated at 28\,\textdegree C, a limit set by data support rather than by the model; Appendix~\ref{app:ceiling} gives the counts, and Appendix~\ref{app:curve} gives the construction in full.
 
 The \emph{per-runner sensitivity score} is each runner's percentile rank of DL-predicted slowdown at $28\,^{\circ}$C relative to $10\,^{\circ}$C, $\mathrm{slowdown}_{28} = 100\,(\mathrm{DL}_{28^\circ}/\mathrm{DL}_{10^\circ} - 1)$. The primary, prospective version uses a strict prior of exactly 15 preceding windows and excludes the target activity, so it is fully prospective.
 
@@ -335,6 +335,28 @@ A linear form cannot represent that threshold at all. It must either overstate t
 
 The learned curve avoids both failures because nothing constrains it to a polynomial. It is flat where the constraint is slack, steepens where the constraint binds, and flattens again at the top of the observed range rather than accelerating without bound, which is the behavior a physically limited process should show.
 
+The response is also not a single slope, because it depends on how hard the runner is working.
+Estimating the heat slope separately within quintiles of mean heart rate, within runner and with
+distance, elevation and fitness controlled, gives $+0.22\%$ per \textdegree C in the easiest fifth
+rising monotonically to $+0.53\%$ in the hardest, a factor of 2.5 (Figure~\ref{fig:hrinteraction}).
+The gradient is concentrated at the top: a linear heart-rate-by-heat interaction does not capture it
+($+0.021\%$ per \textdegree C per standard deviation of heart rate, $t=0.8$), because four of the five
+quintiles are close together and the effect appears in the hardest one. This matters for interpretation
+of the population curve, which averages over efforts that are mostly easy, and it is consistent with the
+physical account: the compensable threshold is crossed sooner when metabolic heat production is higher,
+so the same conditions bind at high effort and not at low.
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=\linewidth]{figures/fig_hr_wbgt_interaction.pdf}
+\caption{The heat penalty as a function of both conditions and effort, estimated within runner. Left:
+the slope above WBGT 15 by heart-rate quintile, with runner-clustered 95\% intervals. Right: the
+cumulative penalty implied by the directly estimated slopes for the easiest, middle and hardest fifths.
+The right panel plots the quintile estimates rather than a fitted interaction surface, because the
+linear interaction term is not distinguishable from zero.}
+\label{fig:hrinteraction}
+\end{figure}
+
 \subsection{Whether weather information improves prediction}
 
 Both heat features lower held-out error (Figure~\ref{fig:mape_ladder}). Robust MAPE falls from 7.34\% for the weather-blind model to 7.29\% with the population curve, and to 7.13\% once the personalized score is added, a total of 0.21 points. On a 3:30 marathon the whole progression is worth about 26 seconds, and on a four-hour marathon about 30. This small magnitude is expected: the effect of heat is a small piece of daily training pace variation, where training intent, terrain and fatigue all have larger effects. Average error over a mostly temperate corpus is therefore a weak instrument for detecting it.
@@ -384,6 +406,63 @@ Refitting that calibration while varying only how much runner-level information 
 
 The mechanism is a confound between runner identity and training climate. Across fitting runners, a runner's mean prediction error correlates with the wet-bulb globe temperature they habitually train in at $r = +0.158$, a slope of $+0.153$ percentage points per \textdegree C; the hottest habitual quartile carries a mean error of $+1.96$ points against $+0.54$ for the coolest. Any runner-level term therefore absorbs part of the heat signal without being shown a temperature, and a personalized heat feature estimated alongside one is left explaining a residual whose sign is not stable. Once runner identity is supplied directly, the personalized deviation adds nothing, which is the cleanest statement of what it was carrying.
 
+\subsection{Benchmarking against the published forms}
+\label{sec:benchmark}
+
+Section~\ref{sec:literature} collected a dozen published heat corrections. Because each can be written
+as a multiplicative adjustment to a weather-blind prediction, all of them can be dropped into the same
+slot as the learned curve and scored on identical held-out runs. Each form is evaluated on the
+temperature variable it was fitted on and centered on the fitting sample, so what is compared is its
+shape and magnitude rather than its arbitrary reference point.
+
+\begin{table}[!ht]
+\centering\small
+\caption{Held-out bias by heat threshold, out-of-fold over all 1{,}628 runners. Flatness is the
+root-mean-square variation of the bias profile across WBGT bins; lower means less of the error is
+predictable from conditions.}
+\label{tab:benchmark}
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+& \multicolumn{3}{c}{signed bias (\%)} & \\
+\cmidrule(lr){2-4}
+Correction & 15+ & 20+ & 23+ & Flatness \\
+\midrule
+None (weather-blind)          & $+0.07$ & $+0.99$ & $+1.90$ & 1.04 \\
+Martin 1999                   & $-0.49$ & $-0.53$ & $-0.21$ & \textbf{0.23} \\
+\textbf{This study}           & $-0.55$ & $-0.35$ & $\mathbf{+0.09}$ & 0.29 \\
+Mantzios 2022 (marathon)      & $-0.44$ & $-0.10$ & $+0.49$ & 0.42 \\
+Ely 2007 (25th place)         & $-1.00$ & $-0.71$ & $-0.15$ & 0.50 \\
+Guy 2014                      & $-0.91$ & $-0.50$ & $+0.12$ & 0.54 \\
+Vernon 2021 (mass field)      & $-2.73$ & $-3.45$ & $-3.33$ & 1.95 \\
+Gasparetto 2020 (cluster 2)   & $-9.55$ & $-18.89$ & $-24.98$ & 11.97 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Three things follow. The learned curve leaves the smallest residual bias in the heat, $+0.09\%$ above
+WBGT 23 against $+1.90\%$ uncorrected, and it is the only form besides Mantzios's marathon slope whose
+published magnitude needs no rescaling; fitting a free scale to it returns $1.05$. Forms estimated on
+mass fields over-correct severely when applied to training runs, by factors of three to fourteen, which
+is the expected direction given that race-day heat sensitivity exceeds training-pace sensitivity.
+And the elite forms, which are shallower, transfer well: Martin's quadratic is marginally flatter across
+the whole range than the learned curve, though it achieves this partly by bending in cool conditions
+where the learned curve is deliberately flat.
+
+Figure~\ref{fig:litbench} shows the same comparison as a profile. No published form and no fitted
+correction alters mean absolute error appreciably, all sitting between 7.4\% and 7.5\% at WBGT 15 and
+above; a three-percent effect is not visible against day-to-day variation in a per-run error statistic,
+which is why calibration rather than error is the reported criterion throughout.
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=\linewidth]{figures/fig_lit_benchmark.pdf}
+\caption{Held-out bias (left) and the same models' bias among heat-intolerant versus heat-tolerant
+runners (right), at three cumulative WBGT thresholds. Bars are runner-clustered bootstrap 95\%
+intervals. A correction that has removed the conditions-dependence sits flat near zero across all three
+thresholds rather than crossing it once.}
+\label{fig:litbench}
+\end{figure}
+
 \subsection{Robustness to the choice of baseline}
 
 Because that reversal is conditional on a baseline containing heart rate, the whole progression was repeated on a baseline that removes current effort entirely, using an independently trained marathon-fitness estimate with distance and elevation. This branch is supplementary and is not an equivalent comparison, since it changes the fitness representation and drops current effort at the same time, which raises its absolute error. Within it, the population temperature information remains useful though its gain interval includes zero, raw WBGT produces a clearer gain, and the strict-prior personalization no longer improves on the population curve. The $\gamma$ reversal disappears, but the estimate is imprecise and unstable across runner folds. The result is that the personalized finding depends on the conditional baseline, and that this branch neither confirms nor refutes its magnitude.
@@ -407,7 +486,54 @@ Literature on heat's effect on endurance running and prediction modeling have de
 
 The population curve that results is well scaled rather than merely correlated with conditions. Its calibration coefficient is compatible with one, meaning the magnitude the deep model learned matches the correction the pace model independently requires, and it falls within the bounds of published literature. Its most consequential property is directional. A weather-blind model predicts runs in the hottest conditions faster than they were actually run, and supplying the curve removes that optimism. Because the error such a model makes is systematically in the runner's disfavor on precisely the days when conditions matter most, correcting its direction is worth more than the small reduction in average error suggests. The magnitude is quantifiable: at $28\,^{\circ}$C the curve implies roughly eleven additional minutes for a runner whose ideal weather marathon prediction is 3:30 and twelve for a four-hour runner.
 
-The per-runner result is more equivocal. A score matched to the correct runner improves prediction reproducibly, and shuffling that match removes the gain, so the score carries genuine individual information. Yet its effect is nearly independent of temperature (WE SHOULD DOUBLE CHECK THIS.  I THINK NEW EXPERIMENTS DON'T SUGGEST THIS), and its residual direction inverts once heart rate is conditioned on (SHOULD MENTION THAT THIS HAPPENS ALSO FOR THE LINEAR MODEL, NOT JUST THE XGBOOST CALIBRATION). Both results are what would be expected if heat sensitivity were already partly expressed through the physiological signals the baseline observes, in which case the personalized feature absorbs what remains rather than the effect itself (SHOULD ALSO MENTION THAT WHEN JUST USING THE PERSONALIZED CURVE WITHOUT THE GLOBAL CURVE, THE MAPE RESULTS ARE SIMILAR, AND THE DIRECTION IS CORRECT, SO THIS JUST SEEMS TO BE AN ISSUE OF ADDITIONAL HEAT-RELATED PERSONAL INFORMATION BEING PROVIDED BY THE MODEL). Separating a runner's heat sensitivity from its own downstream consequences therefore requires either a baseline that excludes those consequences or measurements that identify them directly, and the sensitivity analysis reported above shows that the first is not sufficient on its own.
+The per-runner result is more equivocal. A score matched to the correct runner improves prediction reproducibly, and shuffling that match removes the gain, so the score carries genuine individual information. Its effect is, moreover, clearly temperature-dependent: interacted with the heat hinges, the score carries $+0.13\%$ per \textdegree C above 15\,\textdegree C and a further $+0.65\%$ per \textdegree C above 24\,\textdegree C, so a runner scored as more sensitive requires a progressively slower prediction as conditions worsen. What does not survive is conditioning: the residual direction inverts once heart rate enters the baseline, and it does so in the linear specification as well as in the gradient-boosted calibration, so the reversal is a property of the conditioning set rather than of any one estimator. \textit{\textbf{REVISED:} the previous claim that the effect was nearly independent of temperature was wrong and is replaced by the measured interaction; the reversal is now reported for both specifications.} Both results are what would be expected if heat sensitivity were already partly expressed through the physiological signals the baseline observes, in which case the personalized feature absorbs what remains rather than the effect itself. Supplying the personalized term alone, without the population curve, is consistent with that reading: error is essentially unchanged (7.20\% against 7.19\% for the population curve alone, and 7.22\% with no heat term at all) and the coefficients keep the physiologically expected sign, but the population-level optimism in heat is left uncorrected, which is the population curve's role and not the individual term's. \textit{\textbf{ADDED:} the personalized-only specification, showing similar error and correct direction but no population-level correction.} Separating a runner's heat sensitivity from its own downstream consequences therefore requires either a baseline that excludes those consequences or measurements that identify them directly, and the sensitivity analysis reported above shows that the first is not sufficient on its own.
+
+\subsection{Who is in this corpus, and which way that biases the estimate}
+\label{sec:selection}
+
+The corpus is not a sample of runners, and it is not a sample of races. It is a sample of training runs
+recorded by people who chose to wear a GPS watch and to share the data with a fitness platform. Three
+selection mechanisms follow, and each has a predictable direction, summarized in
+Table~\ref{tab:selection}.
+
+Runs are overwhelmingly training rather than racing. A runner who is not competing can slow down,
+shorten, reschedule to a cooler hour, or move indoors when conditions are bad, and all four responses
+either remove the observation or blunt it. The effect estimated here is therefore the effect on a runner
+free to concede, which is a lower bound on the effect at a race, where the runner is not.
+
+The people are self-selected toward commitment. Opting into a training platform, wearing a monitor
+consistently, and accumulating the thirty-activity history the model requires all select for volume and
+consistency, and plausibly for fitness and heat acclimatization. More acclimatized runners are less
+heat-sensitive, so this too biases the population curve downward.
+
+And within a runner, hot days are not randomly assigned to sessions. Hot runs in this corpus are
+slightly shorter and, in aggregate, easier. Since the penalty is steeper at high effort
+(Section~\ref{sec:results}), conditioning on the runs that actually happened understates what heat would
+have cost had the same session been attempted regardless.
+
+\begin{table}[!ht]
+\centering\small
+\caption{Selection mechanisms and the direction each pushes the estimated heat effect.}
+\label{tab:selection}
+\begin{tabular}{@{}p{5.2cm}p{4.8cm}p{3.2cm}@{}}
+\toprule
+Mechanism & Why it operates & Expected sign \\
+\midrule
+Training runs, not races & the runner may slow, shorten or reschedule & \textbf{understates} \\
+Platform opt-in, 30-run history requirement & selects committed, higher-volume, likely more acclimatized runners & \textbf{understates} \\
+Hot sessions are shorter and easier & the penalty is steeper at high effort & \textbf{understates} \\
+Runs abandoned on the worst days & the observation is never recorded & \textbf{understates} \\
+Warm-climate runners supply most hot runs & they are the most acclimatized & \textbf{understates} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The mechanisms point the same way, which is convenient for interpretation if uncomfortable for
+precision: the population curve should be read as a floor on race-day cost rather than an unbiased
+estimate of it. That is consistent with Section~\ref{sec:benchmark}, where forms fitted on actual
+mass-participation races imply substantially steeper slopes than the one learned here. It is also why no
+attempt is made to extrapolate to championship conditions: this corpus cannot speak to a runner who has
+no option to concede.
 
 \subsection{Limitations}
 
