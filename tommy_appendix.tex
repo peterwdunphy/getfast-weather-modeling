@@ -87,14 +87,30 @@ production and work both scale with $v$, and so does their difference,
   \kappa \;\approx\; 231\,\mathrm{J\,m^{-1}}
   \label{eq:production}
 \end{equation}
-for the reference runner. Two remarks on $\kappa$. It is conservative: in level
-running almost no work is done on the environment beyond overcoming air
-resistance, so the mechanical work the convention credits is dissipated inside
-the body within the stride cycle and reappears as heat, which means
-\eqref{eq:production} understates heat production rather than overstating it.
-And whatever residual drift heat imposes on $\kappa$ runs against the runner
-rather than for them, since the added ventilatory and cardiac work of
-thermoregulating is itself metabolic and therefore itself a heat source.
+for the reference runner. Two remarks on $\kappa$.
+
+It is conservative, and the reason is worth stating because the work term is
+where a heat balance for running differs from one for cycling. In level
+locomotion there is no external force adding positive power to the runner: the
+ground reaction force is applied at a point with zero velocity, so the
+propulsive product vanishes identically and gross efficiency \emph{against the
+environment} is close to zero rather than close to a quarter
+\citep{vaningenschenau1990}. ISO 7933 accordingly sets $W = 0$ outright for
+this reason \citep{iso7933}. What genuinely leaves the system is the work
+against air resistance, about $2\%$ of metabolic cost at marathon speed
+\citep{davies1980} and, once that cost is multiplied by efficiency to give
+work, well under one percent. Equation~\eqref{eq:production} therefore charges
+the runner less heat than the physics does, not more.\footnote{This is a claim
+about work done on the \emph{environment}, which is the thermodynamically
+relevant quantity. It should not be confused with the separate observation that
+positive and negative work on the centre of mass cancel over a stride: that
+cancellation is a bookkeeping identity and does not by itself establish that
+any energy left the body.}
+
+The second remark is that nothing below turns on a drift in $\kappa$ with
+conditions, which is fortunate, because the effect of heat stress on running
+economy is equivocal in the literature; \citet{james2017} report it slightly
+\emph{improved} in the heat.
 
 Now impose the two conditions that describe a runner racing. The first is that
 effort is already maximal, so the runner is not holding anything back. The
@@ -308,8 +324,8 @@ curve shows. Second, the fall has an asymptote rather than a slope: $v_{\max}$
 reaches zero at $T_{wb} = T_{sk}$, because at that point the head is zero and
 no heat leaves at all. For a runner whose skin sits at $31\,^{\circ}$C that
 wall is at a wet-bulb temperature of $31\,^{\circ}$C. It is the running
-counterpart of the wet-bulb limit discussed for resting humans, and it is lower
-for the same reason skin is cooler: running-speed airflow over wet skin holds
+counterpart of the wet-bulb limit discussed for resting humans
+\citep{sherwood2010}, and it is lower for the same reason skin is cooler: running-speed airflow over wet skin holds
 the surface below air temperature, and the wall follows the surface down. The
 runner's own heat production then ends compensable racing some six degrees
 below even that wall. This is why a convex response is the physically expected
@@ -378,8 +394,9 @@ below is $1.80$. If instead it is the fluid cost of sustaining that strain, the
 governing quantity is the sweat that must be \emph{produced} rather than the
 sweat that evaporates, $w_{req}/\eta_{sw}$, since sweat beyond the evaporative
 ceiling drips rather than cools \citep{taylor2006}. Sweating efficiency
-$\eta_{sw}$ is itself a measured function of wettedness, falling to $0.50$ at
-fully wetted skin under ISO 7933 and to $0.67$ under the relation of
+$\eta_{sw}$ is itself a measured function of wettedness, falling at fully wetted
+skin to $0.50$ under ISO 7933, whose curve follows the working measurements of
+\citet{alber1985}, and to $0.67$ under the resting measurements of
 \citet{candas1979}; both forms give a predicted steepening near $5$. The
 observed $2.18$ lies between the two and nearer the strain end, so runners
 appear to concede pace largely in proportion to thermal strain, with a secondary
@@ -405,14 +422,25 @@ production across the core-to-skin temperature gradient,
   \label{eq:skbf}
 \end{equation}
 with $\rho c_b \approx 3.8\,\mathrm{kJ\,L^{-1}\,K^{-1}}$ the volumetric heat
-capacity of blood. For the reference runner holding a core temperature of
+capacity of blood.\footnote{Published values used in this calculation span
+$3.64$ to $4.19\,\mathrm{kJ\,L^{-1}\,K^{-1}}$, the upper end being models that
+treat blood as water. The spread does not affect the shape of the result, only
+its level.} For the reference runner holding a core temperature of
 $39\,^{\circ}$C, this requires at least $1.5\,\mathrm{L\,min^{-1}}$ to the skin
 when skin sits at $31\,^{\circ}$C, and at least $3.1$ when it sits at
-$35\,^{\circ}$C. Those are lower bounds. They credit the skin with the whole
-production, which overstates it by the small respiratory share, but they also
-assume blood returns from the skin fully cooled to skin temperature, which
-countercurrent exchange prevents and which understates the requirement by a
-good deal more.
+$35\,^{\circ}$C. \citet{cheuvront2010} run the same calculation for a
+world-class marathoner and tabulate the same accelerating pattern, $1.1$,
+$2.2$ and $4.4\,\mathrm{L\,min^{-1}}$ as the core-to-skin gradient closes from
+$8$ to $4$ to $2\,^{\circ}$C.
+
+These are lower bounds. They credit the skin with the whole production, which
+overstates it by the small respiratory share, but they also assume blood
+returns from the skin fully cooled to skin temperature, which countercurrent
+exchange prevents and which understates the requirement by a good deal more.
+The margin is real but not large: cutaneous flow reaches roughly $6$ to
+$8\,\mathrm{L\,min^{-1}}$ at rest and plateaus near half of that maximum during
+exercise, against a cardiac output that in trained men at exhaustion in the
+heat runs near $20\,\mathrm{L\,min^{-1}}$.
 
 Two things follow. The first is the competition the main text refers to. Cardiac
 output is finite, and blood directed to the cutaneous beds for cooling is not
@@ -443,10 +471,17 @@ it.
 
 Balance need not hold instantaneously, since heat can be stored as a rise in
 core temperature. That allowance is a rate, however, and it scales inversely
-with the duration over which it is spent: $S = m\,c\,\Delta T_{core}/t$. A
-$2.5\,^{\circ}$C rise in a $70\,\mathrm{kg}$ runner represents about
-$610\,\mathrm{kJ}$, which is worth $57\,\mathrm{W}$ spread over a three-hour
-marathon and $38\,\mathrm{W}$ over four and a half, against $770\,\mathrm{W}$ of
+with the duration over which it is spent: $S = m\,c\,\Delta T_{core}/t$. Taking
+tissue heat capacity as $3474\,\mathrm{J\,kg^{-1}\,K^{-1}}$
+\citep{burton1935},\footnote{Burton adopted $0.83\,\mathrm{kcal\,kg^{-1}}$ per
+degree ``by general custom'' and bounded it only to $0.7$--$0.9$, so the figure
+carries perhaps ten percent of slack. The widely quoted $3500$ has no primary
+source, and a recent direct measurement of tissue puts it some seventeen
+percent lower still. None of this matters here: the storage term is small, and
+the argument is that it is small.} a $2.5\,^{\circ}$C rise in a
+$70\,\mathrm{kg}$ runner represents about $608\,\mathrm{kJ}$, which is worth
+$56\,\mathrm{W}$ spread over a three-hour marathon and $38\,\mathrm{W}$ over
+four and a half, against $770\,\mathrm{W}$ of
 heat production. The storage term thus covers about $7\%$ of the problem at
 three hours and less as the race lengthens, while over a ten-second sprint the
 same allowance is worth tens of kilowatts. Heat balance is accordingly close to

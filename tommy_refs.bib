@@ -1,8 +1,20 @@
 % Additional references for tommy_appendix.tex.
 % Every other key that appendix uses is already in references.bib;
 % this file is kept separate so it never conflicts with edits there.
-% Verified against J Appl Physiol 46(3):522-528, DOI 10.1152/jappl.1979.46.3.522
+%
+% Editorial guidance lives in % comments, NOT in `note` fields: plainnat PRINTS
+% note, so a field here becomes visible text in the paper's reference list. Note
+% fields are also parsed as LaTeX, so an unescaped _ or ^ in one halts the build
+% with "Missing $ inserted" from inside the generated .bbl, which is a confusing
+% place to debug.
 
+% Source of w_max = 0.85 (unacclimatised) / 1.00 (acclimatised), and it MEASURED
+% sweating efficiency at 0.67 for fully wetted skin.
+% It is NOT the source of ISO 7933's r = 1 - w^2/2 curve, which reaches 0.50;
+% that curve tracks alber1985 below. The two differ coherently: Candas used
+% three acclimatized RESTING men, Alber-Wallerstrom and Holmer six
+% unacclimatized men WORKING. Do not merge the attributions.
+% Verified against J Appl Physiol 46(3):522-528, DOI 10.1152/jappl.1979.46.3.522
 @article{candas1979,
   author  = {Candas, Victor and Libert, Jean-Pierre and Vogt, Jean-Jacques},
   title   = {Human skin wettedness and evaporative efficiency of sweating},
@@ -13,4 +25,96 @@
   pages   = {522--528},
   year    = {1979},
   doi     = {10.1152/jappl.1979.46.3.522}
+}
+
+% The propulsive-power identity: in locomotion no external force adds positive
+% power to the system, so gross efficiency AGAINST THE ENVIRONMENT is close to
+% zero in level running. This is the load-bearing citation for F.1's claim that
+% the work term is not a lever. Keep it distinct from the separate observation
+% that positive and negative centre-of-mass work cancel over a stride, which is
+% a bookkeeping identity and proves nothing about energy leaving the body.
+@article{vaningenschenau1990,
+  author  = {van Ingen Schenau, Gerrit Jan and Cavanagh, Peter R.},
+  title   = {Power equations in endurance sports},
+  journal = {Journal of Biomechanics},
+  volume  = {23},
+  number  = {9},
+  pages   = {865--881},
+  year    = {1990},
+  doi     = {10.1016/0021-9290(90)90352-4}
+}
+
+% Sets W = 0 outright, which is the standards-body version of the same point.
+% Cancels and replaces ISO 7933:2004; w_max and the sweating-efficiency relation
+% are unchanged between the two editions, so a 2004-era citation stays valid.
+@manual{iso7933,
+  author       = {{International Organization for Standardization}},
+  title        = {{ISO} 7933:2023 Ergonomics of the thermal environment ---
+                  Analytical determination and interpretation of heat stress
+                  using calculation of the predicted heat strain},
+  organization = {ISO},
+  address      = {Geneva},
+  edition      = {3rd},
+  year         = {2023}
+}
+
+% 2 per cent of metabolic cost at marathon speed (5 m/s), 4 per cent at
+% middle-distance, 7.8 per cent at sprint speed.
+% ATTRIBUTION TRAP: the marathon figure is Davies, NOT Pugh. Pugh (1971) reports
+% roughly double at middle-distance (7.5 per cent) and sprint (13 per cent), and
+% a 2025 reanalysis is nearer Pugh than Davies, so the factor of two is live.
+@article{davies1980,
+  author  = {Davies, C. T. M.},
+  title   = {Effects of wind assistance and resistance on the forward motion of
+             a runner},
+  journal = {Journal of Applied Physiology: Respiratory, Environmental and
+             Exercise Physiology},
+  volume  = {48},
+  number  = {4},
+  pages   = {702--709},
+  year    = {1980},
+  doi     = {10.1152/jappl.1980.48.4.702}
+}
+
+% 0.83 kcal/kg/C, i.e. 3474 J/kg/K, which Burton adopted "by general custom"
+% and bounded only to 0.7-0.9. The widely quoted 3500 has no primary source.
+% Section 2 of the main text already uses 3.47 kJ, so this keeps the two
+% consistent.
+@article{burton1935,
+  author  = {Burton, Alan C.},
+  title   = {Human Calorimetry: {II}. The Average Temperature of the Tissues of
+             the Body},
+  journal = {The Journal of Nutrition},
+  volume  = {9},
+  number  = {3},
+  pages   = {261--280},
+  year    = {1935},
+  doi     = {10.1093/jn/9.3.261}
+}
+
+% 51 per cent efficiency at full wettedness; the empirical basis of ISO 7933's
+% r = 1 - w^2/2, which candas1979 is commonly miscredited with.
+@article{alber1985,
+  author  = {Alber-Wallerstr{\"o}m, Barbro and Holm{\'e}r, Ingvar},
+  title   = {Efficiency of sweat evaporation in unacclimatized man working in a
+             hot humid environment},
+  journal = {European Journal of Applied Physiology and Occupational
+             Physiology},
+  volume  = {54},
+  number  = {5},
+  pages   = {480--487},
+  year    = {1985},
+  doi     = {10.1007/BF00422956}
+}
+
+% The resting wet-bulb tolerance limit, for contrast with the running one.
+@article{sherwood2010,
+  author  = {Sherwood, Steven C. and Huber, Matthew},
+  title   = {An adaptability limit to climate change due to heat stress},
+  journal = {Proceedings of the National Academy of Sciences},
+  volume  = {107},
+  number  = {21},
+  pages   = {9552--9555},
+  year    = {2010},
+  doi     = {10.1073/pnas.0913352107}
 }

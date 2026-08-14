@@ -420,7 +420,11 @@ Third, the per-runner result is narrower than it first appears. The score carrie
 Finally, some of what the literature flags as relevant is simply absent from the data. Raw GPX files carry no body mass, though heat production scales with it and smaller runners are advantaged in heat \citep{marino2008, maughan2010}; no biological sex, an established performance differential under heat \citep{llewellyn2025, vihma2010, kelly2023, weiss2022b}; and no resting heart rate, one of the most validated acclimation markers \citep{periard2015, tyler2016, pryor2019}. Each would plausibly improve prediction. Laboratory variables such as plasma volume or sweat sodium concentration are further out of reach, since they cannot be obtained from consumer devices at all.
 
 \clearpage
-\bibliographystyle{apalike}
+% The style is set once in the preamble (\bibliographystyle{plainnat}). A second
+% \bibliographystyle{apalike} stood here and was inert: BibTeX takes the first
+% and reports "Illegal, another \bibstyle command" for the second, so the paper
+% has always rendered as plainnat. Removing it keeps the output identical and
+% clears the error. To actually switch to apalike, change the preamble line.
 \bibliography{references,tommy_refs}
 \clearpage
 %% create appendix

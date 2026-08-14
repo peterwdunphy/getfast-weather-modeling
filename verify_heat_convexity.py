@@ -28,7 +28,7 @@ import math
 T_SKIN = 31.0      # C, mean skin temp in outdoor competition (Aylwin 2023)
 A_BODY = 1.85      # m2
 MASS   = 70.0      # kg
-C_BODY = 3500.0    # J/kg/K
+C_BODY = 3474.0    # J/kg/K, Burton (1935); the quoted 3500 has no primary source
 ECON   = 4184.0    # J/kg/km
 EFF    = 0.79      # fraction of metabolic turnover appearing as heat
 V_REF  = 3.33      # m/s = 5:00/km  (a 3:31 marathon, not 3:30)
@@ -281,7 +281,8 @@ print("       is a discriminating test the corpus does not yet contain.")
 
 # ------------------------------------------------------------------ CLAIM 9
 print("\nCLAIM 9: storage scales as 1/duration.")
-for label,t,want in (("marathon 3:00",10800,57),("marathon 4:30",16200,38)):
+check("stored energy in a 2.5 C rise (kJ)", MASS*C_BODY*2.5/1000.0, 608, 1.0)
+for label,t,want in (("marathon 3:00",10800,56),("marathon 4:30",16200,38)):
     check(f"{label} (W)", MASS*C_BODY*2.5/t, want, 1.0)
 print(f"    against {H_prod():.0f} W of heat production: the storage term buys"
       f" {100*MASS*C_BODY*2.5/10800/H_prod():.0f}% at 3:00.")
