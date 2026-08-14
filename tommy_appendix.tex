@@ -22,6 +22,12 @@ made by its authors.
 % appendix.tex. It owns \label{app:physics}, which the main text references
 % twice.
 %
+% NOTE: an Overleaf round-trip moved "Literature Conversions for Figure 4"
+% (Appendix E) out of appendix.tex and into the TOP of this file. It renders in
+% the same place either way, since appendix.tex is \input immediately before
+% this one, so it has been left where it is -- but this file now carries two
+% unrelated appendices, and E must stay above the \section below.
+%
 % Every number here is reproduced by verify_heat_convexity.py (stdlib only,
 % self-checking, prints ok/FAIL per line, currently ALL CHECKS PASSED). The
 % three figures are built by build_compensability_figures.py.
@@ -55,7 +61,16 @@ made by its authors.
 %    Settle which is current.
 % ===========================================================================
 
-\subsection{Why the penalty accelerates: a biophysical account}
+% Kept at \section level deliberately. The Overleaf round-trip demoted this to
+% \subsection and dropped \label{app:physics}, which had two consequences: the
+% main text's two "Appendix~\ref{app:physics}" pointers rendered as "??", and
+% the whole biophysical account nested underneath "Literature Conversions for
+% Figure 4" as E.1-E.10, since that section now opens this same file. The title
+% below is left exactly as the Overleaf edit set it. \label{sec:convexity} is
+% preserved as an alias so nothing added against it dangles; nothing references
+% it at present.
+\section{Why the penalty accelerates: a biophysical account}
+\label{app:physics}
 \label{sec:convexity}
 
 This appendix supports the physical argument in Section~\ref{sec:results}. It
