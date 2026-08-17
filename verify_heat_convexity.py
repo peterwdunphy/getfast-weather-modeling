@@ -366,6 +366,28 @@ check("minimum skin blood flow at T_sk = 31 C (L/min)",
       H_prod()/(RHO_CB*(T_CORE-31.0))*60.0, 1.53, 0.05)
 check("and at T_sk = 35 C (L/min)",
       H_prod()/(RHO_CB*(T_CORE-35.0))*60.0, 3.07, 0.05)
+print("\n    the two links pull on the shared boundary T_sk in OPPOSITE directions.")
+CH_TA, CH_RH, CH_SOLAR = 30.0, 0.60, 50.0
+print(f"    environment: T_a = {CH_TA:.0f} C, RH {CH_RH:.0%} "
+      f"(T_wb {twb(CH_TA,CH_RH):.1f} C, WBGT {wbgt(CH_TA,CH_RH,200.0):.1f} C)")
+def _w_of_tsk(T_sk):
+    dry = hc(V_REF)*(T_sk-CH_TA)*A_BODY - CH_SOLAR*A_BODY
+    return (H_prod()-dry)/(LR*hc(V_REF)*(psat(T_sk)-CH_RH*psat(CH_TA))*A_BODY)
+def _flow(T_sk): return H_prod()/(RHO_CB*(T_CORE-T_sk))*60.0
+print(f"    {'T_sk':>5} {'w_req':>8} {'SkBF':>8}")
+for T_sk in (28.0, 31.0, 34.0, 37.0):
+    print(f"    {T_sk:5.0f} {_w_of_tsk(T_sk):8.3f} {_flow(T_sk):8.2f}")
+check("w_req at T_sk = 28 C (hot-marathon air)", _w_of_tsk(28.0), 1.78, 0.01)
+check("w_req at T_sk = 37 C", _w_of_tsk(37.0), 0.43, 0.01)
+check("skin blood flow at T_sk = 28 C (L/min)", _flow(28.0), 1.1, 0.05)
+check("skin blood flow at T_sk = 37 C (L/min)", _flow(37.0), 6.1, 0.05)
+_mono = all(_w_of_tsk(t) > _w_of_tsk(t+0.5) and _flow(t) < _flow(t+0.5)
+            for t in [28.0+0.5*i for i in range(18)])
+check("w_req falls and SkBF rises monotonically in T_sk",
+      1.0 if _mono else 0.0, 1.0, 0.0)
+print("    -> warmer skin EASES the surface link and TIGHTENS the transport one.")
+print("       T_sk is an outcome of both balances, not an input the runner sets;")
+print("       this appendix fixes it at 31 C instead of solving them jointly.")
 print("    1/(T_core - T_sk) is convex in T_sk, so the circulatory route carries")
 print("    the same curvature as the evaporative one. These are two links in one")
 print("    chain, not two rival explanations.")

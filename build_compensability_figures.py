@@ -1,7 +1,7 @@
 """build_compensability_figures.py
 
 Illustrations for the compensability appendix (Appendix F, tommy_appendix.tex).
-Four two-panel figures, in the order the appendix uses them:
+Five two-panel figures, in the order the appendix uses them:
 
   1. fig_heat_ceiling  -- the heat balance as a speed limit. Panel (a) splits the
      dissipation ceiling into its dry and evaporative parts against wet-bulb
@@ -14,13 +14,18 @@ Four two-panel figures, in the order the appendix uses them:
      the tabulated one highlighted; panel (b) walks that line and shows the dry
      and evaporative routes trading off exactly while the strain rises anyway.
 
-  3. fig_duration_bank -- why duration matters. Panel (a) draws core temperature
+  3. fig_two_links -- the chain the balance describes. Panel (a) is a schematic
+     of the two links in series, muscle to skin by blood and skin to air by
+     evaporation, and the boundary they share. Panel (b) shows the two demands
+     against that boundary, moving in opposite directions.
+
+  4. fig_duration_bank -- why duration matters. Panel (a) draws core temperature
      against distance covered for a runner holding pace at several required
      wettednesses; panel (b) shows the storage allowance as a share of heat
      production against race distance, which crosses unity at a fixed distance
      independent of both body mass and pace.
 
-  4. fig_drybulb_axis -- the response on the dry-bulb axis at fixed humidity.
+  5. fig_drybulb_axis -- the response on the dry-bulb axis at fixed humidity.
      Panel (a) is required wettedness, linear in dry air and increasingly convex
      as humidity rises; panel (b) re-expresses the learned WBGT curve as a
      function of air temperature at four humidities.
@@ -85,6 +90,8 @@ DT_TOL = 2.5         # K, the core-temperature rise a runner will spend
 T_CORE_0 = 37.0      # C, core temperature at the gun
 BANK = MASS * C_BODY * DT_TOL          # J of storable heat
 D_BANK = BANK / KAPPA                  # m; = C_BODY*DT_TOL/(EFF*ECON/1000)
+RHO_CB = 3770.0      # J/L/K, volumetric heat capacity of blood
+T_CORE = 39.0        # C, core temperature held during a hot marathon
 
 
 def psat(T):
@@ -395,7 +402,133 @@ def fig_wetbulb_isopleth():
 
 
 # ========================================================================== #
-# FIGURE 3 -- the storage bank, and the distance over which it lasts
+# FIGURE 3 -- the two links of the chain, and the boundary they share
+# ========================================================================== #
+CHAIN_TA = 30.0      # C, the environment panel (b) is drawn in
+CHAIN_RH = 0.60
+CHAIN_SOLAR_ABS = 50.0
+
+
+def skin_blood_flow(T_sk, T_core=T_CORE):
+    """Minimum skin blood flow to carry the whole production, L/min.
+
+    Eq. (skbf) in the appendix. T_core enters only here, and only as the
+    location of the vertical asymptote: the demand diverges as T_sk -> T_core.
+    """
+    return H_prod() / (RHO_CB * (T_core - T_sk)) * 60.0
+
+
+def wreq_of_tsk(T_sk, Ta=CHAIN_TA, rh=CHAIN_RH, solar_abs=CHAIN_SOLAR_ABS):
+    """Required wettedness as a function of skin temperature, environment fixed."""
+    dry = hc(V_REF) * (T_sk - Ta) * A_BODY - solar_abs * A_BODY
+    return (H_prod() - dry) / (he(V_REF) * (psat(T_sk) - rh * psat(Ta)) * A_BODY)
+
+
+def _box(ax, x, y, w, h, title, sub, face, edge):
+    ax.add_patch(plt.Rectangle((x, y), w, h, facecolor=face, edgecolor=edge,
+                               lw=1.4, zorder=3, joinstyle="round"))
+    ax.text(x + w / 2, y + h * 0.62, title, ha="center", va="center",
+            fontsize=9.2, color=INK, zorder=4)
+    ax.text(x + w / 2, y + h * 0.26, sub, ha="center", va="center",
+            fontsize=8.6, color=MUTE, zorder=4)
+
+
+def fig_two_links():
+    fig, (axA, axB) = plt.subplots(1, 2, figsize=(9.8, 3.9))
+
+    # ---- A: the chain, and the boundary the two links share
+    axA.set_xlim(0, 10)
+    axA.set_ylim(0, 6)
+    axA.axis("off")
+    axA.grid(False)
+
+    _box(axA, 0.0, 4.1, 2.1, 1.2, "Working muscle", r"$T_{core}\approx39$ °C",
+         "#f4f3ee", MUTE)
+    _box(axA, 4.1, 4.1, 1.8, 1.2, "Skin", r"$T_{sk}$", "#fdf1e6", ORANGE)
+    _box(axA, 7.9, 4.1, 2.1, 1.2, "Air", r"$T_{wb}$", "#f4f3ee", MUTE)
+
+    for x0, x1, col in ((2.15, 4.05, VERM), (5.95, 7.85, BLUE)):
+        axA.annotate("", xy=(x1, 4.70), xytext=(x0, 4.70),
+                     arrowprops=dict(arrowstyle="-|>", color=col, lw=2.2,
+                                     shrinkA=0, shrinkB=0))
+    axA.text(3.10, 5.45, "transport", ha="center", fontsize=8.8, color=VERM)
+    axA.text(3.10, 4.02, r"$T_{core}\!-\!T_{sk}$", ha="center", va="top",
+             fontsize=8.4, color=VERM)
+    axA.text(6.90, 5.45, "surface", ha="center", fontsize=8.8, color=BLUE)
+    axA.text(6.90, 4.02, r"$\Phi(T_{wb})$", ha="center", va="top",
+             fontsize=8.4, color=BLUE)
+
+    axA.annotate("shared boundary", xy=(5.0, 4.1), xytext=(5.0, 3.20),
+                 ha="center", fontsize=8.6, color=ORANGE,
+                 arrowprops=dict(arrowstyle="->", color=ORANGE, lw=1.0))
+
+    axA.text(5.0, 2.35, r"Raise $T_{sk}$ and the two gaps move oppositely:",
+             ha="center", fontsize=9.0, color=INK)
+    axA.text(3.25, 1.70, "gap narrows,\ntransport tightens", ha="center",
+             va="top", fontsize=8.6, color=VERM)
+    axA.text(6.75, 1.70, "gap widens,\nsurface eases", ha="center", va="top",
+             fontsize=8.6, color=BLUE)
+
+    axA.plot([5.0, 5.0], [1.02, 0.72], color=GREY, lw=1.1, ls=(0, (3, 2)))
+    axA.text(5.0, 0.58, "the same sweat loads both links: the fluid that\n"
+                        "evaporates at the surface leaves the circulation",
+             ha="center", va="top", fontsize=8.2, color=MUTE)
+
+    axA.set_title("(a)  Two links in series, one shared boundary", loc="left")
+
+    # ---- B: the two demands against the boundary they share
+    t = np.linspace(28.0, 38.0, 400)
+    flow = np.array([skin_blood_flow(x) for x in t])
+    w = np.array([wreq_of_tsk(x) for x in t])
+
+    axB.plot(t, flow, color=VERM, lw=2.0)
+    axB.set_xlim(28, 38)
+    axB.set_ylim(0, 8)
+    axB.set_xlabel("Mean skin temperature (°C)")
+    axB.set_ylabel("Required skin blood flow (L min$^{-1}$)", color=VERM)
+    axB.tick_params(axis="y", colors=VERM)
+
+    axB2 = axB.twinx()
+    axB2.plot(t, w, color=BLUE, lw=2.0)
+    axB2.set_ylim(0, 2)
+    axB2.set_ylabel(r"Required wettedness $w_{req}$", color=BLUE)
+    axB2.tick_params(axis="y", colors=BLUE)
+    axB2.grid(False)
+    axB2.spines["top"].set_visible(False)
+    axB2.axhline(1.0, color=BLUE, lw=1.0, ls="--", alpha=0.55)
+    axB2.text(28.2, 1.03, r"$w_{req}=1$: skin fully wet", fontsize=8.0,
+              color=BLUE, va="bottom")
+
+    axB.axvline(31.0, color=MUTE, lw=1.0, ls=":")
+    axB.annotate("this appendix\nholds $T_{sk}$ here", xy=(31.0, 6.6),
+                 xytext=(31.5, 6.9), fontsize=8.2, color=MUTE, va="top",
+                 arrowprops=dict(arrowstyle="->", color=MUTE, lw=0.9))
+
+    axB.annotate("tightens", xy=(36.6, skin_blood_flow(36.6)),
+                 xytext=(-6, 16), textcoords="offset points", fontsize=8.6,
+                 color=VERM, ha="right",
+                 arrowprops=dict(arrowstyle="->", color=VERM, lw=1.0))
+    axB2.annotate("eases", xy=(35.0, wreq_of_tsk(35.0)),
+                  xytext=(2, -22), textcoords="offset points", fontsize=8.6,
+                  color=BLUE, ha="left",
+                  arrowprops=dict(arrowstyle="->", color=BLUE, lw=1.0))
+    axB.text(35.5, 7.25, r"$\to\infty$ as $T_{sk}\to T_{core}$", fontsize=8.2,
+             color=VERM, ha="left")
+    axB.text(28.15, 0.98,
+             "held fixed:  $T_a$ = 30 °C,  RH 60%,\n"
+             r"$T_{core}$ = 39 °C,  5:00 min km$^{-1}$",
+             fontsize=8.0, color=MUTE, ha="left", va="top",
+             bbox=dict(fc="white", ec=GRID, lw=0.7, pad=3.0))
+
+    axB.set_title("(b)  They pull on that boundary in opposite directions",
+                  loc="left")
+
+    fig.tight_layout()
+    finish(fig, "fig_two_links")
+
+
+# ========================================================================== #
+# FIGURE 4 -- the storage bank, and the distance over which it lasts
 # ========================================================================== #
 EVENTS = [("800 m", 800.0), ("1500 m", 1500.0), ("5000 m", 5000.0),
           ("10 km", 10000.0), ("half", 21097.5), ("marathon", 42195.0)]
@@ -497,7 +630,7 @@ def fig_duration_bank():
 
 
 # ========================================================================== #
-# FIGURE 4 -- the response on the dry-bulb axis
+# FIGURE 5 -- the response on the dry-bulb axis
 # ========================================================================== #
 def fig_drybulb_axis():
     fig, (axA, axB) = plt.subplots(1, 2, figsize=(9.8, 3.9))
@@ -561,6 +694,7 @@ if __name__ == "__main__":
     print("building compensability figures into", OUT_PDF)
     fig_heat_ceiling()
     fig_wetbulb_isopleth()
+    fig_two_links()
     fig_duration_bank()
     fig_drybulb_axis()
     print("done")
