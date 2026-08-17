@@ -54,7 +54,7 @@ It is stdlib-only and needs no arguments. The expected last line is
 
 ## Rebuilding the appendix figures
 
-The three figures in the compensability appendix are generated from the same
+The four figures in the compensability appendix are generated from the same
 constants as the verification script, so a change to the physics must be made
 in both and checked in both:
 

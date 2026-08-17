@@ -18,7 +18,10 @@ The argument the script follows, in the order the appendix makes it:
      breakpoint, so runners must respond to graded strain below it. Required
      wettedness w_req is that graded measure, and it is convex for the same
      Clausius-Clapeyron reason.
-  5. On the dry-bulb axis at fixed humidity, the curvature is proportional to
+  5. The storage allowance is a fixed quantity of HEAT, so what it buys is a
+     fixed DISTANCE, d_bank = B/kappa ~ 2.6 km, with pace and body mass both
+     cancelling. That is why heat governs a marathon and spares a mile.
+  6. On the dry-bulb axis at fixed humidity, the curvature is proportional to
      RH. In perfectly dry air w_req is exactly linear.
 
 Run: python3 verify_heat_convexity.py
@@ -280,12 +283,75 @@ print("    -> so the two measures make different predictions in dry air, which")
 print("       is a discriminating test the corpus does not yet contain.")
 
 # ------------------------------------------------------------------ CLAIM 9
-print("\nCLAIM 9: storage scales as 1/duration.")
-check("stored energy in a 2.5 C rise (kJ)", MASS*C_BODY*2.5/1000.0, 608, 1.0)
+print("\nCLAIM 9: the storage allowance is a fixed quantity of HEAT, so what it")
+print("         buys is a fixed DISTANCE -- independent of pace and of mass.")
+DT_TOL  = 2.5
+BANK    = MASS*C_BODY*DT_TOL
+D_BANK  = BANK/KAPPA
+check("stored energy in a 2.5 C rise (kJ)", BANK/1000.0, 608, 1.0)
 for label,t,want in (("marathon 3:00",10800,56),("marathon 4:30",16200,38)):
-    check(f"{label} (W)", MASS*C_BODY*2.5/t, want, 1.0)
-print(f"    against {H_prod():.0f} W of heat production: the storage term buys"
-      f" {100*MASS*C_BODY*2.5/10800/H_prod():.0f}% at 3:00.")
+    check(f"spread over a {label} (W)", BANK/t, want, 1.0)
+print(f"    d_bank = B/kappa = {D_BANK:.0f} m.  Both the speed and the mass")
+print("    cancel: production and distance both scale with v, and the bank and")
+print("    the cost of covering ground both scale with m. Check that directly:")
+same = []
+for m in (52.0, 70.0, 91.0):
+    for v in (2.8, 3.33, 6.0):
+        same.append((m*C_BODY*DT_TOL)/(EFF*ECON*m/1000.0))
+check("d_bank identical across 3 masses x 3 speeds (m)", max(same)-min(same), 0.0, 1e-9)
+check("d_bank from the mass-free form c*dT/c_run (m)",
+      C_BODY*DT_TOL/(EFF*ECON/1000.0), 2628, 2.0)
+check("economy carried as heat, c_run = kappa/m (J/kg/m)", KAPPA/MASS, 3.3, 0.02)
+print("\n    share of total heat production the bank covers, = d_bank/d exactly:")
+for lab,d in (("100 m",100),("800 m",800),("1500 m",1500),("3000 m",3000),
+              ("5000 m",5000),("10 km",10000),("half",21097.5),("marathon",42195.0)):
+    print(f"      {lab:9s} {100*D_BANK/d:8.1f}% of production")
+check("share over 1500 m (x production)", D_BANK/1500, 1.75, 0.02)
+check("share over a marathon (%)", 100*D_BANK/42195, 6.2, 0.1)
+for v in (3.33, 42195/10800, 42195/16200):     # the share does not move with pace
+    check(f"marathon share at v={v:.2f} m/s (%)",
+          100*BANK/(H_prod(v)*(42195/v)), 6.2, 0.1)
+print(f"    over a ten-second sprint the same bank is worth {BANK/10/1000:.0f} kW,")
+print(f"    against {H_prod():.0f} W of production. Heat cannot bind a race")
+print(f"    shorter than {D_BANK/1000:.1f} km in ANY conditions.")
+
+print("\n    trajectories: S = E_max*(w_req - 1), core climbs at S/(m c).")
+print(f"    {'w_req':>6} {'WBGT':>6} {'T_a':>6} {'S (W)':>7} {'C/h':>6} "
+      f"{'t* (min)':>9} {'d* (km)':>8}")
+def _ta_wall(rh):
+    lo, hi = T_SKIN, 90.0
+    for _ in range(200):
+        m = (lo+hi)/2
+        if rh*psat(m) < psat(T_SKIN): lo = m
+        else: hi = m
+    return lo
+def _ta_for_w(target, rh=0.60):
+    lo, hi = 5.0, _ta_wall(rh)-0.05      # must stop below the vapour-gradient
+    for _ in range(200):                 # reversal or the bisection walks past it
+        m = (lo+hi)/2
+        if wreq(m, rh, solar=50.0) < target: lo = m
+        else: hi = m
+    return lo
+traj = {}
+for w in (1.05, 1.10, 1.25, 1.50):
+    Ta = _ta_for_w(w)
+    S  = (w-1.0)*LR*hc(V_REF)*(psat(T_SKIN)-0.60*psat(Ta))*A_BODY
+    rate = S/(MASS*C_BODY)
+    traj[w] = (wbgt(Ta,0.60,200.0), Ta, S, rate*3600, BANK/S/60, V_REF*BANK/S)
+    print(f"    {w:6.2f} {traj[w][0]:6.1f} {Ta:6.1f} {S:7.0f} {rate*3600:6.1f} "
+          f"{BANK/S/60:9.0f} {V_REF*BANK/S/1000:8.1f}")
+for w,(wb,ta,S,cph,tmin,dm) in traj.items():
+    check(f"w_req={w:.2f}: WBGT (C)", wb, {1.05:27.5,1.10:27.9,1.25:28.9,1.50:30.1}[w], 0.1)
+    check(f"w_req={w:.2f}: stored (W)", S, {1.05:40,1.10:78,1.25:177,1.50:307}[w], 1.0)
+    check(f"w_req={w:.2f}: core rise (C/h)", cph,
+          {1.05:0.6,1.10:1.1,1.25:2.6,1.50:4.5}[w], 0.05)
+    check(f"w_req={w:.2f}: allowance spent at (km)", dm/1000,
+          {1.05:50.5,1.10:26.1,1.25:11.5,1.50:6.6}[w], 0.1)
+check("the no-dissipation limit lands on d_bank (km)",
+      V_REF*BANK/H_prod()/1000, D_BANK/1000, 1e-6)
+check("and its core rise (C/h)", H_prod()/(MASS*C_BODY)*3600, 11.4, 0.05)
+print("    t* is a hyperbola in (w_req - 1), not a threshold -- which is why the")
+print("    same physics gives a flat cool band and a steep warm one.")
 print("    (compare W with W, not W with W/m2.)")
 
 # ------------------------------------------------------------------ CLAIM 10

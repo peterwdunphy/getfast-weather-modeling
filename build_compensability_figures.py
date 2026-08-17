@@ -1,7 +1,7 @@
 """build_compensability_figures.py
 
 Illustrations for the compensability appendix (Appendix F, tommy_appendix.tex).
-Three two-panel figures, in the order the appendix uses them:
+Four two-panel figures, in the order the appendix uses them:
 
   1. fig_heat_ceiling  -- the heat balance as a speed limit. Panel (a) splits the
      dissipation ceiling into its dry and evaporative parts against wet-bulb
@@ -14,7 +14,13 @@ Three two-panel figures, in the order the appendix uses them:
      the tabulated one highlighted; panel (b) walks that line and shows the dry
      and evaporative routes trading off exactly while the strain rises anyway.
 
-  3. fig_drybulb_axis -- the response on the dry-bulb axis at fixed humidity.
+  3. fig_duration_bank -- why duration matters. Panel (a) draws core temperature
+     against distance covered for a runner holding pace at several required
+     wettednesses; panel (b) shows the storage allowance as a share of heat
+     production against race distance, which crosses unity at a fixed distance
+     independent of both body mass and pace.
+
+  4. fig_drybulb_axis -- the response on the dry-bulb axis at fixed humidity.
      Panel (a) is required wettedness, linear in dry air and increasingly convex
      as humidity rises; panel (b) re-expresses the learned WBGT curve as a
      function of air temperature at four humidities.
@@ -74,6 +80,11 @@ V_REF = 3.33         # m/s, the reference runner's marathon speed
 LR = 124.0 / 8.3     # 14.9 K/kPa, Taylor (2006)
 LR_PSY = 15.04
 KAPPA = EFF * ECON * MASS / 1000.0     # J of heat per metre travelled
+C_BODY = 3474.0      # J/kg/K, Burton (1935)
+DT_TOL = 2.5         # K, the core-temperature rise a runner will spend
+T_CORE_0 = 37.0      # C, core temperature at the gun
+BANK = MASS * C_BODY * DT_TOL          # J of storable heat
+D_BANK = BANK / KAPPA                  # m; = C_BODY*DT_TOL/(EFF*ECON/1000)
 
 
 def psat(T):
@@ -130,6 +141,49 @@ def wbgt(Ta, rh, solar, wind=1.0):
 def wreq(Ta, rh, T_sk=T_SKIN, v=V_REF, solar=0.0):
     dry = hc(v) * (T_sk - Ta) * A_BODY - solar * A_BODY
     return (H_prod(v) - dry) / (he(v) * (psat(T_sk) - rh * psat(Ta)) * A_BODY)
+
+
+def e_max(Ta, rh, T_sk=T_SKIN, v=V_REF):
+    """Maximum evaporative capacity of the environment, W over the whole body."""
+    return he(v) * (psat(T_sk) - rh * psat(Ta)) * A_BODY
+
+
+def Ta_vapour_wall(rh, T_sk=T_SKIN):
+    """Air temperature at which rh*Ps(Ta) reaches Ps(T_sk).
+
+    Above it the skin-to-air vapour gradient reverses, E_max turns negative and
+    w_req changes sign. Any search over air temperature has to stop below it or
+    a bisection will walk straight through the singularity.
+    """
+    lo, hi = T_sk, 90.0
+    for _ in range(200):
+        m = (lo + hi) / 2
+        if rh * psat(m) < psat(T_sk):
+            lo = m
+        else:
+            hi = m
+    return lo
+
+
+def Ta_for_wreq(target, rh=0.60, solar_abs=50.0):
+    """Air temperature at which the reference runner faces a given w_req."""
+    lo, hi = 5.0, Ta_vapour_wall(rh) - 0.05
+    for _ in range(200):
+        m = (lo + hi) / 2
+        if wreq(m, rh, solar=solar_abs) < target:
+            lo = m
+        else:
+            hi = m
+    return lo
+
+
+def storage_rate(w, Ta, rh=0.60):
+    """Heat stored per second once the skin is fully wet, W.
+
+    Beyond w_req = 1 the skin cannot get wetter, so evaporation saturates at
+    E_max and the excess is stored: S = E_req - E_max = E_max*(w_req - 1).
+    """
+    return max(w - 1.0, 0.0) * e_max(Ta, rh)
 
 
 # The learned population curve, at the anchor points reported in Section 4.
@@ -341,7 +395,109 @@ def fig_wetbulb_isopleth():
 
 
 # ========================================================================== #
-# FIGURE 3 -- the response on the dry-bulb axis
+# FIGURE 3 -- the storage bank, and the distance over which it lasts
+# ========================================================================== #
+EVENTS = [("800 m", 800.0), ("1500 m", 1500.0), ("5000 m", 5000.0),
+          ("10 km", 10000.0), ("half", 21097.5), ("marathon", 42195.0)]
+
+
+def fig_duration_bank():
+    fig, (axA, axB) = plt.subplots(1, 2, figsize=(9.8, 3.9))
+
+    # ---- A: core temperature against distance, at several wettednesses
+    ladder = [(1.05, BLUE), (1.10, GREEN), (1.25, ORANGE), (1.50, VERM)]
+    d = np.linspace(0, 42195, 600)
+    t_lim = T_CORE_0 + DT_TOL
+
+    axA.axhline(t_lim, color=INK, lw=1.3, ls="--", zorder=1)
+    axA.text(41700, t_lim + 0.07, f"tolerable ceiling, +{DT_TOL:.1f} °C",
+             fontsize=8.4, color=INK, ha="right", va="bottom")
+
+    # the compensable case: balance closes, so core plateaus and never arrives
+    axA.plot([0, 42195], [38.0, 38.0], color=GREY, lw=1.5, ls=(0, (5, 3)),
+             zorder=1)
+    axA.text(500, 37.83, r"$w_{req}\leq 1$: core plateaus",
+             fontsize=8.4, color=MUTE, ha="left", va="top")
+
+    for w, col in ladder:
+        Ta = Ta_for_wreq(w)
+        S = storage_rate(w, Ta)
+        rate = S / (MASS * C_BODY)                   # K per second
+        temp = T_CORE_0 + rate * d / V_REF
+        axA.plot(d, np.minimum(temp, 41.0), color=col, lw=1.9, zorder=4,
+                 label=rf"$w_{{req}}$ = {w:.2f}")
+        d_star = (DT_TOL / rate) * V_REF
+        if d_star <= 42195:
+            axA.plot([d_star], [t_lim], "o", color=col, ms=6, mec="white",
+                     mew=0.9, zorder=6)
+            axA.annotate(f"{d_star/1000:.1f} km", xy=(d_star, t_lim),
+                         xytext=(7, -12), textcoords="offset points",
+                         fontsize=8.0, color=col, ha="left")
+        else:
+            axA.annotate(f"{d_star/1000:.0f} km", xy=(42195, T_CORE_0 + DT_TOL
+                                                      * 42195 / d_star),
+                         xytext=(-6, 6), textcoords="offset points",
+                         fontsize=8.0, color=col, ha="right")
+
+    axA.set_xlabel("Distance covered (km)")
+    axA.set_ylabel("Core temperature (°C)")
+    axA.set_title("(a)  Overshooting the ceiling is a stopwatch", loc="left")
+    axA.set_xlim(0, 42195)
+    axA.set_xticks([0, 10000, 20000, 30000, 42195])
+    axA.set_xticklabels(["0", "10", "20", "30", "42.2"])
+    axA.set_ylim(36.6, 40.6)
+    axA.legend(loc="lower right", borderpad=0.2, labelspacing=0.35,
+               handlelength=1.6)
+
+    # ---- B: the bank as a share of production, against race distance
+    dd = np.logspace(math.log10(100.0), math.log10(42195.0), 400)
+    share = 100.0 * D_BANK / dd
+
+    axB.fill_between(dd, 100.0, np.maximum(share, 100.0), color=BLUE,
+                     alpha=0.13, lw=0)
+    axB.fill_between(dd, np.minimum(share, 100.0), 100.0, color=VERM,
+                     alpha=0.13, lw=0)
+    axB.plot(dd, share, color=INK, lw=2.0)
+    axB.axhline(100.0, color=MUTE, lw=1.1, ls="--")
+    axB.axvline(D_BANK, color=VERM, lw=1.0, ls=":")
+
+    for lab, dist in EVENTS:
+        y = 100.0 * D_BANK / dist
+        axB.plot([dist], [y], "o", color=INK, ms=4.5, mec="white", mew=0.8,
+                 zorder=6)
+        off = (-2, 14) if dist > 30000 else (11, 8)
+        axB.annotate(lab, xy=(dist, y), xytext=off, textcoords="offset points",
+                     fontsize=7.8, color=MUTE,
+                     ha="right" if dist > 30000 else "left")
+
+    axB.annotate(f"storage alone covers the whole race out to\n{D_BANK/1000:.1f} km,"
+                 " whatever the pace and whoever runs it",
+                 xy=(D_BANK, 100.0), xytext=(118, 6.2), fontsize=8.4,
+                 color=INK, ha="left", va="bottom",
+                 arrowprops=dict(arrowstyle="->", color=MUTE, lw=0.9),
+                 bbox=dict(fc="white", ec="none", alpha=0.85, pad=1.5))
+    axB.text(118, 170, "heat is bankable:\nthe race ends first", fontsize=8.6,
+             color=BLUE, va="bottom")
+    axB.text(40000, 55, "heat binds", fontsize=8.6, color=VERM, ha="right")
+
+    axB.set_xscale("log")
+    axB.set_yscale("log")
+    axB.set_xlabel("Race distance (m)")
+    axB.set_ylabel("Storage allowance (% of heat production)")
+    axB.set_title("(b)  Where the allowance runs out", loc="left")
+    axB.set_xlim(100, 42195)
+    axB.set_ylim(4, 3000)
+    axB.set_xticks([100, 1000, 10000, 42195])
+    axB.set_xticklabels(["100", "1000", "10 000", "42 195"])
+    axB.set_yticks([10, 100, 1000])
+    axB.set_yticklabels(["10%", "100%", "1000%"])
+
+    fig.tight_layout()
+    finish(fig, "fig_duration_bank")
+
+
+# ========================================================================== #
+# FIGURE 4 -- the response on the dry-bulb axis
 # ========================================================================== #
 def fig_drybulb_axis():
     fig, (axA, axB) = plt.subplots(1, 2, figsize=(9.8, 3.9))
@@ -405,5 +561,6 @@ if __name__ == "__main__":
     print("building compensability figures into", OUT_PDF)
     fig_heat_ceiling()
     fig_wetbulb_isopleth()
+    fig_duration_bank()
     fig_drybulb_axis()
     print("done")

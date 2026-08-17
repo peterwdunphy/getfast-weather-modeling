@@ -30,7 +30,7 @@ made by its authors.
 %
 % Every number here is reproduced by verify_heat_convexity.py (stdlib only,
 % self-checking, prints ok/FAIL per line, currently ALL CHECKS PASSED). The
-% three figures are built by build_compensability_figures.py.
+% four figures are built by build_compensability_figures.py.
 %
 % Structure of the argument, so an editor can see the spine at a glance:
 %
@@ -44,9 +44,18 @@ made by its authors.
 %        wettedness measure -- is convex for the same Clausius-Clapeyron
 %        reason. The wettedness result is a corollary, not a separate fact.
 %   F.5  The same balance read as a demand on cardiac output, which carries
-%        the same curvature. Not a rival account; the next link in the chain.
-%   F.6  Duration.  F.7  The measured curvature.  F.8  The dry-bulb axis.
+%        the same curvature. Not a rival account; the next link in the chain,
+%        sharing the boundary T_sk, which is why T_sk dominates everything.
+%   F.6  Duration. The storage allowance B = m*c*dT is a FIXED quantity of
+%        heat, so the distance it covers, d_bank = B/kappa ~ 2.6 km, is
+%        independent of both pace and body mass (both cancel). Heat cannot
+%        bind a race shorter than that, which is the sprint/marathon split.
+%   F.7  The measured curvature.  F.8  The dry-bulb axis.
 %   F.9  What this does and does not establish.
+%
+% The preamble carries a roadmap of the above, added deliberately: the chain
+% (surface link -> transport link, coupled through T_sk) was previously only
+% visible to a reader who had already got as far as F.5.
 %
 % REQUIRES THREE EDITS ELSEWHERE IN THE MANUSCRIPT (see handoff notes):
 %  * Section 2 currently uses T_sk = 35 C and says dry exchange reverses "near
@@ -80,6 +89,60 @@ traces to a single term, the curvature of saturation vapour pressure with
 temperature. Everything else in the calculation moves the size of the effect
 without touching its shape.
 
+The argument runs in one direction, and it is worth having the whole of it in
+view before the algebra starts. A runner at the limit of effort has no lever
+left but pace: metabolic heat production is fixed by speed, the external work
+term is not free to move, and once core temperature has stopped rising the heat
+balance ceases to be an accounting identity and becomes an equation in the
+single unknown $v$ (Section~\ref{app:physics:limit}). Heat is governed by speed
+and speed by heat, in other words, only because the runner is already at
+maximum metabolic rate; a runner with something in reserve is not on this
+constraint at all. What the environment will accept on the other side of that
+equation then turns out to depend on one number rather than two, a
+\emph{thermal head} that collapses air temperature and humidity into a single
+quantity carried in kelvin-equivalents (Section~\ref{app:physics:head}). That
+head does two things. It falls as conditions warm, and it falls at an
+accelerating rate, because saturation vapour pressure is convex in temperature.
+So the dissipation ceiling, and the speed it permits, are decreasing and
+\emph{concave} in wet-bulb temperature. A pace penalty is a reciprocal of a
+permitted speed, and the reciprocal of a decaying concave function is convex
+(Section~\ref{app:physics:convex}). That is the whole of the result, and it is
+a theorem about the heat balance rather than a curve fitted to our data.
+
+The hard ceiling binds only in the mid-twenties, while the measured curve bends
+near $16\,^{\circ}$C, so runners are evidently responding to something graded
+well below the point at which balance fails. That something is \emph{required
+wettedness}: the evaporation the balance demands divided by the maximum the air
+will accept, or equivalently the fraction of the skin that must be covered in
+sweat to hold pace. It is a ratio of demand to capacity rather than a measure
+of effort, it can be read at any condition rather than only at the limit, and
+it inherits the same denominator, so it is convex in wet-bulb temperature for
+the same one reason (Section~\ref{app:physics:graded}).
+
+Wettedness is a statement about the skin, and it says nothing about how the
+heat reached the skin. That is a second constraint, and the two are consecutive
+links in one chain rather than competing accounts. Heat is made in muscle and
+can only be carried to the surface by blood, so the same balance can be written
+as a required skin blood flow, which is a claim on cardiac output
+(Section~\ref{app:physics:circulation}). The links share a boundary, mean skin
+temperature, and they pull on it in opposite directions: warmer skin widens the
+skin-to-air gradients and eases the surface link, while narrowing the
+core-to-skin gradient and tightening the transport link hyperbolically. They
+are loaded twice over by the same sweat, since the fluid that evaporates at the
+surface leaves the circulation to do it, which is the cost the last column of
+Table~\ref{tab:wbtradeoff} prices. Both links carry the same curvature, and
+they must, so the convexity appears whichever one is measured. How much of a
+transient imbalance a runner may simply ignore is then a question of how long
+they must ignore it for, which is why heat governs a marathon and barely
+touches a mile (Section~\ref{app:physics:duration}).
+
+The three closing sections test the account rather than extend it: against the
+curvature actually measured (Section~\ref{app:physics:curvature}), on the
+thermometer's own axis, where it makes its sharpest and most falsifiable
+prediction (Section~\ref{app:physics:drybulb}), and against the competing
+explanations and statistical artifacts it cannot rule out
+(Section~\ref{app:physics:limits}).
+
 All coefficients are those reported by \citet{taylor2006} and already used in
 Section~\ref{sec:literature}: convective exchange $8.3\,(T_{sk}-T_a)\sqrt{v}$,
 radiant $5.2\,(T_{sk}-T_{mrt})$ and evaporative $124\,(P_{sk}-P_a)\sqrt{v}$ per
@@ -92,8 +155,10 @@ Mean skin temperature is taken as $31\,^{\circ}$C rather than the
 $35\,^{\circ}$C typical of laboratory treadmill work. \citet{aylwin2023}
 measured it falling from $29.8$ to $28.9\,^{\circ}$C through the men's marathon
 at the 2019 World Championships, below air temperature, because airflow at
-running speed cools wet skin. As shown in Section~\ref{app:physics:curvature}, this is
-the single most consequential input in the calculation.
+running speed cools wet skin. As shown in Section~\ref{app:physics:curvature},
+this is the single most consequential input in the calculation, and the
+paragraph above says why: skin temperature is the boundary the two links share,
+so it enters the surface balance and the transport balance at once.
 
 \subsection{The heat balance is a speed limit}
 \label{app:physics:limit}
@@ -504,32 +569,153 @@ it.
 \subsection{Why duration matters}
 \label{app:physics:duration}
 
-Balance need not hold instantaneously, since heat can be stored as a rise in
-core temperature. That allowance is a rate, however, and it scales inversely
-with the duration over which it is spent: $S = m\,c\,\Delta T_{core}/t$. Taking
+Everything so far has assumed balance. It need not hold instantaneously, since
+heat can be stored as a rise in core temperature, and a runner may therefore
+hold a pace the environment will not support --- for a while. What that buys is
+finite, and pricing it exactly is what separates a marathon from a mile. Taking
 tissue heat capacity as $3474\,\mathrm{J\,kg^{-1}\,K^{-1}}$
 \citep{burton1935},\footnote{Burton adopted $0.83\,\mathrm{kcal\,kg^{-1}}$ per
 degree ``by general custom'' and bounded it only to $0.7$--$0.9$, so the figure
 carries perhaps ten percent of slack. The widely quoted $3500$ has no primary
 source, and a recent direct measurement of tissue puts it some seventeen
-percent lower still. None of this matters here: the storage term is small, and
-the argument is that it is small.} a $2.5\,^{\circ}$C rise in a
-$70\,\mathrm{kg}$ runner represents about $608\,\mathrm{kJ}$, which is worth
-$56\,\mathrm{W}$ spread over a three-hour marathon and $38\,\mathrm{W}$ over
-four and a half, against $770\,\mathrm{W}$ of
-heat production. The storage term thus covers about $7\%$ of the problem at
-three hours and less as the race lengthens, while over a ten-second sprint the
-same allowance is worth tens of kilowatts. Heat balance is accordingly close to
-irrelevant at sprint distances and close to absolute at marathon distances,
-which is consistent with \citet{guy2014} reporting faster sprint performances in
-the heat alongside slower marathons, and it gives a reason beyond exposure time
-why the same conditions cost a slower finisher more. It also predicts that the
-constraint should bind only weakly in middle-distance work, consistent with
-\citet{leslie2024}, who find critical velocity falling $3.7\%$ and then a
-further $2.9\%$ across heat indices of $20$, $38$ and $55\,^{\circ}$C, a
-decelerating rather than accelerating response in precisely the regime where the
-storage term dominates. \citet{taylor2006} list duration of competition among
-the determinants of compensability for the same reason.
+percent lower still. None of this matters here: the storage term is small at
+the distance we model, and the argument is that it is small.} the
+$2.5\,^{\circ}$C rise a runner will spend in a $70\,\mathrm{kg}$ body is
+\begin{equation}
+  B \;=\; m\,c\,\Delta T_{core} \;\approx\; 608\,\mathrm{kJ},
+  \label{eq:bank}
+\end{equation}
+a fixed quantity of heat, spent once and not replaced during the race.
+
+The rate at which it is spent is set by the same strain measure as before. Once
+$w_{req}$ passes unity the skin cannot get any wetter, so evaporation saturates
+at $E_{\max}$ and every further joule is stored:
+\begin{equation}
+  S \;=\; E_{req} - E_{\max} \;=\; E_{\max}\,\bigl(w_{req} - 1\bigr).
+  \label{eq:storage}
+\end{equation}
+Core temperature then climbs at $S/mc$ and the allowance is exhausted after
+$t^{*} = B/S$. Table~\ref{tab:duration} and Figure~\ref{fig:duration_bank}(a)
+evaluate this for the reference runner holding
+$5{:}00\,\mathrm{min\,km^{-1}}$, and the striking feature is how sharply the
+ladder steepens. At $w_{req} = 1.05$ core temperature rises at
+$0.6\,^{\circ}\mathrm{C\,h^{-1}}$ and the runner reaches the finish before the
+allowance does, so a five percent overshoot is, for practical purposes, free. At
+$1.10$ it is spent at $26\,\mathrm{km}$, which is a race that goes wrong late
+and not gradually; at $1.25$ at $11\,\mathrm{km}$; at $1.50$ before
+$7\,\mathrm{km}$. Nothing in that ladder is a threshold. It is one hyperbola,
+$t^{*} \propto (w_{req}-1)^{-1}$, and the flat measured response at cool
+temperatures and the steep one at warm are its two ends.
+
+\begin{table}[!ht]
+\centering\small
+\caption{What the storage allowance of \eqref{eq:bank} buys, for the reference
+runner holding $5{:}00\,\mathrm{min\,km^{-1}}$ in air at $60\%$ relative
+humidity under $200\,\mathrm{W\,m^{-2}}$ of solar load. Each row is the
+environment that puts the runner at that required wettedness. The last row is
+the limit in which the environment carries nothing away at all, and its
+distance is $d_{bank}$ of \eqref{eq:dbank} --- the floor no runner gets below,
+whatever the weather. Figure~\ref{fig:duration_bank} draws both halves.}
+\label{tab:duration}
+\begin{tabular}{@{}rrrrr@{}}
+\toprule
+Required & WBGT & Stored & Core rise & Allowance \\
+wettedness & (\textdegree C) & $S$ (W) & (\textdegree C\,h$^{-1}$)
+   & spent at \\
+\midrule
+1.05 & 27.5 & 40  & 0.6  & 50.5\,km \\
+1.10 & 27.9 & 78  & 1.1  & 26.1\,km \\
+1.25 & 28.9 & 177 & 2.6  & 11.5\,km \\
+1.50 & 30.1 & 307 & 4.5  & 6.6\,km \\
+\midrule
+\multicolumn{2}{@{}l}{no dissipation at all} & 770 & 11.4 & 2.6\,km \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+That last row generalises, and it is the cleanest statement in this section.
+Suppose the environment carries nothing away, so the whole of production is
+stored. The allowance then lasts $B/H$ seconds, and over that time the runner
+covers
+\begin{equation}
+  d_{bank} \;=\; v\,\frac{B}{\kappa\,v} \;=\; \frac{B}{\kappa}
+  \;=\; \frac{c\,\Delta T_{core}}{c_{run}} \;\approx\; 2.6\,\mathrm{km}.
+  \label{eq:dbank}
+\end{equation}
+Speed cancels, because production and distance both scale with it. Body mass
+cancels too, because the allowance and the cost of covering ground both scale
+with that, leaving running economy carried as heat per kilogram per metre,
+$c_{run} = \kappa/m \approx 3.3\,\mathrm{J\,kg^{-1}\,m^{-1}}$. What is left is
+a distance fixed by three quantities --- tissue heat capacity, the
+core-temperature rise the runner is willing to spend, and economy --- and by
+nothing whatever about the weather, since the derivation never consulted it. Out to roughly two and a half kilometres, a runner could shed no
+heat whatsoever and still finish inside the tolerable rise. Heat cannot bind a
+race shorter than that, in any conditions, at any pace, for anybody.
+
+The same cancellation gives the general version. Over a race of distance $d$
+the allowance is worth $B/(\kappa d) = d_{bank}/d$ of the runner's total heat
+production, again independently of pace and of body mass, which is the curve of
+Figure~\ref{fig:duration_bank}(b). It is worth twenty-six times production over
+$100\,\mathrm{m}$, $1.75$ times over $1500\,\mathrm{m}$, $88\%$ over
+$3000\,\mathrm{m}$, half over $5000\,\mathrm{m}$, a quarter over
+$10\,\mathrm{km}$, an eighth over the half marathon and $6\%$ over the marathon.
+Read as a fraction of the problem, heat is a rounding error at sprint distances,
+a real but secondary term through the middle distances, and essentially the
+whole of the problem at the marathon. This is a prediction about where the
+constraint switches on, and it is worth noting that it lands on distance rather
+than on time.
+
+\begin{figure}[!ht]
+  \centering
+  \includegraphics[width=\linewidth]{figures/fig_duration_bank.pdf}
+  \caption{Why the same physics governs a marathon and spares a mile.
+  (a)~Core temperature against distance covered, for the reference runner
+  holding $5{:}00\,\mathrm{min\,km^{-1}}$ at four required wettednesses
+  (Table~\ref{tab:duration}); the dot marks where the $2.5\,^{\circ}$C
+  allowance is spent and the runner must slow. Below $w_{req} = 1$ balance
+  closes and core temperature plateaus instead, so the trajectory never
+  arrives. Lines are straight because mean skin temperature is held fixed,
+  which makes them optimistic: as the surface balance fails, skin warms, the
+  core-to-skin gradient closes and the real trajectory bends upward
+  (Section~\ref{app:physics:circulation}). (b)~The allowance as a share of the
+  runner's total heat production against race distance. The share is exactly
+  $d_{bank}/d$, so the curve is the same for every runner and every pace, and
+  it crosses unity at $2.6\,\mathrm{km}$: shorter than that, storage alone
+  could absorb the entire race.}
+  \label{fig:duration_bank}
+\end{figure}
+
+The empirical pattern agrees. \citet{guy2014} report faster sprint performances
+in the heat alongside slower marathons. The two halves of that finding are not
+in tension: at $100\,\mathrm{m}$ the allowance is twenty-six times production,
+so \eqref{eq:dbank} says heat imposes no constraint at all there, which leaves
+the ergogenic effect of warmer muscle --- outside this balance, and not
+predicted by it --- free to dominate. What the balance does predict is the
+distance at which that freedom ends. \citet{leslie2024} find
+critical velocity falling $3.7\%$ and then a further $2.9\%$ across heat indices
+of $20$, $38$ and $55\,^{\circ}$C --- a \emph{decelerating} response, and the
+only regime in this appendix where we predict one, since critical velocity is a
+three-to-thirty-minute construct and therefore sits astride $d_{bank}$ where
+the storage term still covers most of the imbalance. The same reasoning gives a
+reason beyond exposure time why identical conditions cost a slower finisher
+more: the allowance is a fixed quantity of heat, so spreading it over a longer
+race dilutes it in exactly the proportion $d_{bank}/d$. \citet{taylor2006} list
+duration of competition among the determinants of compensability for the same
+reason.
+
+Two caveats attach to the trajectories rather than to the accounting. The first
+is that the $2.5\,^{\circ}$C allowance is a modelling convention rather than a
+measured constant. The rise a runner will accept differs between individuals
+and shifts with acclimatisation \citep{periard2015}, and \eqref{eq:dbank} is
+exactly proportional to it, so $d_{bank}$ inherits that softness without
+attenuation: it is a scale, not a threshold. The second is that holding mean
+skin temperature fixed makes
+the straight lines of Figure~\ref{fig:duration_bank}(a) the best case. In a
+failing balance the skin warms, which narrows the core-to-skin gradient and
+raises the blood flow required to move the next joule
+(Section~\ref{app:physics:circulation}), so the real trajectory accelerates and
+the distances in Table~\ref{tab:duration} are upper bounds. Both caveats push
+the same way, which is toward heat binding sooner than tabulated, not later.
 
 \subsection{Does it predict the curvature we measured?}
 \label{app:physics:curvature}
