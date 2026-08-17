@@ -409,9 +409,13 @@ CHAIN_RH = 0.60
 CHAIN_SOLAR_ABS = 50.0
 
 
-def skin_blood_flow(T_sk):
-    """Minimum skin blood flow to carry the whole production, L/min."""
-    return H_prod() / (RHO_CB * (T_CORE - T_sk)) * 60.0
+def skin_blood_flow(T_sk, T_core=T_CORE):
+    """Minimum skin blood flow to carry the whole production, L/min.
+
+    Eq. (skbf) in the appendix. T_core enters only here, and only as the
+    location of the vertical asymptote: the demand diverges as T_sk -> T_core.
+    """
+    return H_prod() / (RHO_CB * (T_core - T_sk)) * 60.0
 
 
 def wreq_of_tsk(T_sk, Ta=CHAIN_TA, rh=CHAIN_RH, solar_abs=CHAIN_SOLAR_ABS):
@@ -510,6 +514,11 @@ def fig_two_links():
                   arrowprops=dict(arrowstyle="->", color=BLUE, lw=1.0))
     axB.text(35.5, 7.25, r"$\to\infty$ as $T_{sk}\to T_{core}$", fontsize=8.2,
              color=VERM, ha="left")
+    axB.text(28.15, 0.98,
+             "held fixed:  $T_a$ = 30 °C,  RH 60%,\n"
+             r"$T_{core}$ = 39 °C,  5:00 min km$^{-1}$",
+             fontsize=8.0, color=MUTE, ha="left", va="top",
+             bbox=dict(fc="white", ec=GRID, lw=0.7, pad=3.0))
 
     axB.set_title("(b)  They pull on that boundary in opposite directions",
                   loc="left")

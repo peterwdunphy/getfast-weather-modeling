@@ -454,13 +454,18 @@ supplies the shape of the response but not its onset.
 \label{app:physics:graded}
 
 Runners concede pace long before balance becomes impossible, so we need a graded
-measure of strain rather than a threshold. Thermal compensability supplies one,
-$w_{req} = E_{req}/E_{\max}$, where $E_{req} = H_{prod} - (C + R)$ is the
-evaporation needed for balance and $E_{\max}$ is the maximum the environment
-will accept \citep{taylor2006, belding1955}. Evaporation scales with wetted
-area, so $w_{req}$ is also the fraction of the skin that must be covered in
-sweat. That is what makes it a graded measure of strain rather than a bare
-ratio.
+measure of strain rather than a threshold. Thermal compensability supplies one
+\citep{taylor2006, belding1955},
+\begin{equation}
+  w_{req} \;=\; \frac{E_{req}}{E_{\max}}
+  \;=\; \frac{H_{prod} - (C + R)}
+             {A\,h_e\,\bigl(P_s(T_{sk}) - P_a\bigr)},
+  \label{eq:wreq}
+\end{equation}
+where $E_{req}$ is the evaporation needed for balance and $E_{\max}$ is the
+maximum the environment will accept. Evaporation scales with wetted area, so
+$w_{req}$ is also the fraction of the skin that must be covered in sweat. That
+is what makes it a graded measure of strain rather than a bare ratio.
 
 Its convexity is the same fact in different clothing, and we stress that this is
 a corollary and not an independent finding. The numerator rises exactly linearly
@@ -593,12 +598,17 @@ prediction is most sensitive to.
   drives each link, and the two gaps meet at one shared boundary, mean skin
   temperature. The same sweat loads both links, since the fluid that evaporates
   at the surface leaves the circulation to do it. (b)~The two demands against
-  that shared boundary, for the reference runner at
-  $5{:}00\,\mathrm{min\,km^{-1}}$ in air at $30\,^{\circ}$C and $60\%$ relative
-  humidity. Warmer skin eases the surface link and tightens the transport link,
-  and the transport demand diverges as $T_{sk}$ approaches $T_{core}$. Both
-  demands are reciprocals of a closing gap, which is the sense in which the two
-  links carry the same curvature.}
+  that shared boundary. The transport curve is the skin blood flow
+  $\dot{Q}_{sk}$ of \eqref{eq:skbf} and the surface curve is the required
+  wettedness $w_{req}$ of \eqref{eq:wreq}, each evaluated as a function of
+  $T_{sk}$ with everything else held fixed: the reference runner at
+  $5{:}00\,\mathrm{min\,km^{-1}}$, air at $30\,^{\circ}$C and $60\%$ relative
+  humidity, and a core temperature of $39\,^{\circ}$C. Warmer skin eases the
+  surface link and tightens the transport link. Note that $T_{core}$ enters only
+  the transport curve, where it fixes the location of the vertical asymptote; a
+  runner holding a hotter core moves that wall to the right, and the surface
+  curve does not depend on it at all. Both demands are reciprocals of a closing
+  gap, which is the sense in which the two links carry the same curvature.}
   \label{fig:two_links}
 \end{figure}
 
