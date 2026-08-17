@@ -30,7 +30,7 @@ made by its authors.
 %
 % Every number here is reproduced by verify_heat_convexity.py (stdlib only,
 % self-checking, prints ok/FAIL per line, currently ALL CHECKS PASSED). The
-% four figures are built by build_compensability_figures.py.
+% five figures are built by build_compensability_figures.py.
 %
 % Structure of the argument, so an editor can see the spine at a glance:
 %
@@ -46,6 +46,7 @@ made by its authors.
 %   F.5  The same balance read as a demand on cardiac output, which carries
 %        the same curvature. Not a rival account; the next link in the chain,
 %        sharing the boundary T_sk, which is why T_sk dominates everything.
+%        fig_two_links draws the chain and the opposing pull on T_sk.
 %   F.6  Duration. The storage allowance B = m*c*dT is a FIXED quantity of
 %        heat, so the distance it covers, d_bank = B/kappa ~ 2.6 km, is
 %        independent of both pace and body mass (both cancel). Heat cannot
@@ -135,7 +136,7 @@ narrows the core-to-skin gradient and tightens the transport link. The same
 sweat loads both, since the fluid that evaporates at the surface leaves the
 circulation to do it (the last column of Table~\ref{tab:wbtradeoff}). Both
 links carry the same curvature, so the convexity appears whichever one we
-measure.
+measure (Figure~\ref{fig:two_links}).
 
 \textbf{Duration decides whether any of this binds.} A runner can ignore a
 transient imbalance by storing heat. How much they can ignore depends on how
@@ -569,6 +570,37 @@ temperature, which narrows the gradient, which raises the flow required to
 deliver the next joule. A chain of this shape produces a convex response
 whichever link we measure. We therefore hold the convexity finding more
 confidently than any particular mechanism attributed to it.
+
+Figure~\ref{fig:two_links} draws the chain and the boundary its two links share.
+The links pull on that boundary in opposite directions, which is what makes mean
+skin temperature the pivotal input rather than merely one input among several.
+In air at $30\,^{\circ}$C and $60\%$ relative humidity, raising mean skin
+temperature from $28$ to $37\,^{\circ}$C drops required wettedness from $1.78$
+to $0.43$, because it widens the skin-to-air vapour-pressure gradient. Over the
+same interval it raises the required skin blood flow from $1.1$ to
+$6.1\,\mathrm{L\,min^{-1}}$, because it closes the core-to-skin gradient. Note
+that the runner does not set $T_{sk}$. It is an outcome of the two balances, and
+a complete treatment would solve them jointly. We take it as an input instead,
+which is the simplification Section~\ref{app:physics:curvature} shows the
+prediction is most sensitive to.
+
+\begin{figure}[!ht]
+  \centering
+  \includegraphics[width=\linewidth]{figures/fig_two_links.pdf}
+  \caption{The chain the heat balance describes. (a)~Heat is made in muscle and
+  leaves at the skin, so it crosses two links in series. Blood carries it from
+  core to skin, and evaporation and convection carry it from skin to air. A gap
+  drives each link, and the two gaps meet at one shared boundary, mean skin
+  temperature. The same sweat loads both links, since the fluid that evaporates
+  at the surface leaves the circulation to do it. (b)~The two demands against
+  that shared boundary, for the reference runner at
+  $5{:}00\,\mathrm{min\,km^{-1}}$ in air at $30\,^{\circ}$C and $60\%$ relative
+  humidity. Warmer skin eases the surface link and tightens the transport link,
+  and the transport demand diverges as $T_{sk}$ approaches $T_{core}$. Both
+  demands are reciprocals of a closing gap, which is the sense in which the two
+  links carry the same curvature.}
+  \label{fig:two_links}
+\end{figure}
 
 \subsection{Why duration matters}
 \label{app:physics:duration}
