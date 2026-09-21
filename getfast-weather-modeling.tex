@@ -52,7 +52,7 @@
 }
 
 \title{Weather Effects and Heat Acclimation in Endurance Running:\\
-A Deep-Learning Approach to Heat-Adjusted Pace Prediction}
+A Data Learned Approach to Heat-Adjusted Pace Prediction}
 \author{Peter Dunphy}
 \author{Thomas Mulc}
 \author{Gabe Cupino}
@@ -370,7 +370,7 @@ A negative control establishes that the personalized gain is runner-specific rat
   \label{fig:mape_ladder}
 \end{figure}
 
-\subsection{Where the weather-blind model goes wrong}
+\subsection{Limitations of the weather-blind model}
 
 Stratifying held-out error by temperature exposes a systematic failure that average error conceals (Figure~\ref{fig:bias_fix}). The weather-blind model predicts runs too slow in cold and mild conditions, with a bias near $-2\%$, then crosses zero and predicts too fast in the hottest band, at $+0.755\%$ for runs between 22 and $25\,^{\circ}$C. Its errors on hot days are therefore optimistic, which is the direction that matters for a runner planning a race.
 
@@ -557,6 +557,8 @@ Finally, some of what the literature flags as relevant is simply absent from the
 \appendix
 \renewcommand{\thetable}{A\arabic{table}}
 \setcounter{table}{0} % This resets the table counter
+\renewcommand{\thefigure}{A\arabic{figure}}
+\setcounter{figure}{0}
 \input{appendix} 
 \input{tommy_appendix}
 
