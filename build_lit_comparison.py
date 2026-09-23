@@ -20,6 +20,8 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 
+# v3 rerun: the curve artifact is overridable (HEADLINE_CURVE) so the figures can be rebuilt on the 5M-run checkpoint
+CURVE_NPZ = os.environ.get("HEADLINE_CURVE", "/weather/data/heat_percentile_averaged_v3.npz")
 OUT_PDF = "/home/bb/weather/getfast-weather-modeling/figures"
 OUT_PNG = "/tmp/claude-1000/-home-bb-weather/599857c7-9ec0-49e5-8a67-0c0c8644ad80/scratchpad/paperfigs"
 os.makedirs(OUT_PNG, exist_ok=True)
@@ -50,7 +52,7 @@ ELITE_S, AMATEUR_S = 130*60.0, 240*60.0   # 2:10 and 4:00 marathons, in seconds
 # FIGURE 1 -- heat-slowdown: our curve vs the published forms
 # =========================================================================== #
 def fig_heat_effects_lit():
-    a = np.load("/weather/data/heat_percentile_averaged.npz", allow_pickle=True)
+    a = np.load(CURVE_NPZ, allow_pickle=True)
     w = a["wsweep"].astype(float); pc = a["pctl_curves"].astype(float)
     dl = pc[49] - np.interp(10, w, pc[49])                 # our DL population median, anchored at 10C
     T = np.linspace(10, 30, 200)

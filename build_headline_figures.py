@@ -12,7 +12,7 @@ in units a runner recognises rather than in model-error units.
      systematic optimism. Drawn as bias against WBGT with the optimistic region
      shaded, plus a bar inset in finish-time minutes for the hottest band.
 
-Curve source: /weather/data/heat_percentile_averaged.npz (population sweep and
+Curve source: /weather/data/heat_percentile_averaged_v3.npz (v3 corpus, 5M-step run) (population sweep and
 per-runner percentile curves, both anchored at 10 C).
 Bias source: notebook 10 held-out bin table, transcribed in BINS below.
 
@@ -25,6 +25,8 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 
+# v3 rerun: the curve artifact is overridable (HEADLINE_CURVE) so the figures can be rebuilt on the 5M-run checkpoint
+CURVE_NPZ = os.environ.get("HEADLINE_CURVE", "/weather/data/heat_percentile_averaged_v3.npz")
 OUT_PDF = "/home/bb/weather/getfast-weather-modeling/figures"
 OUT_PNG = "/tmp/claude-1000/-home-bb-weather/599857c7-9ec0-49e5-8a67-0c0c8644ad80/scratchpad/paperfigs"
 os.makedirs(OUT_PNG, exist_ok=True)
@@ -58,7 +60,7 @@ def finish(fig, name):
 # FIGURE 1 -- what the heat costs, in percent and in minutes
 # =========================================================================== #
 def fig_heat_cost():
-    a = np.load("/weather/data/heat_percentile_averaged.npz", allow_pickle=True)
+    a = np.load(CURVE_NPZ, allow_pickle=True)
     w = a["wsweep"].astype(float)
     pc = a["pctl_curves"].astype(float)
     anc = lambda r: r - np.interp(10.0, w, r)      # re-anchor every curve at 10 C
@@ -104,14 +106,16 @@ def fig_heat_cost():
 # =========================================================================== #
 def fig_bias_fix():
     # (wbgt_mid, n, bias_weatherblind, bias_population, bias_personalized)
+    # v3 / 5M checkpoint (notebook 19b), holdout ceiling 28 C
     BINS = np.array([
-        [0.82, 1951, -2.061, -1.660, -1.205],
-        [7.81, 2673, -2.295, -1.924, -1.471],
-        [12.57, 3888, -2.093, -1.666, -1.242],
-        [16.49, 2621, -1.467, -1.404, -0.964],
-        [18.99, 1529, -1.013, -1.238, -0.709],
-        [21.01, 1431, -0.473, -1.537, -0.962],
-        [23.37, 1799, 0.755, -1.336, -0.715],
+        [0.13, 2840, -2.109, -1.559, -0.979],
+        [7.79, 3449, -2.646, -2.073, -1.612],
+        [12.59, 5398, -2.490, -1.920, -1.431],
+        [16.51, 3800, -1.968, -1.687, -1.217],
+        [18.99, 2282, -1.580, -1.605, -1.168],
+        [21.01, 2117, -0.761, -1.438, -0.951],
+        [23.44, 2800, 0.360, -1.118, -0.651],
+        [26.24, 1625, 1.836, -1.076, -0.814],
     ])
     x, n = BINS[:, 0], BINS[:, 1]
 
@@ -121,13 +125,13 @@ def fig_bias_fix():
     # --- A: bias across the temperature range --------------------------------
     axA.axhline(0, color=INK, lw=1.0)
     # the region above zero is where a model predicts a run faster than it was run
-    axA.fill_between([-1, 26], 0, 1.4, color=VERM, alpha=0.07, lw=0)
-    axA.annotate("predicted too fast", (-0.4, 1.15), fontsize=8.4, color=VERM, style="italic")
+    axA.fill_between([-1, 29], 0, 2.2, color=VERM, alpha=0.07, lw=0)
+    axA.annotate("predicted too fast", (-0.4, 1.9), fontsize=8.4, color=VERM, style="italic")
     for j, (c, lab, lw) in enumerate([(GREY, "weather-blind", 2.4),
                                       (BLUE, "+ population curve", 1.8),
                                       (GREEN, "+ personalized score", 1.8)]):
         axA.plot(x, BINS[:, 2 + j], "o-", color=c, lw=lw, ms=5, label=lab, zorder=3 - j)
-    axA.set_xlim(-1, 26)
+    axA.set_xlim(-1, 29)
     axA.set_xlabel("wet-bulb globe temperature (°C)")
     axA.set_ylabel("signed bias (%)")
     axA.set_title("A. Prediction bias across conditions", loc="left", fontsize=10.5)
@@ -153,7 +157,7 @@ def fig_bias_fix():
     axB.set_yticks(y); axB.set_yticklabels(labs, fontsize=8.6)
     axB.set_xlim(-7.6, 5.2)
     axB.set_xlabel("bias in minutes (3:30 solid, 4:00 pale)")
-    axB.set_title(f"B. Hottest band (22--25°C, n = {int(n[-1]):,})", loc="left", fontsize=10.5)
+    axB.set_title(f"B. Hottest band (25--28°C, n = {int(n[-1]):,})", loc="left", fontsize=10.5)
     axB.grid(axis="y", visible=False)
 
     fig.tight_layout()
@@ -171,7 +175,7 @@ def fig_heat_nomogram():
     f(WBGT)/100 with f the population curve. Contours are therefore hyperbolas,
     which is itself the point: the same conditions cost a slower runner more
     absolute time than a faster one."""
-    a = np.load("/weather/data/heat_percentile_averaged.npz", allow_pickle=True)
+    a = np.load(CURVE_NPZ, allow_pickle=True)
     w = a["wsweep"].astype(float)
     med = a["pctl_curves"].astype(float)[49]
     med = med - np.interp(10.0, w, med)

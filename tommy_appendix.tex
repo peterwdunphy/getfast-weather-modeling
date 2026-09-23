@@ -67,8 +67,6 @@ made by its authors.
 %    T_sk = 31 C, total 555.1, so DELETE the appendix one rather than keeping
 %    two isopleths at different skin temperatures. The labels differ, so
 %    nothing breaks if you leave it in place -- it will just contradict.
-%  * Appendix C reports the learned steepening as 2.12; this insert uses 2.18.
-%    Settle which is current.
 % ===========================================================================
 
 % Kept at \section level deliberately. The Overleaf round-trip demoted this to
@@ -489,11 +487,11 @@ humidities from 30 to 90\%.
 
 A response proportional to $w_{req}$ still does not quite describe the measured
 curve. Rescaled to match the learned penalty at its endpoints, $w_{req}$
-predicts a $0.9\%$ slowdown at $16\,^{\circ}$C WBGT where the learned curve
+predicts a $0.7\%$ slowdown at $16\,^{\circ}$C WBGT where the learned curve
 shows $0.3\%$. Strain rises perceptibly in the cool range while measured pace
 does not. A single convex map from strain to conceded pace reconciles the two.
 Fitting $\text{penalty} = c\,w_{req}^{\,k}$ over the $16$ to $28\,^{\circ}$C
-range returns $k \approx 1.9$, and that one exponent does both jobs at once. It
+range returns $k \approx 1.7$, and that one exponent does both jobs at once. It
 suppresses the response at low strain, which produces the flat band without a
 threshold, and it steepens the response at high strain.
 
@@ -509,9 +507,9 @@ efficiency $\eta_{sw}$ is itself a measured function of wettedness. At fully
 wetted skin it falls to $0.50$ under ISO 7933, whose curve follows the working
 measurements of \citet{alber1985}, and to $0.67$ under the resting measurements
 of \citet{candas1979}. Both forms give a predicted steepening near $5$. The
-observed $2.18$ lies between the two and nearer the strain end, so we conclude
-that runners concede pace largely in proportion to thermal strain, with a
-secondary sensitivity to fluid cost as the skin approaches saturation. Both
+observed $1.45$ lies below both, and below the $1.80$ of the strain measure alone, so we conclude
+that runners concede pace roughly in proportion to thermal strain and show no additional
+sensitivity to fluid cost as the skin approaches saturation, at least on training runs. Both
 bounds come from measured physiology rather than from a free parameter, but a
 bracket is not a derivation. One caveat attaches at the hot end: $w_{req}$
 exceeds unity at $28\,^{\circ}$C for this runner, so we are reading both
@@ -767,12 +765,13 @@ the same way, which is toward heat binding sooner than tabulated, not later.
 \label{app:physics:curvature}
 
 Between the $20$--$24$ and $24$--$28\,^{\circ}$C WBGT bands the learned curve of
-Section~\ref{sec:results} steepens by a factor of $2.18$. Evaluated over the
+Section~\ref{sec:results} steepens by a factor of $1.45$. Evaluated over the
 same bands, $w_{req}$ alone steepens by $1.80$, and across relative humidities
 of $40$--$85\%$ and solar loads of $0$--$500\,\mathrm{W\,m^{-2}}$ the predicted
-factor spans $1.5$ to $2.7$. The prediction brackets the observation, and the
-direction of any residual gap is the expected one: with a convex strain-to-pace
-map the heat balance supplies a lower bound on curvature, not an equality.
+factor spans $1.5$ to $2.7$. The observation falls just below that band. A shortfall
+in this direction is consistent with the selection mechanisms of Section~\ref{sec:selection},
+which all act to understate the penalty on the hottest training days, and with the race-day
+result of Section~\ref{sec:raceday}, where the same curve applies at about five times the scale.
 
 The prediction is robust to most of its inputs and fragile in one. Varying the
 convective coefficient across the full published span at this speed, $10.4$ to
@@ -781,8 +780,8 @@ $1.4$--$2.8$; varying metabolic rate from a $60\,\mathrm{kg}$ runner at
 $5{:}00\,\mathrm{min\,km^{-1}}$ to a $70\,\mathrm{kg}$ runner at $4{:}00$ moves
 it to $1.5$--$2.8$. Mean skin temperature dominates instead. At the
 laboratory-running value of $35\,^{\circ}$C the prediction falls to $1.3$--$1.8$
-and misses the observation; at $29\,^{\circ}$C it widens to $1.6$--$4.3$. We
-adopt $31\,^{\circ}$C because \citet{aylwin2023} measured mean skin temperature
+and brackets the observation; at $29\,^{\circ}$C it widens to $1.6$--$4.3$ and misses it from above. We
+nevertheless adopt $31\,^{\circ}$C because \citet{aylwin2023} measured mean skin temperature
 falling from $29.8$ to $28.9\,^{\circ}$C through the men's marathon at the 2019
 World Championships, below air temperature and well below laboratory treadmill
 values, with running-speed airflow over wet skin the reason.
@@ -792,12 +791,11 @@ Aylwin's thermography covers exposed skin, some $64\%$ of body surface area,
 while the heat balance wants a whole-body mean that includes covered skin, which
 runs warmer. Weighting the covered remainder at anything from $32$ to
 $38\,^{\circ}$C puts the whole-body mean between $30.3$ and $32.5\,^{\circ}$C.
-Over that range the predicted factor spans $1.4$ to $3.1$ and continues to
-bracket the observation, and the prediction fails only above about
-$33\,^{\circ}$C, which no plausible weighting of these measurements reaches. We
-therefore report the agreement as correct in sign and order of magnitude but not
+Over that range the predicted factor spans $1.4$ to $3.1$; it brackets the observation
+only at the warm end of the range, above about $32\,^{\circ}$C, and sits just above it below
+that. We therefore report the agreement as correct in sign and order of magnitude but not
 sharp, with the width of the band dominated by a quantity the corpus does not
-observe.
+observe, and with the observed curvature at or slightly below the physical prediction.
 
 \subsection{Does the penalty survive on the thermometer's axis?}
 \label{app:physics:drybulb}
@@ -838,9 +836,9 @@ $(T_a, \mathrm{RH})$ to WBGT and read the result on the thermometer's axis,
 which is Figure~\ref{fig:drybulb_axis}(b) and Table~\ref{tab:drybulb}. The
 slowdown does not depend on the index for its existence. At $50\%$ humidity and
 a solar load of $200\,\mathrm{W\,m^{-2}}$, warming from $10$ to $25\,^{\circ}$C
-of air temperature costs $1.7\%$ of pace, and warming to $30\,^{\circ}$C costs
-$3.7\%$. The same $25\,^{\circ}$C day costs $1.0\%$ at $30\%$ humidity and
-$3.5\%$ at $90\%$. The penalty rises monotonically along every constant-humidity
+of air temperature costs $1.6\%$ of pace, and warming to $30\,^{\circ}$C costs
+$3.3\%$. The same $25\,^{\circ}$C day costs $0.9\%$ at $30\%$ humidity and
+$3.2\%$ at $90\%$. The penalty rises monotonically along every constant-humidity
 line and accelerates along each of them, so we conclude that the shape reported
 in Section~\ref{sec:results} is a property of the weather rather than of the
 weighting. The composition also shows how much the thermometer alone conceals. A
@@ -882,10 +880,10 @@ Air temp. & \multicolumn{4}{c}{Relative humidity} \\
 (\textdegree C) & 30\% & 50\% & 70\% & 90\% \\
 \midrule
 10 & 0.00 & 0.00 & 0.00 & 0.03 \\
-15 & 0.03 & 0.10 & 0.18 & 0.29 \\
-20 & 0.24 & 0.59 & 1.00 & 1.45 \\
-25 & 1.03 & 1.70 & 2.34 & 3.53 \\
-30 & 2.17 & 3.74 & --- & --- \\
+15 & 0.03 & 0.08 & 0.16 & 0.31 \\
+20 & 0.24 & 0.55 & 0.88 & 1.31 \\
+25 & 0.90 & 1.59 & 2.30 & 3.19 \\
+30 & 2.11 & 3.34 & --- & --- \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -894,7 +892,7 @@ Air temp. & \multicolumn{4}{c}{Relative humidity} \\
 \label{app:physics:limits}
 
 The argument constrains shape and not magnitude. Nothing here derives the
-$5.0\%$ penalty of Section~\ref{sec:results}. What we do establish is narrower
+$4.3\%$ penalty of Section~\ref{sec:results}. What we do establish is narrower
 and more durable. Convexity in the response is a theorem about the heat balance
 rather than a feature fitted to the data. It holds on the ceiling and on the
 graded strain measure alike, it survives the change of axis from wet-bulb to

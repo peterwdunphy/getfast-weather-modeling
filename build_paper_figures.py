@@ -3,7 +3,8 @@
 Figure suite for the modeling-and-results paper. The Results report the analysis
 in notebooks 09/10 (population and personalized deep-learning heat features added
 to a weather-blind XGBoost pace model). Values are the authoritative held-out
-numbers from notebook 10 (15,892 activities, 104 runners, 3 XGB seeds, robust
+numbers from notebook 10 rerun on v3 with the 5M-run checkpoint (notebook 19b:
+24,311 activities, 154 runners, 3 XGB seeds, holdout ceiling 28 C, robust
 p99-clipped MAPE and 1st/99th-clipped signed bias).
 
 Design rules (project conventions): titles state WHAT is plotted (interpretation
@@ -48,12 +49,12 @@ def finish(fig, name):
 def fig_mape_ladder():
     models = ["weather-blind\nXGB", "+ population\nDL curve", "+ personalized\nDL score",
               "shuffled\ncontrol"]
-    mape   = [7.3381, 7.2936, 7.1304, 7.2996]
+    mape   = [7.5574, 7.4976, 7.3293, 7.4841]      # v3 / 5M checkpoint (nb 19b)
     cols   = [GREY, BLUE, GREEN, VERM]
     # gain vs the reference each is compared against (points + 95% runner bootstrap)
-    gains  = [("population DL\nvs weather-blind", 0.0445, -0.0092, 0.1011, BLUE),
-              ("personalized DL\nvs population",  0.1632,  0.0390, 0.3075, GREEN),
-              ("shuffled control\nvs population", -0.0060, -0.0514, 0.0339, VERM)]
+    gains  = [("population DL\nvs weather-blind", 0.0598,  0.0027, 0.1183, BLUE),
+              ("personalized DL\nvs population",  0.1683,  0.0620, 0.2826, GREEN),
+              ("shuffled control\nvs population",  0.0135, -0.0190, 0.0425, VERM)]
 
     fig, (axA, axB) = plt.subplots(1, 2, figsize=(9.6, 3.8),
                                    gridspec_kw={"width_ratios":[1.05,1]})
@@ -61,7 +62,7 @@ def fig_mape_ladder():
     y = np.arange(len(models))[::-1]
     axA.barh(y, mape, color=cols, height=0.62)
     axA.set_yticks(y); axA.set_yticklabels(models, fontsize=8.6)
-    axA.set_xlim(7.0, 7.40); axA.set_xlabel("robust MAPE (%)")
+    axA.set_xlim(7.2, 7.60); axA.set_xlabel("robust MAPE (%)")
     axA.set_title("A. Held-out error by model", loc="left", fontsize=10.5)
     axA.grid(axis="y", visible=False)
     for yi, m in zip(y, mape):
@@ -84,14 +85,16 @@ def fig_mape_ladder():
 # =========================================================================== #
 def fig_error_by_temp():
     # (wbgt_mid, mape_pre, mape_pop, mape_strict, bias_pre, bias_pop, bias_strict)
+    # v3 / 5M checkpoint, notebook 19b cell "Error by temperature" (bins up to the 28 C ceiling)
     B = np.array([
-        [ 0.82, 7.312,7.181,6.962, -2.061,-1.660,-1.205],
-        [ 7.81, 7.408,7.316,7.106, -2.295,-1.924,-1.471],
-        [12.57, 7.367,7.329,7.171, -2.093,-1.666,-1.242],
-        [16.49, 7.412,7.399,7.198, -1.467,-1.404,-0.964],
-        [18.99, 7.153,7.162,7.067, -1.013,-1.238,-0.709],
-        [21.01, 7.096,7.113,6.942, -0.473,-1.537,-0.962],
-        [23.37, 7.489,7.440,7.342,  0.755,-1.336,-0.715],
+        [ 0.13, 7.189,7.089,6.927, -2.109,-1.559,-0.979],
+        [ 7.79, 7.834,7.697,7.464, -2.646,-2.073,-1.612],
+        [12.59, 7.720,7.639,7.452, -2.490,-1.920,-1.431],
+        [16.51, 7.705,7.693,7.529, -1.968,-1.687,-1.217],
+        [18.99, 7.607,7.622,7.476, -1.580,-1.605,-1.168],
+        [21.01, 7.188,7.223,7.024, -0.761,-1.438,-0.951],
+        [23.44, 7.155,7.118,7.050,  0.360,-1.118,-0.651],
+        [26.24, 7.911,7.747,7.636,  1.836,-1.076,-0.814],
     ])
     x = B[:,0]
     fig, (axA, axB) = plt.subplots(1, 2, figsize=(9.6, 3.8))
@@ -114,17 +117,17 @@ def fig_gamma():
                                    gridspec_kw={"width_ratios":[1,1.35]})
     # A: population curve scale alpha, reference = 1 (compatible)
     axA.axvline(1, color=GREY, lw=1, ls=(0,(4,3)))
-    axA.hlines(0, 0.823, 1.344, color=BLUE, lw=2.6)
-    axA.plot(1.078, 0, "o", color=BLUE, ms=9, markeredgecolor="white", markeredgewidth=0.8)
+    axA.hlines(0, 0.914, 1.303, color=BLUE, lw=2.6)
+    axA.plot(1.098, 0, "o", color=BLUE, ms=9, markeredgecolor="white", markeredgewidth=0.8)
     axA.set_yticks([0]); axA.set_yticklabels(["population\ncurve scale α"], fontsize=8.8)
     axA.set_xlim(0.4, 1.7); axA.set_xlabel("calibrated scale (1 = compatible)")
     axA.set_title("A. Population scale", loc="left", fontsize=10.5)
     axA.grid(axis="y", visible=False)
     # B: personalized gamma by WBGT subset, reference = 0
-    subs = [("all eligible",-1.654,-2.545,-0.865),
-            ("WBGT > 10°C", -1.627,-2.528,-0.792),
-            ("WBGT > 15°C", -1.452,-2.320,-0.602),
-            ("WBGT > 20°C", -0.961,-1.827,-0.067)]
+    subs = [("all eligible",-0.963,-1.712,-0.100),     # v3 / 5M checkpoint, nb 19b section 9
+            ("WBGT > 10°C", -0.946,-1.719,-0.080),
+            ("WBGT > 15°C", -0.906,-1.663, 0.003),
+            ("WBGT > 20°C", -0.652,-1.463, 0.332)]
     y = np.arange(len(subs))[::-1]
     axB.axvline(0, color=GREY, lw=1, ls=(0,(4,3)))
     for yi,(lab,g,lo,hi) in zip(y, subs):

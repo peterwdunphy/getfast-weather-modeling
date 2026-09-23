@@ -194,7 +194,7 @@ def storage_rate(w, Ta, rh=0.60):
 
 
 # The learned population curve, at the anchor points reported in Section 4.
-LEARNED = {10: 0.0, 12: 0.05, 14: 0.15, 16: 0.30, 20: 1.20, 24: 2.40, 28: 5.02}
+LEARNED = {10: 0.0, 12: 0.052, 14: 0.108, 16: 0.321, 20: 1.039, 24: 2.363, 28: 4.286}   # v3 (5M-step) anchors, heat_percentile_averaged_v3.npz median curve
 LEARNED_MAX = 28.0
 SOLAR = 200.0        # W/m2, the convention used throughout the appendix
 WIND = 1.0           # m/s

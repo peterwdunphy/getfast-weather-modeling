@@ -107,11 +107,11 @@ def check(label, got, want, tol):
     if not ok: fails.append(label)
     print(f"  [{'ok ' if ok else 'FAIL'}] {label}: {got:.4g} (claimed {want:g})")
 
-OBS = ((5.02-2.4)/4)/((2.4-1.2)/4)
+OBS = ((4.286-2.363)/4)/((2.363-1.039)/4)   # v3 anchors: 20/24/28 C = 1.039/2.363/4.286 %
 print(f"reference runner: {H_prod():.0f} W total, {H_prod()/A_BODY:.0f} W/m2; "
       f"h_c = {hc(V_REF):.1f} W/m2K; LR = {LR:.1f} K/kPa; "
       f"kappa = {KAPPA:.0f} J/m")
-check("observed steepening of the learned curve", OBS, 2.18, 0.02)
+check("observed steepening of the learned curve", OBS, 1.45, 0.02)
 
 # ------------------------------------------------------------------ CLAIM 1
 print("\nCLAIM 1: heat balance at S=0 is one equation in one unknown, the speed.")
@@ -394,7 +394,7 @@ print("    chain, not two rival explanations.")
 
 # ------------------------------------------------------------------ CLAIM 11
 print("\nCLAIM 11: one convex strain->pace map does both jobs.")
-learned = {10:0.0,12:0.05,14:0.15,16:0.30,20:1.20,24:2.40,28:5.02}
+learned = {10: 0.0, 12: 0.052, 14: 0.108, 16: 0.321, 20: 1.039, 24: 2.363, 28: 4.286}
 w = {t: wreq(Ta_for_wbgt(t,0.60,200.0),0.60,solar=50.0) for t in learned}
 best=None
 for k10 in range(5,61):
@@ -417,7 +417,7 @@ print("    AND flattens the cool end. The physics predicts a LOWER BOUND.")
 print("\nCLAIM 12: what the curvature prediction is, and is not, sensitive to.")
 lo_c,hi_c = curvature()
 print(f"    baseline (T_sk=31, RH 40-85%, solar 0-500): {lo_c:.2f} to {hi_c:.2f}")
-check("baseline band brackets the observation", 1.0 if lo_c<=OBS<=hi_c else 0.0, 1.0, 0.0)
+check("baseline band (T_sk=31) brackets the observation (v3: it does not; brackets from T_sk>=32)", 1.0 if lo_c<=OBS<=hi_c else 0.0, 0.0, 0.0)
 print("    varying h_c across the full published span at 3.3 m/s:")
 for h_v in (10.4, hc(V_REF), 17.1, 33.7):
     l,hh = curvature(h_c=h_v)
@@ -464,9 +464,9 @@ for Ta in (10,15,20,25,30):
         p = g(wbgt(float(Ta),rh,SOLAR))
         row += ("      n/a" if p is None else f"{p:10.2f}")
     print(row)
-check("penalty at 25 C air, 50% RH (%)", g(wbgt(25.0,0.5,SOLAR)), 1.70, 0.05)
-check("penalty at 25 C air, 90% RH (%)", g(wbgt(25.0,0.9,SOLAR)), 3.53, 0.05)
-check("penalty at 30 C air, 30% RH (%)", g(wbgt(30.0,0.3,SOLAR)), 2.17, 0.05)
+check("penalty at 25 C air, 50% RH (%)", g(wbgt(25.0,0.5,SOLAR)), 1.59, 0.05)
+check("penalty at 25 C air, 90% RH (%)", g(wbgt(25.0,0.9,SOLAR)), 3.19, 0.05)
+check("penalty at 30 C air, 30% RH (%)", g(wbgt(30.0,0.3,SOLAR)), 2.11, 0.05)
 print("    -> raising air temperature at FIXED humidity raises the penalty")
 print("       monotonically, so the finding is not an artifact of the index;")
 print("       'n/a' marks cells whose WBGT leaves the evaluated range.")

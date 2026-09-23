@@ -111,14 +111,11 @@ remains pinned near 132\%, the value obtained by predicting the center of the bi
 \subsection{Optimization}
 
 Adam with global-norm gradient clipping at 1.0. The learning rate warms linearly from 0 to
-$1\times10^{-4}$ over 1{,}000 steps, then follows a cosine decay to $1\times10^{-5}$ over 200{,}000
-steps. Batch size 64, data-parallel across two GPUs. Training runs 200{,}000 steps, roughly 20 hours.
+$1\times10^{-4}$ over 1{,}000 steps, then follows a cosine decay. The reported model was trained for 1{,}000{,}000 steps and then resumed from its final state for a further 4{,}000{,}000 steps, with the decay stretched so that the rate reaches its floor of $5\times10^{-6}$ at step 5{,}000{,}000. Batch size 64, data-parallel across two GPUs. The architecture-search runs of Appendix~\ref{app:ablation} used 200{,}000 steps.
 
-Checkpoints are written whenever held-out $R^2$ or error improves. These two criteria do not peak
-together: $R^2$ peaks near 115{,}000 steps while error continues to improve to roughly 190{,}000.
-Both checkpoints are therefore evaluated and reported, since selecting on $R^2$ alone overstates
-error by about 0.2 percentage points. The artifacts in this paper come from the error-selected
-checkpoint.
+Checkpoints are written whenever held-out $R^2$ or error improves. In the reported run the two criteria
+select different steps ($R^2$ peaks at 4.9 million, error at 4.33 million); the artifacts in this paper come
+from the error-selected checkpoint.
 
 \section{Construction of the Heat Artifacts}
 \label{app:curve}
@@ -128,8 +125,8 @@ the WBGT channel of the target activity is overwritten with a constant $w$ while
 is held fixed, and the model is re-evaluated. The difference between two such evaluations is
 attributable to WBGT alone, since nothing else in the input has changed. The sweep covers 5 to
 30\,\textdegree C in 0.5\,\textdegree C steps; artifacts are truncated to $[10, 28]$, a 37-point
-grid, because the evaluation panel contains no held-out target above 29.8\,\textdegree C and the
-region beyond it cannot be checked.
+grid, because above 28\,\textdegree C the corpus is too sparse to support per-runner estimates
+(Appendix~\ref{app:ceiling}) and no held-out pace-model activity lies above the ceiling.
 
 Write $D_a(w)$ for runner $a$'s swept prediction. The runner's sensitivity is the percentage
 slowdown at 28\,\textdegree C relative to 10\,\textdegree C,
@@ -143,13 +140,13 @@ response, so averaging unnormalized curves would confound the two.
 
 The population curve is $g(w) = \bar{s}\,\cdot\,\mathrm{med}_a\,\phi_a(w)$, the median shape rescaled
 by the median sensitivity of the reference sample. The monotone projection $\max$-accumulate is
-applied to the median shape at this point; as reported in Section~\ref{sec:methods} it moves 8 of 37
-grid points by at most 0.13 percentage points.
+applied to the median shape at this point; as reported in Section~\ref{sec:results} it moves 6 of 37
+grid points by at most 0.07 percentage points.
 
-A single window's sensitivity is dominated by noise, with test-retest reliability near 0.34, so
-roughly three-quarters of the observed spread in $s_a$ across windows is measurement error rather
-than a difference between runners. Averaging the 15 most recent windows raises reliability to
-approximately 0.8. The per-runner score is therefore the percentile rank of a runner's window-averaged
+A single window's sensitivity is dominated by noise: within a runner, two windows with non-overlapping
+histories correlate at about 0.2, so most of the observed spread in $s_a$ across windows is measurement
+error rather than a difference between runners. Averaging the 15 most recent windows raises the agreement
+between non-overlapping averages to about 0.65. The per-runner score is therefore the percentile rank of a runner's window-averaged
 sensitivity against the distribution of window-averaged sensitivities, not against the noise-inflated
 single-window distribution. The prospective version uses exactly 15 preceding windows and excludes
 the target activity.
@@ -162,31 +159,30 @@ and the counterfactual sweep was run to 30, but the estimates there rest on too 
 
 \begin{table}[!ht]
 \centering\small
-\caption{Observations available above each WBGT threshold, whole corpus ($n=278{,}853$).}
+\caption{Observations available above each WBGT threshold, whole corpus before the ceiling is applied ($n=407{,}946$ activities with pace, WBGT and every baseline feature present).}
 \label{tab:ceiling}
 \begin{tabular}{@{}rrrr@{}}
 \toprule
 WBGT above & Runs & Share of corpus & Runners \\
 \midrule
-24\,\textdegree C & 22{,}293 & 7.995\% & 1{,}005 \\
-26\,\textdegree C & 8{,}659 & 3.105\% & 657 \\
-28\,\textdegree C & 1{,}880 & 0.674\% & 300 \\
-30\,\textdegree C & 189 & 0.068\% & 71 \\
-32\,\textdegree C & 9 & 0.003\% & 7 \\
+24\,\textdegree C & 44{,}466 & 10.900\% & 1{,}793 \\
+26\,\textdegree C & 18{,}947 & 4.644\% & 1{,}302 \\
+28\,\textdegree C & 4{,}205 & 1.031\% & 683 \\
+30\,\textdegree C & 376 & 0.092\% & 160 \\
+32\,\textdegree C & 19 & 0.005\% & 15 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Support falls by roughly an order of magnitude every two degrees above 26. At 28\,\textdegree C there
-remain 1{,}880 runs from 300 runners, enough that a median across runners is anchored by more than a
-handful of individuals. At 30 there are 189 runs from 71 runners, several contributing a single run. At
+Support falls by a factor of about four between 26 and 28\,\textdegree C and by an order of magnitude or more per two degrees thereafter. At 28\,\textdegree C there
+remain 4{,}205 runs from 683 runners, enough that a median across runners is anchored by more than a
+handful of individuals. At 30 there are 376 runs from 160 runners, many contributing a single run. At
 32 the quantity is meaningless.
 
-The held-out panel binds tighter still: no evaluated window has a target run above 29.8\,\textdegree C,
-so nothing beyond that could be checked against a held-out outcome even in principle. Two further
-considerations point the same way. The upper hinge in the calibration spans only the interval between
-its knot and the ceiling, so a ceiling set too close to that knot leaves the coefficient weakly
-identified. And the flattening the model shows in its top few degrees is precisely where a sparse-data
+The held-out evaluation binds tighter still: the modelling frame is itself capped at the ceiling, so no
+held-out activity above 28\,\textdegree C is scored and nothing beyond that point could be checked
+against a held-out outcome even in principle. One further
+consideration points the same way. The flattening the model shows in its top few degrees is precisely where a sparse-data
 artifact and a genuine physiological plateau are least distinguishable, so reporting it would invite an
 interpretation the data cannot support.
 
@@ -221,8 +217,8 @@ on a variable realized during the run being predicted.
 
 The architecture was not chosen a priori. Table~\ref{tab:ablations} records the modifications tested
 against the accepted configuration of the moment, each as a separate 200{,}000-step run judged on the
-same held-out panel of 1{,}349 windows from 158 runners. Changes were applied one at a time, since
-bundling them makes attribution impossible.
+same held-out panel of 1{,}349 windows from 158 runners. Changes were applied one at a time where possible, since
+bundling them makes attribution impossible; two exceptions are marked (the live date channel was bundled with the longer window, and the batch-size change ran together with the first working padding mask).
 
 \begin{table}[!ht]
 \centering
@@ -249,14 +245,24 @@ Embedding width 64 $\rightarrow$ 128$^{b}$ & capacity    & 0.802 & 6.74 & reject
 Acclimation channel         & carry exposure history     & 0.683 & 6.82 & rejected \\
 \bottomrule
 \end{tabular}
+
+\vspace{2pt}
+\begin{minipage}{0.92\linewidth}\footnotesize
+$^{a}$ Tested bundled with the longer window rather than alone, and stopped once it was clearly
+behind at matched steps, so no completed run exists; the rejection rests on that trajectory and on
+the interference argument given below.\\
+$^{b}$ Measured in an earlier round on a 261-window panel, against a contemporaneous baseline of
+0.84 and 6.20 on that same panel. The comparison within that round is valid, but the numbers are not
+on the same scale as the other rows.
+\end{minipage}
 \end{table}
 
 Several outcomes are informative beyond the selection they drove. Added capacity was consistently
 harmful: restoring a feed-forward sublayer in the cross-activity block, and doubling embedding width,
 both degraded every metric, which places the useful operating point well below the capacity the data
 will support. Lengthening the history window also lost, and the diagnostic was that training loss was
-worse as well, indicating a harder optimization rather than an overfitting gap; roughly half the
-runners have fewer than 60 activities, so the additional slots are padding for them. Restoring the
+worse as well, indicating a harder optimization rather than an overfitting gap; over a third of the
+runners (37.5\%) have fewer than 60 activities, so the additional slots are padding for them. Restoring the
 dead date channel was the clearest failure, plausibly because slot position within a window is
 already carried by the positional embedding and a second, noisier copy competes with it.
 
