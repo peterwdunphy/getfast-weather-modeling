@@ -1,0 +1,19 @@
+{
+  // LaTeX Workshop: build with Tectonic instead of latexmk (no MacTeX needed).
+  // %DOC% is the root .tex file without its extension; the build runs in that file's folder.
+  "latex-workshop.latex.tools": [
+    {
+      "name": "tectonic",
+      "command": "tectonic",
+      "args": ["--synctex", "--keep-logs", "--keep-intermediates", "%DOC%.tex"],
+      "env": {}
+    }
+  ],
+  "latex-workshop.latex.recipes": [{ "name": "tectonic", "tools": ["tectonic"] }],
+  "latex-workshop.latex.recipe.default": "tectonic",
+  "latex-workshop.latex.autoBuild.run": "onSave",
+  "latex-workshop.view.pdf.viewer": "tab",
+  // The appendices are \input into the long manuscript; build that file when editing them.
+  "latex-workshop.latex.rootFile.doNotPrompt": true,
+  "latex-workshop.latex.search.rootFiles.include": ["getfast-weather-modeling.tex", "journal/getfast-heat-journal.tex"]
+}

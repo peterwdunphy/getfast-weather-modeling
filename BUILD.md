@@ -1,9 +1,28 @@
 # Building the manuscript locally
 
-Overleaf is still the source of truth for drafting, but the paper builds
-locally with [Tectonic](https://tectonic-typesetting.github.io/), a single
-binary that downloads only the LaTeX packages this document needs. No MacTeX
+Drafting happens locally in VS Code; Overleaf is no longer used. Git is the
+only sync between machines, so pull before you start editing and push when you
+stop (`git pull`, then `git add -A && git commit -m "..." && git push`).
+
+Two documents build from this repo:
+
+| File | What it is |
+|---|---|
+| `getfast-weather-modeling.tex` (+ `appendix.tex`, `tommy_appendix.tex`) | the long version for arXiv: full methods, physiology and every analysis |
+| `journal/getfast-heat-journal.tex` | the short journal version; numbers come from `journal/numbers.tex` |
+
+Both build with [Tectonic](https://tectonic-typesetting.github.io/), a single
+binary that downloads only the LaTeX packages a document needs. No MacTeX
 install and no `sudo`.
+
+## VS Code
+
+Install the **LaTeX Workshop** extension. The repo's `.vscode/settings.json`
+makes Tectonic its default recipe, so saving a `.tex` file rebuilds the PDF
+and the PDF viewer tab syncs to the source (Cmd-click in the PDF jumps to the
+line). VS Code must be able to find `tectonic`: if it was installed into
+`~/.local/bin`, start VS Code from a terminal (`code .`) or set
+`latex-workshop.latex.tools` to the full path.
 
 ## One-time setup
 
