@@ -1,0 +1,405 @@
+% =====================================================================================================================
+% numbers.tex -- every reported number in getfast-heat-journal.tex, one macro each, with its source.
+%
+% Canonical source (9 November 2026): /weather/data/fade/paper_open_items_20261109/numbers.json (same rows in
+% numbers.csv), which resolves the 19 open items of the long manuscript. Comments give the numbers.json `name` (NJ:
+% <name>). Numbers that numbers.json does not carry cite the stored file they come from; the journal scripts
+% (journal/build_journal_figures.py, build_table1_numbers.py, derived_numbers.py) reproduce or derive them and write
+% their output to the *.log files beside them. Specification throughout: identified first stage (no drift term, log
+% units), official race windows, Capital City Half 2017 removed.
+%
+% Conventions
+%   \pending{what}      a result not yet available (analyses in progress); renders as a red bracket.
+%   \placeholder{what}  an administrative item to be supplied by the authors (declarations, contact).
+%   \ot{value}{n}, \otv{value}  red marking for a value tied to an open item n of the long manuscript; no longer used
+%                       (all items are resolved or carry a recommendation) but kept so a value can be re-flagged.
+% Design constants (thresholds, window lengths, filter bounds) and numbers quoted from the literature stay inline in
+% the text: they are procedure or citation, not results of this study.
+% =====================================================================================================================
+\definecolor{otred}{HTML}{C00000}
+\newif\ifshowmarks \showmarkstrue
+\newcommand{\pending}[1]{\textcolor{otred}{\textbf{[pending: #1]}}}
+\newcommand{\placeholder}[1]{\textcolor{otred}{[#1]}}
+\newcommand{\ot}[2]{\ifshowmarks\textcolor{otred}{#1}\textsuperscript{\textcolor{otred}{\,OT#2}}\else#1\fi}
+\newcommand{\otv}[1]{\ifshowmarks\textcolor{otred}{#1}\else#1\fi}
+
+% ---- word counts (journal/wordcount.sh; red draft markers excluded) -------------------------------------------------
+\newcommand{\wcAbstract}{249}
+\newcommand{\wcMain}{5{,}462}
+
+% =====================================================================================================================
+% 1. Cohorts (Table 1)
+% =====================================================================================================================
+% training-run corpus. NJ: corpus_runs (403,719 runs, 2,420 runners; strict HR and pace bounds as coded);
+% descriptives: build_table1_numbers.log (same filter, same 403,719 runs)
+\newcommand{\nRuns}{403{,}719}
+\newcommand{\nRunners}{2{,}420}
+\newcommand{\runsPerRunnerMed}{97}
+\newcommand{\runsPerRunnerIQR}{33--240}
+\newcommand{\corpusFirst}{May 2023}
+\newcommand{\corpusLast}{August 2026}
+\newcommand{\effortsLast}{October 2026}   % build_efforts_v3.json last_effort 2026-10-25
+\newcommand{\nCountries}{157}
+\newcommand{\shareUS}{23.9}
+\newcommand{\shareKR}{8.4}
+\newcommand{\shareGB}{6.7}
+\newcommand{\medDist}{8.1 (5.2--11.3)}
+\newcommand{\medDur}{47 (32--65)}
+\newcommand{\medPace}{5.7 (5.1--6.4)}
+\newcommand{\medHR}{147 (137--156)}
+\newcommand{\wbgtMed}{14.7}
+\newcommand{\wbgtPten}{3.1}
+\newcommand{\wbgtPninety}{24.0}
+\newcommand{\shareEighteen}{33.9}
+\newcommand{\shareTwentytwo}{16.9}
+% race-distance efforts: /weather/data/fade/hrrr_extension_20261028/build_efforts_v3.json;
+% combined_placement_20261109/combined_placement.json (data, coverage)
+\newcommand{\nEfforts}{5{,}013}
+\newcommand{\nEffHalf}{3{,}940}
+\newcommand{\nEffMar}{1{,}073}
+\newcommand{\nEffRunners}{1{,}224}
+\newcommand{\nEffHot}{1{,}308}
+\newcommand{\nEffHotRunners}{572}
+\newcommand{\nEffHotHalf}{1{,}142}
+\newcommand{\nEffHotMar}{166}
+% official results. NJ: finishes_linked, linkage_persons, linkage_persons_2plus_finishes, courses_with_edition_effects,
+% finishes_in_analysis_editions; per-distance finishes and persons: build_table1_numbers.log
+\newcommand{\nFinishes}{8{,}221{,}398}
+\newcommand{\nEditionsAll}{840}
+\newcommand{\nPersons}{3{,}927{,}315}
+\newcommand{\nRepeaters}{1{,}565{,}641}
+\newcommand{\nCoursesEff}{92}
+\newcommand{\nFinAnalysis}{5{,}852{,}530}
+\newcommand{\nEdMar}{321}
+\newcommand{\nRacesMar}{49}
+\newcommand{\nEdHalf}{239}
+\newcommand{\nRacesHalf}{40}
+\newcommand{\finMar}{2{,}993{,}606}
+\newcommand{\finHalf}{2{,}858{,}924}
+% NJ: wbgt_range_marathon_editions, wbgt_range_half_editions; counts at 18 / 22 C: build_journal_figures.log
+\newcommand{\wbgtRangeMar}{$-3.8$ to 23.4}
+\newcommand{\wbgtRangeHalf}{$-4.1$ to 25.9}
+\newcommand{\wbgtMaxMar}{23.4}
+\newcommand{\edMarEighteen}{34}
+\newcommand{\edMarTwentytwo}{7}
+\newcommand{\edHalfEighteen}{21}
+\newcommand{\edHalfTwentytwo}{5}
+\newcommand{\medFinMar}{4:23}      % 4.39 h, median over editions of the edition median finish time (build_table1_numbers.log)
+\newcommand{\medFinHalf}{2:14}     % 2.23 h
+% NJ: falselink_bound_pct (2,574 of 105,258 checkable person-courses)
+\newcommand{\falseLink}{2.45}
+% editions without a sourced first mass-start time: paper_open_items_20261109/RESULTS.md, item 11 (128 held, non-2020
+% editions; 122 for that reason alone, 6 also with an unverified date)
+\newcommand{\nNoStart}{128}
+
+% =====================================================================================================================
+% 2. Training-run dose-response
+% =====================================================================================================================
+% NJ: curve_training_pct_W16 ... W28 (c(14) from build_journal_figures.log: 0.11 %)
+\newcommand{\cFourteen}{0.1}
+\newcommand{\cSixteen}{0.3}
+\newcommand{\cTwenty}{1.0}
+\newcommand{\cTwentyfour}{2.4}
+\newcommand{\cTwentyeight}{4.3}
+% verbal reading of the curve and of the race-day free shape (positive from 14 C; effort_heat_tests_round2.json R5)
+\newcommand{\flatToWBGT}{14}
+\newcommand{\costStartRange}{14 to 16}
+% NJ: curve_artifact_includes_holdout_runners
+\newcommand{\curveShapeRunners}{1{,}961}
+\newcommand{\curveShapeHoldout}{175}
+\newcommand{\curveRefRunners}{1{,}201}
+\newcommand{\curveRefHoldout}{108}
+\newcommand{\curveHoldoutDiff}{0.019}   % paper_open_items_20261109/RESULTS.md "Further findings"
+% NJ: training_scale_expected_duration_<30min ... >150min (n from the same rows)
+\newcommand{\scLtThirty}{0.21 [0.03, 0.38]}
+\newcommand{\scLtThirtyPt}{0.21}
+\newcommand{\scThirtySixty}{0.81 [0.66, 0.95]}
+\newcommand{\scSixtyNinety}{1.41 [1.24, 1.58]}
+\newcommand{\scNinetyOneFifty}{1.71 [1.49, 1.94]}
+\newcommand{\scGtOneFifty}{2.34 [1.82, 2.87]}
+\newcommand{\scGtOneFiftyPt}{2.34}
+\newcommand{\nLtThirty}{87{,}099}
+\newcommand{\nThirtySixty}{188{,}884}
+\newcommand{\nSixtyNinety}{83{,}367}
+\newcommand{\nNinetyOneFifty}{31{,}286}
+\newcommand{\nGtOneFifty}{7{,}046}
+\newcommand{\nGtOneFiftyRunners}{997}
+% NJ: training_scale_per_log_duration, training_scale_placebo_recovered
+\newcommand{\scPerLog}{0.69 [0.56, 0.82]}
+\newcommand{\placeboTrue}{0.79}
+\newcommand{\placeboRange}{0.74 to 0.81}
+% scale 2.34 applied to the curve at WBGT 20 C: derived_numbers.log part 3
+\newcommand{\longTwenty}{2.5}
+% NJ: effort_gradient_predetermined_labels (hard minus easy days, % per C, base 0.20)
+\newcommand{\effortGradient}{0.02 [$-0.03$, 0.07]}
+\newcommand{\effortBase}{0.20}
+
+% =====================================================================================================================
+% 3. Race-day scale (official results)
+% =====================================================================================================================
+% NJ: alpha_marathon_fs2, alpha_half_fs2, *_partial_r2, alpha_marathon_minus_half_fs2
+\newcommand{\alphaMarCI}{5.09 [4.52, 5.67]}
+\newcommand{\alphaHalfCI}{4.21 [3.62, 4.80]}
+\newcommand{\alphaMarPlain}{5.09}
+\newcommand{\alphaHalfPlain}{4.21}
+\newcommand{\prsqMar}{0.54}
+\newcommand{\prsqHalf}{0.52}
+\newcommand{\alphaDiff}{1.07 [0.29, 1.85]}
+\newcommand{\alphaDiffP}{0.007}
+% rounded verbal forms used in the abstract, key points and conclusions
+\newcommand{\alphaMarRound}{five}
+\newcommand{\alphaHalfRound}{four}
+\newcommand{\ratioRound}{twice}
+% NJ: race_scale_over_duration_matched_training_marathon / _half
+\newcommand{\ratioMar}{2.17 [1.63, 2.71]}
+\newcommand{\ratioHalf}{2.46 [1.99, 2.93]}
+\newcommand{\ratioMarPt}{2.2}
+\newcommand{\ratioHalfPt}{2.5}
+% median edition finish times in minutes: effort_heat_tests_round2.json R3.alpha.*.median_finish_min
+\newcommand{\medFinMarMin}{263}
+\newcommand{\medFinHalfMin}{134}
+% NJ: finish_cost_marathon_W21_fs2 (6.94 [6.13, 7.75] %); minutes on a 4:00 finish: build_journal_figures.log
+\newcommand{\marPctTwentyone}{6.9 [6.1, 7.8]}
+\newcommand{\marMinTwentyone}{16.7 [14.7, 18.6]}
+% implied cost on the Table 2 grid (same method as NJ finish_cost_*; derived_numbers.log part 1)
+\newcommand{\marMinSixteen}{3.9}
+\newcommand{\marMinEighteen}{8.2}
+\newcommand{\marMinTwenty}{13.0 [11.5, 14.5]}
+\newcommand{\marMinTwentytwo}{21.0}
+\newcommand{\halfMinTwenty}{5.3}
+\newcommand{\trMinTwentyMar}{2.5}
+% NJ: alpha_marathon_q50_runners, alpha_marathon_q25_runners, alpha_half_q50_runners, alpha_half_q25_runners;
+% trimmed and spread: /weather/data/race_heat_without_blowups.json (A, B; same first stage)
+\newcommand{\alphaMarMedian}{5.21 [4.54, 5.87]}
+\newcommand{\alphaMarQtf}{4.87 [4.27, 5.46]}
+\newcommand{\alphaMarTrim}{5.12 [4.49, 5.75]}
+\newcommand{\alphaHalfMedian}{4.32 [3.48, 5.15]}
+\newcommand{\alphaHalfQtf}{3.89 [3.09, 4.69]}
+\newcommand{\spreadMar}{1.14 [0.51, 1.78]}
+% NJ: alpha_by_finish_tier_loo_marathon / _half; intervals and trends: /weather/data/alpha_by_finish_tier_loo.json V2
+\newcommand{\tierMarFast}{4.66 [3.85, 5.47]}
+\newcommand{\tierMarPeak}{5.72 [5.08, 6.36]}
+\newcommand{\tierMarSlow}{4.04 [3.46, 4.62]}
+\newcommand{\tierMarTrend}{$-0.41$ [$-1.10$, 0.28]}
+\newcommand{\tierHalfRange}{3.17 to 4.78}
+\newcommand{\tierHalfTrend}{$-0.21$ [$-1.77$, 1.36]}
+% short races, official results (RunSignup, US): /weather/data/fade/short_race_alpha_20261109/results.json (main),
+% alpha_table.csv (course-clustered CI = primary), alpha_vs_duration_fit.json; reproduced in build_journal_figures.log
+\newcommand{\alphaFiveK}{1.28 [1.19, 1.36]}
+\newcommand{\alphaFiveKPt}{1.28}
+\newcommand{\alphaTenK}{2.54 [2.26, 2.81]}
+\newcommand{\alphaFifteen}{3.31 [2.70, 3.93]}
+\newcommand{\alphaFifteenNoBoiler}{2.99}       % without the largest-weight course (sensitivity_table.csv)
+\newcommand{\nEdFiveK}{30{,}165}
+\newcommand{\nCrFiveK}{6{,}827}
+\newcommand{\nWarmFiveK}{10{,}936}
+\newcommand{\nEdTenK}{3{,}976}
+\newcommand{\nCrTenK}{820}
+\newcommand{\nWarmTenK}{1{,}126}
+\newcommand{\nEdFifteen}{703}
+\newcommand{\nCrFifteen}{151}
+\newcommand{\nWarmFifteen}{165}
+\newcommand{\durIntercept}{$-5.20$}
+\newcommand{\durSlope}{1.85}
+\newcommand{\durRsq}{0.95}
+\newcommand{\durPerDoubling}{1.3}             % 1.28 (all_race_bands.per_doubling)
+\newcommand{\trainPerDoubling}{0.66}          % training.per_doubling (fit through the five R3 band estimates)
+\newcommand{\raceOverTrainRange}{1.8 to 2.7}  % race_over_training_at_same_duration, ten bands
+\newcommand{\rsuMar}{5.03}                    % check_vs_official: RunSignup marathon (official 5.09)
+\newcommand{\rsuHalf}{3.56}                   % RunSignup half (official 4.21)
+\newcommand{\startShift}{3 to 12}             % % change in alpha for a 1 h shift of every start (sensitivity_table.csv)
+\newcommand{\startMatch}{97.5}                % rsu_start_validation.json: % within 15 min of official first-mass starts
+\newcommand{\startMatchN}{40}
+% rounded verbal forms
+\newcommand{\alphaFiveKRound}{1.3}
+% NJ: alpha_majors_minus_nonmajors_fs2 (p = 0.046)
+\newcommand{\majorsDiff}{1.11 [0.02, 2.21]}
+\newcommand{\majorsDiffP}{0.046}
+% shape: effort_heat_tests_round2.json R5.by_band.marathon (free hinge shape vs scaled curve, leave-one-race-out)
+\newcommand{\freeFourteen}{1.42 [1.00, 1.83]}
+\newcommand{\scaledFourteen}{0.55}
+\newcommand{\rmseNoWx}{1.83}
+\newcommand{\rmseScaled}{1.24}
+\newcommand{\rmseFree}{1.18}
+% NJ: rise_marathon_fs2, rise_half_fs2, rise_pooled_fs2, degree_hours22_marathon_fs2, degree_hours22_half_fs2
+\newcommand{\riseMar}{0.14 [0.08, 0.20]}
+\newcommand{\riseHalf}{0.18 [0.09, 0.26]}
+\newcommand{\risePooled}{0.16 [0.11, 0.21]}
+\newcommand{\dhMar}{0.16 [$-0.06$, 0.38]}
+\newcommand{\dhHalf}{0.34 [$-0.53$, 1.21]}
+\newcommand{\nDhMar}{16}
+\newcommand{\nDhHalf}{8}
+% NJ: late_share_heat_cost (15 warm editions; official splits 368,545 runners, 50 editions, 9 races)
+\newcommand{\lateShare}{79 [47, 111]}
+\newcommand{\nSplitRunners}{368{,}545}
+\newcommand{\nSplitEd}{50}
+\newcommand{\nSplitCourses}{9}
+\newcommand{\nSplitWarm}{15}
+
+% =====================================================================================================================
+% 4. Recent heat exposure
+% =====================================================================================================================
+% NJ: trait_hr_heat_slope_population (368,042 runs, 2,341 persons; +0.43 above 24); 7.0 bpm at 27 C:
+% trait_state_20261027/summary.json hr_magnitudes
+\newcommand{\hrSlope}{0.48 [0.45, 0.51]}
+\newcommand{\hrSlopeTwentyfour}{0.43 [0.35, 0.51]}
+\newcommand{\hrAtTwentyseven}{7.0}
+\newcommand{\hrRuns}{368{,}042}
+\newcommand{\hrPersons}{2{,}341}
+% acclimation kinetics (9 November 2026): /weather/data/fade/acclimation_kinetics_20261109/summary.json, onset_ydayctrl.json,
+% travel.json, breaks.json; reproduced in journal/build_kinetics_figure.log. Outcome: HR excess over the population heat
+% cost at matched pace, duration and climb on hot runs (heat counted from WBGT 22 C). These supersede the September
+% travel numbers and the trait/state level shift (which fails the kinetics study's future-dose placebo).
+% onset (summary.json build_onset_ydayctrl): half-life in hot-run days, decline, count vs calendar days / ambient heat
+\newcommand{\kinOnsetEpisodes}{2{,}468}
+\newcommand{\kinOnsetPersons}{1{,}313}
+\newcommand{\kinOnsetHalf}{3.5 [1.4, 13.9]}
+\newcommand{\kinOnsetDecline}{1.6 [1.0, 3.9]}
+\newcommand{\kinCountCal}{100}           % share_count_beats_calendar (500 person bootstraps)
+\newcommand{\kinCountAmb}{98}            % share_count_beats_ambient 0.976
+\newcommand{\kinCalAdd}{$-0.5$ [$-1.4$, 0.3]}   % joint_count_vs_days.coef_d -0.536 (SE 0.445)
+\newcommand{\kinAmbAdd}{0.1 [$-0.3$, 0.5]}      % joint_count_vs_ambient.coef_a 0.116 (SE 0.215)
+% trips (summary.json build_travel; travel.json A_build day0_2 means: hot +0.14 minus neutral -1.07)
+\newcommand{\kinTrips}{892}
+\newcommand{\kinTripPersons}{495}
+\newcommand{\kinTripsNeutral}{828}
+\newcommand{\kinTripsCool}{646}
+\newcommand{\kinTripHalf}{2.7 [0.7, 10.5]}
+\newcommand{\kinTripDrop}{1.6 [0.6, 4.4]}
+\newcommand{\kinSlopeHot}{$-0.23$ [$-0.36$, $-0.11$]}
+\newcommand{\kinSlopeNeutral}{0.06 [$-0.07$, 0.19]}
+\newcommand{\kinSlopeCool}{0.03 [$-0.15$, 0.20]}
+\newcommand{\kinArrival}{1.2}
+\newcommand{\travelEarlySept}{1.9 [0.7, 3.1]}   % NJ: hr_travel_arrival_excess (person fixed-effect baseline)
+% breaks (summary.json decay_breaks; breaks.json by_L)
+\newcommand{\kinBreaks}{23{,}134}
+\newcommand{\kinBreakPersons}{1{,}134}
+\newcommand{\kinBreakFour}{0.5}
+\newcommand{\kinBreakEight}{0.6}
+\newcommand{\kinBreakFifteen}{1.5}
+\newcommand{\kinBreakTwentynine}{2.1}
+\newcommand{\kinDecayHalf}{9.7 [2.1, 27.7]}
+\newcommand{\kinFullLoss}{2.9 [2.1, 5.3]}
+% state-model decay half-lives (onset_ydayctrl.json state_grid_onset_boot; summary.json kinetic._ydayctrl.hot22)
+\newcommand{\kinStateOnset}{11 (80\% interval 7--27)}
+\newcommand{\kinStatePanel}{7 (80\% interval 4--11)}
+% heat-specificity check (summary.json decay_breaks.did_nonhot, 15-28 d: +1.37, SE 0.76, p 0.07; 3,215 breaks)
+\newcommand{\kinNonhotDiD}{1.4 [$-0.1$, 2.9]}
+\newcommand{\kinNonhotBreaks}{3{,}215}
+% rounded verbal forms (build half-life 2.7-3.5 hot-run days; decay half-life 7-11 days)
+\newcommand{\kinBuildRound}{three}
+\newcommand{\kinDecayRound}{ten}
+% shares of the slope variance carried by recent exposure: trait_state_20261027/summary.json (score22, hours: 0.2%,
+% upper 95% 1.1%) and RESULTS.md reconciliation (21-day count: about 2% within, 3% between persons)
+\newcommand{\stateShareIdx}{under 1}
+\newcommand{\stateShareCount}{2 to 3}
+% race-distance efforts, combined placement model (RA0): combined_placement_20261109/boot_ra0.json
+% "heat: acclimation score22 (per unit)", "heat: volume (per SD)"
+\newcommand{\scoreRace}{$-0.93$ [$-1.27$, $-0.62$]}
+\newcommand{\volumeRace}{0.21 [0.11, 0.31]}
+% NJ: deviation_pos_marathon_fs2, deviation_pos_half_fs2
+\newcommand{\devMar}{0.11 [0.04, 0.18]}
+\newcommand{\devHalf}{0.11 [0.07, 0.16]}
+% NJ: hometown_recent_alone_marathon / _half (recommended single-term model); illustration: derived_numbers.log part 2
+\newcommand{\homeMarAlone}{$-0.047$ [$-0.069$, $-0.024$]}
+\newcommand{\homeHalfAlone}{$-0.062$ [$-0.095$, $-0.029$]}
+\newcommand{\homeIllusMar}{0.4}
+\newcommand{\homeIllusMarMin}{0.9}
+\newcommand{\homeFinMar}{1{,}197{,}267}
+\newcommand{\homePersMar}{337{,}536}
+\newcommand{\homeEdMar}{302}
+\newcommand{\homeFinHalf}{915{,}106}
+\newcommand{\homePersHalf}{306{,}038}
+\newcommand{\homeEdHalf}{224}
+
+% =====================================================================================================================
+% 5. Between-runner differences (late-October and 9 November results; supersede the July per-runner claims)
+% =====================================================================================================================
+% NJ: trait_persistent_between_runner_sd (1,791 persons), trait_sd_across_heat_seasons (1,304), trait_sd_alternate_weeks,
+% trait_share_persistent_across_summers_pct, trait_reliability_full_history, trait_proxies_joint_share_pct,
+% trait_mass_proxy_share_pct; 66 / 33 %: trait_state_20261027/summary.json hr_variance_budget_shares
+\newcommand{\sdPersistent}{0.28 [0.24, 0.34]}
+\newcommand{\sdWeeks}{0.34 [0.31, 0.38]}
+\newcommand{\sdSeasons}{0.29 [0.24, 0.34]}
+\newcommand{\nSeasonsPersons}{1{,}304}
+\newcommand{\nSlopePersons}{1{,}791}
+\newcommand{\sharePersistent}{66}
+\newcommand{\shareSameSeason}{33}
+\newcommand{\acrossSummers}{74 [62, 85]}
+\newcommand{\reliability}{0.61}
+\newcommand{\proxyShare}{4.7 [0.2, 8.4]}
+\newcommand{\massShare}{0.1 [$-0.8$, 0.9]}
+% NJ: groups_late_half_slopes (gap 0.31 [0.24, 0.38], 1,789 runners), groups_posterior_own_group_pct;
+% cut-points and mean of person slopes: resilience_buckets_20261028/resilience_buckets.json
+\newcommand{\tierCuts}{0.37 and 0.61}
+\newcommand{\muPersons}{0.49}
+\newcommand{\tierLate}{0.32, 0.51 and 0.62}
+\newcommand{\tierGap}{0.31 [0.24, 0.38]}
+\newcommand{\nTierRunners}{1{,}789}
+\newcommand{\postThree}{56}
+\newcommand{\postFour}{42}
+\newcommand{\postFive}{33}
+% combined placement (RA0, miss-trait correlation fixed at 0): combined_placement_20261109/RESULTS.md section 2
+% (combined_placement.json heldout / paired, followups.json, extra_pairs.json); 1,308 hot efforts, 572 runners
+\newcommand{\cpMissPop}{7.92 [7.48, 8.35]}
+\newcommand{\cpTrainPrior}{$-0.02$ [$-0.06$, 0.04]}
+\newcommand{\cpRaces}{$-0.52$ [$-0.72$, $-0.33$]}
+\newcommand{\cpRacesVal}{7.41}
+\newcommand{\cpCombined}{$-0.63$ [$-0.85$, $-0.41$]}
+\newcommand{\cpCombinedVal}{7.30}
+\newcommand{\cpHeatOnly}{$-0.13$ [$-0.21$, $-0.07$]}
+\newcommand{\cpWithEarlier}{736}
+\newcommand{\shareNoEarlier}{44}
+% groups: calibration_ra0.json thirds_with_earlier_hot (736 efforts); followups.json training_trait_thirds
+\newcommand{\groupsEarlier}{0.83, 1.03 and 1.17}
+\newcommand{\gapEarlier}{0.34 [0.06, 0.59]}
+\newcommand{\groupsTrain}{0.91, 0.98 and 1.22}
+\newcommand{\gapTrain}{0.31 [0.02, 0.60]}
+\newcommand{\nTrainThirds}{726}
+\newcommand{\nEarlierThirds}{736}
+\newcommand{\gapNoEarlier}{0.11 [$-0.24$, 0.48]}
+\newcommand{\nNoEarlierTrait}{521}
+% race-to-race persistence of the race-day scale in official results:
+% /weather/data/fade/race_resilience_persistence_20261109/summary.json (marathon.S6_course_disjoint_within, .S7_*,
+% .period_check.S8_course_and_year_disjoint, .S0_naive, .hier, .product.S6_course_disjoint_within_point, .four_cell,
+% half.S6_course_disjoint_within); SD and % at WBGT 21 C, trait terms: RESULTS.md sections 1 and 5;
+% reproduced in build_journal_figures.log
+\newcommand{\persistTau}{8.7 [3.0, 14.3]}
+\newcommand{\persistP}{0.001}
+\newcommand{\persistTauPlacebo}{6.8 [1.0, 12.7]}
+\newcommand{\persistSD}{2.6 [1.0, 3.6]}
+\newcommand{\persistPct}{3.5 [1.3, 4.7]}
+\newcommand{\persistRunners}{33{,}129}
+\newcommand{\persistNeff}{4{,}255}
+\newcommand{\persistTrend}{8.9 [$-2.7$, 20.5]}
+\newcommand{\persistYear}{10.3 [$-4.4$, 24.9]}
+\newcommand{\nRepeatMar}{562{,}388}
+\newcommand{\remlUpper}{0.06}
+\newcommand{\naiveTau}{41.9}
+\newcommand{\naiveP}{37.4}
+\newcommand{\persistRel}{0.04}
+\newcommand{\persistRelPninety}{0.07}
+\newcommand{\persistTercile}{39}
+\newcommand{\persistShrink}{0.09}
+\newcommand{\formCorr}{0.79}
+\newcommand{\contrastCorr}{0.015 [0.000, 0.030]}
+\newcommand{\persistHalf}{$-2.5$ [$-26.6$, 21.5]}
+\newcommand{\persistHalfRunners}{7{,}047}
+\newcommand{\womenScale}{$-1.25$ [$-1.58$, $-0.88$]}
+\newcommand{\subThreeScale}{$-2.50$ [$-3.49$, $-1.63$]}
+\newcommand{\persistSpreadShare}{a third}   % RESULTS.md: persistent part at most about a quarter to a third of the heat-related spread
+% posterior confidence: RESULTS.md section 5 (median most-probable-bucket posterior)
+\newcommand{\postOneRace}{0.38}
+\newcommand{\postFiveRaces}{0.45}
+
+% =====================================================================================================================
+% 6. Table 2 rows: derived_numbers.log part 1. Each row: scale [95% CI] & % slower than at WBGT 10 C (minutes on the
+%    reference finish time) at WBGT 16, 18, 20 and 22 C; scale interval only. Training rows: % only.
+% =====================================================================================================================
+\newcommand{\TabTr}{1 & 0.3 & 0.7 & 1.0 & 1.7}   % Training runs, all
+\newcommand{\TabLong}{2.34 [1.82, 2.87] & 0.8 & 1.6 & 2.5 & 3.9}   % Training runs over 150 min
+\newcommand{\TabFiveK}{1.28 [1.19, 1.36] & 0.4 (0.1) & 0.8 (0.3) & 1.3 (0.4) & 2.1 (0.6)}   % 5K, reference finish 30 min
+\newcommand{\TabTenK}{2.54 [2.26, 2.81] & 0.8 (0.5) & 1.7 (1.0) & 2.7 (1.6) & 4.3 (2.6)}   % 10K, reference finish 60 min
+\newcommand{\TabFifteen}{3.31 [2.70, 3.93] & 1.1 (1.0) & 2.2 (2.0) & 3.5 (3.1) & 5.6 (5.1)}   % 15K and 10 miles, reference finish 90 min
+\newcommand{\TabHalf}{4.21 [3.62, 4.80] & 1.4 (1.6) & 2.8 (3.4) & 4.5 (5.3) & 7.2 (8.6)}   % Half marathon, reference finish 120 min
+\newcommand{\TabMar}{5.09 [4.52, 5.67] & 1.6 (3.9) & 3.4 (8.2) & 5.4 (13.0) & 8.8 (21.0)}   % Marathon, reference finish 240 min

@@ -1,0 +1,313 @@
+% getfast-heat-journal.tex -- journal-length version of the heat and running paper.
+% The long manuscript (../getfast-weather-modeling.tex) is the extended version and is cited for full methods.
+% Every reported number is a macro defined in numbers.tex (with its source; canonical file
+% /weather/data/fade/paper_open_items_20261109/numbers.json). Red brackets mark pending results and author placeholders.
+% Build: latexmk -pdf getfast-heat-journal.tex   (or pdflatex, bibtex, pdflatex, pdflatex)
+\documentclass[12pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{textcomp}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage[table]{xcolor}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{caption}
+\captionsetup{font=small,labelfont=bf,labelsep=period,justification=raggedright,singlelinecheck=false}
+\usepackage{setspace}
+\usepackage[mathlines]{lineno}
+\usepackage[numbers,sort&compress]{natbib}
+\usepackage{tcolorbox}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+\graphicspath{{figures/}{../figures/}}
+\setlength{\emergencystretch}{2em}
+
+\input{numbers}
+
+% ---- notation ------------------------------------------------------------------------------------------------------
+\newcommand{\degC}{\,\textdegree C}
+\newcommand{\cW}{$c(W)$}
+\newcommand{\bpmC}{bpm per \textdegree C}
+
+% word-count build (wordcount.sh): pdflatex "\def\wordcountbuild{1}\input{getfast-heat-journal}" drops the line
+% numbers; tables and figures already sit after the references, outside the counted span
+\ifdefined\wordcountbuild
+  \AtBeginDocument{\let\linenumbers\relax}
+\fi
+
+\begin{document}
+
+% =====================================================================================================================
+% TITLE PAGE
+% =====================================================================================================================
+\begin{titlepage}
+\begin{flushleft}
+{\Large\bfseries The performance cost of environmental heat in recreational distance runners: from within-runner training data to official race results\par}
+\vspace{1.2em}
+\textbf{Running head:} Heat cost from training to race day\par
+\vspace{1.2em}
+Peter Dunphy, Thomas Mulc, Gabe Cupino\par
+\vspace{0.4em}
+Kailo, Mountain View, CA, USA\par
+\vspace{1.4em}
+\textbf{Corresponding author:} \placeholder{name, postal address, e-mail address and telephone of the corresponding author}\par
+\vspace{1.4em}
+\textbf{Word count:} abstract \wcAbstract{} words; main text \wcMain{} words (Introduction to Conclusions, excluding the key-points box, references, tables and figure legends)\par
+\textbf{Tables:} 2\quad \textbf{Figures:} 4\par
+\vspace{1.4em}
+\textbf{Extended version:} full methods and additional analyses are given in reference \citenum{dunphy2026extended}.\par
+\vspace{1.4em}
+{\small\textcolor{otred}{Working draft. Red brackets mark items to be supplied by the authors.}\par}
+\end{flushleft}
+\end{titlepage}
+
+% =====================================================================================================================
+% ABSTRACT
+% =====================================================================================================================
+\begin{onehalfspace}
+\section*{Abstract}
+\noindent\textbf{Purpose:} To quantify the performance cost of environmental heat in recreational runners, from training to race day, and to examine heat acclimation and between-runner differences.
+
+\noindent\textbf{Methods:} We analysed \nRuns{} GPS-recorded training runs (\nRunners{} runners) and official results of 5-km to marathon races, computing wet-bulb globe temperature (WBGT) along each run and race window. A training-run heat curve was scaled within runner by expected duration and against within-person edition effects. Secondary outcomes were heart rate (HR) at matched load and individual differences.
+
+\noindent\textbf{Results:} Versus 10\degC, training pace slowed at most \cFourteen\% up to WBGT 14\degC{} and \cTwentyeight\% at 28\degC; the within-runner scale rose from \scLtThirtyPt{} (runs under 30\,min) to \scGtOneFiftyPt{} (over 150\,min). Race-day scales rose with race duration, from \alphaFiveK{} (5K; 95\% CI) to \alphaHalfCI{} (half marathon) and \alphaMarCI{} (marathon), about \ratioRound{} the training scale at matched duration: \marMinTwenty{} min for a 4:00 marathon at WBGT 20\degC. In the heat, excess HR at matched load halved within \kinOnsetHalf{} hot-run days and returned with a half-life of \kinDecayHalf{} days without heat. Runners differed persistently in training HR heat slope (SD \sdPersistent{} \bpmC; at most three tiers), but this did not predict race-day heat cost, which was barely repeatable between races (reliability of a runner's race history about \persistRel).
+
+\noindent\textbf{Conclusions:} Heat costs recreational runners more the longer the race, and about \ratioRound{} as much as training runs of equal duration.
+
+\vspace{0.6em}
+\noindent\textbf{Keywords:} wet-bulb globe temperature; heat acclimatization; marathon; half marathon; heart rate; wearable sensors
+\end{onehalfspace}
+
+\vspace{1em}
+\begin{tcolorbox}[colback=white,colframe=black,boxrule=0.6pt,arc=0pt,left=6pt,right=6pt,top=4pt,bottom=4pt,title=Key points,coltitle=black,colbacktitle=gray!15,fonttitle=\bfseries]
+\begin{itemize}[leftmargin=1.2em,itemsep=2pt,topsep=2pt]
+\item Within the same recreational runners, the pace cost of heat on training runs was close to zero up to a WBGT of about \flatToWBGT\degC{}, accelerated above it, and grew with the duration of the run.
+\item In official results, finish times followed the same curve at a scale rising with race duration, from about \alphaFiveKRound{} for the 5K to about \alphaMarRound{} for the marathon, about \ratioRound{} the cost of training runs of the same duration: \marMinTwenty{} min for a 4:00 marathon at WBGT 20\degC.
+\item Heat acclimation was visible in HR at matched load, building within about \kinBuildRound{} hot runs and fading over one to two weeks without heat; runners differed persistently in their training HR response to heat (at most three groups), but neither this nor race history sorted runners reliably by race-day heat cost.
+\end{itemize}
+\end{tcolorbox}
+
+\newpage
+\doublespacing
+\linenumbers
+
+% =====================================================================================================================
+\section{Introduction}
+% =====================================================================================================================
+Heat is among the most consistent environmental limits on endurance performance. During running most metabolic energy is released as heat; when the environment cannot remove it fast enough, skin blood flow competes with working muscle for cardiac output, sweat losses accumulate, and core temperature rises toward levels at which runners reduce their pace \cite{cheuvront2001,maughan2007,racinais2015}. The cost grows with the length of the event: across World Championships, sprint performances improved in the heat while the marathon was the most impaired event \cite{guy2015art}. Because warming has made record heat more frequent \cite{king2017,russo2014}, more mass-participation races are run in conditions in which these limits bind.
+
+Field estimates of the cost come mainly from race results, which show slowing that is small in cool conditions and grows with wet-bulb globe temperature (WBGT) \cite{ely2007,elhelou2012,knechtle2019,mantzios2022,vernon2021}. Most of these designs compare fields rather than people, so an edition's result also reflects who entered, started and finished. Controlled studies isolate the physiology and show that 5 to 14 days of heat exposure lower heart rate (HR) and core temperature at a fixed workload and improve performance in the heat \cite{periard2015,tyler2016art,tyler2024,james2017}, but they include tens of participants and rarely connect to race outcomes.
+
+Wrist-worn GPS devices now record recreational runners' training in the conditions they actually meet, which allows within-runner comparisons of hot and cool days at scale. It is unknown whether a heat cost estimated on training runs, when a runner can slow down, shorten the session or move it to a cooler hour, describes what heat does on race day, how quickly heat exposure changes the cost in free-living runners, and whether runners differ in heat sensitivity consistently enough to be told apart.
+
+The primary aim was to quantify the performance cost of environmental heat in recreational runners, linking a within-runner dose--response on training runs to race-day finish times in official results from 5\,km to the marathon. The secondary aims were (i) to describe how heat acclimation builds and decays in HR at matched load, and how recent exposure relates to race-day cost, and (ii) to estimate how persistent and how measurable individual differences in heat sensitivity are, in training and on race day. Full methods and further analyses are reported in an extended version \cite{dunphy2026extended}.
+
+% =====================================================================================================================
+\section{Methods}
+% =====================================================================================================================
+\subsection{Study design}
+This retrospective observational study had three components: within-runner analyses of GPS-recorded training runs, analyses of race-distance efforts by the same runners, and within-person analyses of official marathon and half-marathon results, all secondary uses of existing records (see Declarations).
+
+\subsection{Data sources and participants}
+\paragraph{Training runs.} The corpus comprised outdoor runs recorded on Garmin devices by users of a training platform who had connected their accounts and permitted research use of their data. A run was retained when its mean pace was above 2.5 and below 11.5\,min\,km$^{-1}$, its mean HR above 60 and below 210\,bpm and its run-averaged WBGT at or below 28\degC, and when every covariate used below was present. The pace and HR bounds remove sensor and GPS artefacts; the WBGT ceiling reflects sparse data above it; runs without GPS were not included. Accounts belonging to one person were merged for the between-runner analyses.
+
+\paragraph{Race-distance efforts.} Runs of 20.9 to 21.6\,km or 41.68 to 43.45\,km, with a mean HR of at least 80\% of the runner's estimated maximum, at least 20 earlier runs with weather, and a pre-race finish-time prediction, were analysed as race-distance efforts. The prediction came from a fitness model that uses only earlier training (fastest-segment times over preceding windows) \cite{dunphy2026extended}. Race labels are not available, so these efforts include an unknown share of training runs at race distance.
+
+\paragraph{Official results.} Finish lists of marathons and half marathons held from 2014 to 2026 were assembled from a public results service, excluding virtual and cancelled editions, 2020, editions listed only as a multi-day weekend, and editions whose date or first mass-start time could not be verified from an official page or a news report. Finishers were linked across editions on normalised name, sex and a birth-year interval, with hometown as a tie-breaker; disagreement with the service's persistent member identifier, where present, bounded the false-link rate. Races from 5\,km to 10 miles came from a second public results service (United States) that records each event's scheduled start, with finishers linked within a course in the same way.
+
+\subsection{Environmental exposure}
+Exposure was outdoor WBGT ($0.7\,T_{\mathrm{nwb}} + 0.2\,T_{\mathrm{g}} + 0.1\,T_{\mathrm{a}}$), computed with the thermofeel library \cite{brimicombe2022} from air temperature, dew point, wind speed and shortwave and direct radiation, with mean radiant temperature derived from the radiation fluxes and the solar zenith angle. For training runs, weather came from a self-hosted instance of the Open-Meteo service \cite{zippenfenig2023} (the finest model available, 15-min or hourly), sampled at the start, every 15\,min and at the finish, and each run was summarised by its time-weighted mean WBGT. For each race edition, the date came from the published schedule, the start time from official pages or news reports (first mass-start wave; scheduled start for short races), and hourly ERA5 reanalysis \cite{hersbach2020} at the start line (the race city's 0.25\textdegree{} cell for short races) was interpolated and averaged from the start to the start plus the edition's median finish time. Over this window, the rise in WBGT and the degree-hours above 22\degC{} were computed, and the deviation from recent climate was the window WBGT minus the mean over the same clock window on the 60 preceding days.
+
+A runner's recent exposure was summarised by a heat-exposure index between 0 and 1, computed from earlier runs only and updated daily: it rises in proportion to heat-weighted running time (minutes weighted from 0 at WBGT 22\degC{} to 1 at 28\degC, divided by 60 and capped at 1 per day; gain 0.15 times this stimulus times the remaining capacity) and decays by 2.5\% per day, following published kinetics \cite{racinais2015,daanen2018art}. For finishers in the official results, the published hometown was geocoded to a 1\textdegree{} cell (at least 30 persons), and a decay-weighted (14-day half-life) home WBGT over the 60 days before each race was expressed relative to the course's 60-day pre-race value.
+
+\subsection{Outcomes}
+For training runs the outcome was $100 \times \ln(\text{mean pace})$, which approximates a percentage change. For official results it was the within-person edition effect, estimated per course from same-course repeat pairs as $\ln(t_b/t_a) = e_b - e_a + \text{age term}$, with person-clustered standard errors; editions with fewer than 30 repeat pairs were dropped, and no drift term was fitted because it is collinear with the edition contrasts (long-run change enters through calendar-year effects). HR at matched load was the run's mean HR adjusted for relative speed, 30-day pace and distance, duration, climb and start hour. For race-distance efforts the outcome was the loss, $100 \times \ln(\text{actual}/\text{predicted finish time})$, re-centred on cool efforts (WBGT below 12.5\degC) of other runners, and its ratio $\rho$ to the population-typical race-day heat cost.
+
+\subsection{Statistical analysis}
+\paragraph{Training-run heat curve.} The shape of the heat response was taken from a transformer network trained on 90\% of runners to predict pace from each runner's 30 most recent activities, each represented as 128-point streams of pace, HR, cadence, power, distance, altitude, cumulative climb and WBGT, with date, latitude and activity type \cite{dunphy2026extended}. Sweeping WBGT through the trained network with all other inputs held fixed gave each runner's predicted pace across conditions. The curve \cW{} combines the median of the runners' normalised response shapes (\curveShapeRunners{} runners) with the median sensitivity of a reference sample (\curveRefRunners{} runners); it is zero at and below WBGT 10\degC{} and held constant above 28\degC{} \cite{dunphy2026extended}. These samples include \curveShapeHoldout{} and \curveRefHoldout{} runners from the network's holdout; a curve built on fitting runners alone differs from it by at most \curveHoldoutDiff{} percentage points. The network received no constraint on shape. Every magnitude reported below was estimated by regression on \cW, so the curve enters as a fixed covariate and its scale is estimated.
+
+\paragraph{Within-runner dose--response.} On training runs, $100 \ln(\text{pace})$ was regressed on \cW{} within runner, with a cold term $\max(0, 10 - W)$, log distance, climb per kilometre (clipped at 100\,m\,km$^{-1}$) and log 30-day pace, separately within five bands of expected duration (distance times 30-day pace: under 30, 30 to 60, 60 to 90, 90 to 150 and over 150\,min), with runner-by-band intercepts. Expected rather than actual duration was used because heat itself lengthens a run, and HR was omitted because heat raises it. Race-distance runs were removed and runners needed at least 20 runs. Standard errors were clustered by runner and by date and country. A continuous version interacted \cW{} with log expected duration. Effort was examined with a label fixed before the run (the runner's usual share of maximal HR on that weekday), in thirds within runner. To check that the design does not produce a gradient by itself, the estimator was applied to data simulated with one common scale.
+
+\paragraph{Race-day scale.} Edition effects were regressed on course and calendar-year fixed effects and $\alpha\,c(\bar W)$, where $\bar W$ is the race-window WBGT, by weighted least squares (weights $1/\mathrm{SE}^2$), separately for each distance; marathons and half marathons were also fitted jointly with a distance interaction, short-race intervals were clustered by course, and the scales of ten distances were regressed on the log of median finish time. The coefficient $\alpha$ states how many times the training-run curve the race-day cost is; dividing it by the training scale of the matching duration band gave a race-to-training factor (delta method). Fit is reported as the partial $R^2$ of the curve beyond the fixed effects, because the overall $R^2$ includes the calendar trend absorbed by the year effects. Robustness analyses used quantiles of the within-person deviations, finish-time tiers assigned from each runner's other finishes (so that tiers are not built from the outcome), a free piecewise-linear shape compared by leave-one-race-out cross-validation, and the WBGT rise and degree-hours as added terms. Official split times gave the share of the heat cost incurred in the second part of the race.
+
+\paragraph{Recent heat exposure.} (a) Kinetics: the HR excess was a run's HR minus a within-person load model fitted on cool runs (log pace, log duration, climb), the start-hour effect and the population heat cost, on runs of at least 20\,min; a hot run lasted at least 20\,min at WBGT 22\degC{} or above. Three natural experiments used it. Onset: the first hot-run day after 45 or more days without one, with the excess on hot runs modelled by the number of earlier hot-run days (episode fixed effects, a days-since-onset trend, a control for a hot run the day before) and compared with calendar days and ambient heat by person bootstrap. Trips: runs more than 500\,km from a rolling home, classed as hot ($\geq$5\degC{} warmer than nearby home runs), neutral (within 2\degC) or cool ($\geq$5\degC{} cooler), with the excess relative to home runs in the 45 preceding days regressed on days since arrival (trip fixed effects). Breaks: after at least four hot-run days in 14, the first hot run back was compared with the block's last week, by break length. Exponential fits gave half-lives, and a recursive state (gain proportional to remaining capacity, first-order decay) was fitted by profile likelihood with a future-dose placebo. (b) Race-distance efforts: the exposure index entered the placement model below. (c) Official results: the positive deviation from recent climate was added to the edition regression, and in the hometown design $\ln(\text{finish time})$ was regressed on person and edition fixed effects and the interaction of $c(\bar W)$ with recent home climate (percent of finish time per percentage point of curve per \textdegree C), clustered by person.
+
+\paragraph{Between-runner differences.} Each person's HR heat slope above WBGT 15\degC{} was estimated in the matched-load model (persons with at least 10 runs above 15\degC). Because errors of consecutive runs are correlated, the true between-person variance was estimated as the covariance of slopes from disjoint halves of each history: alternate calendar weeks, early against late history (the persistent part), and odd against even heat seasons. The persistent variance explained by proxies (body mass from active energy per kilometre, a stride-based height proxy, maximal HR, fitness, volume) was cross-fitted over five folds of persons, and empirical-Bayes-shrunk slopes were cut into three, four or five equal-probability tiers on the early half of each history and evaluated on the late half. Race-day placement used a linear mixed model of the loss with two effects per runner, a personal miss against the prediction that applies at every temperature and a heat trait (a multiple of the typical cost), with the exposure index and 28-day volume in the heat term and an optional training-derived prior for the trait. It was fitted by restricted maximum likelihood on four of five runner folds, each held-out effort's runner effects coming from that runner's earlier efforts only; the correlation between the two effects was fixed at zero after inspection. Pre-specified comparisons added earlier efforts, the training-derived trait and the exposure index to a population model, judged by the mean absolute error of predicted loss on hot efforts (WBGT at or above 18\degC) with runner-bootstrap intervals. Persistence of the race-day scale in official results was estimated by splitting each runner's editions into two halves that shared no course, each with warm (WBGT 15\degC{} or above) and cool editions; within each half, edition-adjusted log finish time was regressed on the curve value relative to the course mean, and the precision-weighted covariance of the two slopes estimated the persistent between-runner variance, with delete-one-course jackknife intervals and placebos that shuffled heat within runner or across years within course.
+
+\paragraph{Inference.} Estimates are reported with 95\% confidence intervals (CI), from cluster-robust standard errors or from bootstrap resampling of runners, persons or race dates, as detailed in the extended version \cite{dunphy2026extended}. The within-runner training scale by duration and $\alpha$ for each distance were designated primary. All other analyses are secondary, were not adjusted for multiplicity, and their intervals should be read as descriptive; $p$ values are given only for key contrasts. Analyses used Python with statsmodels, scikit-learn and JAX.
+
+% =====================================================================================================================
+\section{Results}
+% =====================================================================================================================
+\subsection{Cohorts}
+The corpus held \nRuns{} runs by \nRunners{} runners (median \runsPerRunnerMed{} runs per runner, interquartile range \runsPerRunnerIQR) recorded from \corpusFirst{} to \corpusLast{} in \nCountries{} countries (Table~\ref{tab:cohorts}). Median run WBGT was \wbgtMed\degC{} (10th to 90th percentile \wbgtPten{} to \wbgtPninety\degC); \shareEighteen\% of runs took place at 18\degC{} or above and \shareTwentytwo\% at 22\degC{} or above. There were \nEfforts{} race-distance efforts (\nEffHalf{} half, \nEffMar{} marathon) by \nEffRunners{} runners, \nEffHot{} of them at WBGT 18\degC{} or above (\nEffHotRunners{} runners). The official results comprised \nFinishes{} finishes by \nPersons{} persons, \nRepeaters{} of whom finished twice or more, and edition effects were estimable on \nCoursesEff{} courses. After exclusions (\nNoStart{} held editions outside 2020 lacked a sourced first mass-start time), \nEdMar{} marathon editions of \nRacesMar{} races and \nEdHalf{} half-marathon editions of \nRacesHalf{} races, with \nFinAnalysis{} finishes, entered the analysis. Their race-window WBGT ranged from \wbgtRangeMar\degC{} for marathons (\edMarEighteen{} editions at 18\degC{} or above, \edMarTwentytwo{} at 22\degC{} or above) and from \wbgtRangeHalf\degC{} for half marathons (\edHalfEighteen{} and \edHalfTwentytwo). The member identifier disagreed with the linkage for \falseLink\% of the persons on whom it could be checked.
+
+\subsection{Training-run dose--response}
+The training-run curve was close to zero up to WBGT 14\degC{} (\cFourteen\%) and then rose at an increasing rate, to \cSixteen\% at 16\degC, \cTwenty\% at 20\degC, \cTwentyfour\% at 24\degC{} and \cTwentyeight\% at 28\degC, relative to 10\degC{} (Fig.~\ref{fig:dose}A). Within runner, the scale on this curve increased with expected run duration, from \scLtThirty{} for runs under 30\,min (\nLtThirty{} runs) to \scThirtySixty{} (30 to 60\,min), \scSixtyNinety{} (60 to 90\,min), \scNinetyOneFifty{} (90 to 150\,min) and \scGtOneFifty{} for runs over 150\,min (\nGtOneFifty{} runs by \nGtOneFiftyRunners{} runners) (Fig.~\ref{fig:dose}B). Across the bands the scale rose by about \trainPerDoubling{} per doubling of duration. Applied to data simulated with one common scale of \placeboTrue, the estimator returned \placeboRange{} in every band. With effort fixed before the run, hard days were not steeper than easy days (difference \effortGradient\% per \textdegree C). At WBGT 20\degC, a training run of over 150\,min was therefore \longTwenty\% slower than at 10\degC{} (Table~\ref{tab:cost}).
+
+\subsection{Race-day scale in official results}
+Within-person edition effects rose with the value of the training-run curve at each edition's WBGT (Fig.~\ref{fig:raceday}). The race-day scale was $\alpha$ = \alphaMarCI{} for the marathon (partial $R^2$ of the curve \prsqMar) and \alphaHalfCI{} for the half marathon (\prsqHalf), a difference of \alphaDiff{} ($p$ = \alphaDiffP). Relative to training runs of matching duration, the race-day cost was \ratioMar{} times larger for the marathon and \ratioHalf{} times larger for the half marathon (Fig.~\ref{fig:dose}B). At a race-window WBGT of 21\degC{} a marathon took \marPctTwentyone\% longer than at 10\degC, \marMinTwentyone{} min on a 4:00 finish. Table~\ref{tab:cost} converts the scales into finish time across distances and conditions; at WBGT 20\degC{} a 4:00 marathon was \marMinTwenty{} min slower than at 10\degC. In official results of shorter races the scale was \alphaFiveK{} for the 5K (\nEdFiveK{} editions of \nCrFiveK{} races, \nWarmFiveK{} at WBGT 18\degC{} or above), \alphaTenK{} for the 10K (\nEdTenK{}, \nCrTenK{}, \nWarmTenK) and \alphaFifteen{} for 15\,km and 10 miles pooled (\nEdFifteen{}, \nCrFifteen{}, \nWarmFifteen; \alphaFifteenNoBoiler{} without the race with the largest weight). Across ten distances from 5\,km to the marathon, $\alpha$ = \durIntercept{} + \durSlope{}\,ln(median finish time, min) (weighted $R^2$ \durRsq), about \durPerDoubling{} per doubling of race duration against \trainPerDoubling{} for training runs, so races cost \raceOverTrainRange{} times the training scale at matched duration (Fig.~\ref{fig:dose}B). In this source the marathon scale was \rsuMar{} and the half-marathon scale \rsuHalf{}; shifting every start by one hour changed the scale by \startShift\%. Within each distance, the scale was highest for mid-pack finishers and lower for the fastest and slowest.
+
+The scale did not depend on a minority of runners who slowed markedly. Estimated on the median of each edition's within-person deviations it was \alphaMarMedian{} for the marathon and \alphaHalfMedian{} for the half marathon; on the 25th percentile, \alphaMarQtf{} and \alphaHalfQtf. Finish-time tiers assigned from each runner's other finishes showed no linear trend in the marathon (\tierMarTrend{} per hour) or half marathon (\tierHalfTrend). A free piecewise shape rose earlier than the scaled curve (\freeFourteen{} against \scaledFourteen{} log points at WBGT 14\degC, marathon) but lowered leave-one-race-out error only from \rmseScaled{} to \rmseFree{} (\rmseNoWx{} without weather).
+
+At matched mean WBGT, each degree of rise over the race window added \riseMar\% of finish time in the marathon and \riseHalf\% in the half marathon (pooled \risePooled\%). Degree-hours above 22\degC, non-zero in \nDhMar{} marathon and \nDhHalf{} half-marathon editions, were not distinguishable from zero alongside the curve (\dhMar{} and \dhHalf\% per \textdegree C\,h). In official split times (\nSplitRunners{} runners in \nSplitEd{} editions of \nSplitCourses{} courses), \lateShare\% of the heat cost in the \nSplitWarm{} warm editions fell in the second part of the race.
+
+\subsection{Recent heat exposure}
+At matched load, HR rose by \hrSlope{} \bpmC{} above WBGT 15\degC{} plus \hrSlopeTwentyfour{} above 24\degC{} (\hrRuns{} runs, \hrPersons{} persons), and this cost was larger before acclimation (Fig.~\ref{fig:kinetics}). After 45 or more days without heat (\kinOnsetEpisodes{} episodes, \kinOnsetPersons{} persons), the excess fell by \kinOnsetDecline{} bpm, half of it within \kinOnsetHalf{} hot-run days. On hot trips (\kinTrips{} trips, \kinTripPersons{} runners) the half-life was \kinTripHalf{} days and the excess declined by \kinSlopeHot{} bpm per day over the first week, against \kinSlopeNeutral{} on neutral (\kinTripsNeutral) and \kinSlopeCool{} on cool trips (\kinTripsCool); the arrival level (about \kinArrival{} bpm above neutral trips) depends on the baseline used. The count of hot-run days described the build better than calendar days (\kinCountCal\% of bootstraps) or ambient heat (\kinCountAmb\%), neither of which added to it (\kinCalAdd{} and \kinAmbAdd{} bpm). After a block of hot running (\kinBreaks{} breaks, \kinBreakPersons{} persons), the first hot run back carried \kinBreakFour, \kinBreakEight, \kinBreakFifteen{} and \kinBreakTwentynine{} bpm more excess after 4--7, 8--14, 15--28 and 29--56 days off, a decay half-life of \kinDecayHalf{} days; state models gave \kinStateOnset{} and \kinStatePanel{} days. On \kinNonhotBreaks{} breaks with non-hot runs at both ends, the hot-run rise exceeded the non-hot rise by \kinNonhotDiD{} bpm at 15--28 days, so up to about a third of the rise was not specific to heat. Saturation was not identified, and a shift in HR at every WBGT failed the future-dose placebo.
+
+In the placement model, each unit of the exposure index changed the race-day heat cost by \scoreRace{} times the typical cost (28-day volume \volumeRace{} per SD). In official results, each degree by which race-window WBGT exceeded the 60-day climate added \devMar\% of finish time in marathons and \devHalf\% in half marathons. A warmer recent home climate went with a smaller heat cost, by \homeMarAlone{} percent of finish time per percentage point of curve per \textdegree C in marathons (\homeFinMar{} finishes, \homePersMar{} persons, \homeEdMar{} editions) and \homeHalfAlone{} in half marathons (\homeFinHalf, \homePersHalf, \homeEdHalf); for a marathon at WBGT 22\degC, a home climate 5\degC{} warmer than the course corresponds to \homeIllusMar\% (\homeIllusMarMin{} min on 4:00).
+
+\subsection{Between-runner differences}
+The true between-person SD of the HR heat slope was \sdPersistent{} \bpmC{} between the early and late halves of each history (\nSlopePersons{} persons) and \sdSeasons{} between different heat seasons (\nSeasonsPersons{} persons), against a population slope of \hrSlope. The persistent part made up \sharePersistent\% of the systematic between-person variance, the remaining \shareSameSeason\% varying within a season, and \acrossSummers\% of the alternate-week variance persisted across summers. The split-half reliability of a slope estimated from a full history was \reliability. The proxies jointly explained \proxyShare\% of the persistent variance, and the body-mass proxy \massShare\%.
+
+Three tiers formed on the early half of each history separated later-half slopes of \tierLate{} \bpmC{} (upper minus lower \tierGap; \nTierRunners{} runners; Fig.~\ref{fig:between}A,B). The median runner's posterior probability of belonging to the assigned tier was \postThree\% with three tiers, \postFour\% with four and \postFive\% with five.
+
+On the \nEffHot{} hot race-distance efforts (\nEffHotRunners{} runners), the held-out mean absolute error of the population model was \cpMissPop{} percentage points of finish time. The training-derived trait did not change it (\cpTrainPrior), the runner's earlier race-distance efforts reduced it by \cpRaces{} (to \cpRacesVal), and these with the exposure index by \cpCombined{} (to \cpCombinedVal). Most of the gain came from the personal miss, which applies at every temperature; the heat-specific part alone gave \cpHeatOnly. Among runners with an earlier hot effort, thirds of the estimated trait had race-day heat costs of \groupsEarlier{} times typical (upper minus lower \gapEarlier), against \groupsTrain{} (\gapTrain) for thirds of the training-derived trait (Fig.~\ref{fig:between}C), but the median posterior probability of the most probable third was only \postOneRace{} after one earlier hot effort and \postFiveRaces{} after five or more. \shareNoEarlier\% of hot efforts had no earlier hot effort; among these, training-derived thirds differed by \gapNoEarlier. Fixing the personal-miss and trait correlation at zero left the held-out error unchanged.
+
+In official results, race-day heat cost showed little persistence between races (Fig.~\ref{fig:between}D). With marathon races split into halves sharing no course (\persistRunners{} runners, effective sample \persistNeff), the between-runner variance of the race-day scale was \persistTau{} (one-sided $p$ = \persistP), \persistTauPlacebo{} after subtracting the placebo, an SD of \persistSD{} scale units (\persistPct\% of finish time at WBGT 21\degC). The estimate was fragile: with personal trends it was \persistTrend, with halves that also shared no calendar year \persistYear, and a random-slope model fitted to all \nRepeatMar{} repeat marathoners placed it at zero (upper bound \remlUpper). A naive split sharing courses gave \naiveTau, of which shuffling hot years within course reproduced \naiveP. A runner's whole race history measured the scale with reliability \persistRel{} (90th percentile \persistRelPninety); thirds assigned from it would be right for \persistTercile\% of runners against 33\% by chance, and one earlier hot race at WBGT 21\degC{} would move the forecast for the next by about \persistShrink{} of its excess. General form persisted (correlation of cool-race levels between halves \formCorr), the warm-minus-cool contrast did not (\contrastCorr). In half marathons persistence was not identified (\persistHalf; \persistHalfRunners{} runners). Women (\womenScale) and runners finishing under 3:00 (\subThreeScale) had lower scales.
+
+% =====================================================================================================================
+\section{Discussion}
+% =====================================================================================================================
+\subsection{Principal findings}
+On training runs, the cost of heat was negligible up to a WBGT of about \flatToWBGT\degC{} and then accelerated, and within the same runners it grew with the duration of the run. In official results, within-person finish times followed approximately the same curve at a scale rising with race duration, from about \alphaFiveKRound{} for the 5K to about \alphaMarRound{} for the marathon, roughly \ratioRound{} the cost of training runs of the same duration. Heat acclimation was visible in HR at matched load, building over about \kinBuildRound{} hot-run days and fading with a half-life of about \kinDecayRound{} days, and recent heat exposure was associated with a smaller race-day cost. Runners differed persistently in their HR response to heat in training, but race-day heat cost showed little detectable persistence between races, and the gain from a runner's earlier races came mostly from their general standing rather than from heat.
+
+\subsection{Comparison with previous work}
+The flat-then-accelerating shape agrees with syntheses of elite racing, in which performance was stable up to about 15\degC{} WBGT and declined above it \cite{mantzios2022}, and with mass-field marathon analyses \cite{ely2007,elhelou2012,knechtle2019}; the race-day response began at a lower WBGT than the scaled training curve, consistent with optimal marathon air temperatures of about 4 to 12\degC{} \cite{elhelou2012,maughan2010,llewellyn2025}. The magnitudes are of the order reported for mass fields: in seven North American marathons the 50th finisher slowed by 3.5\% between the coolest and warmest WBGT quartile and the 300th by 7.9\% \cite{ely2007}, and at the warm 2018 London Marathon finishers were about 14\% slower than their own expectations \cite{vernon2021}. The present estimates compare the same people across editions, so changes in who enters or finishes affect them less.
+
+The dependence on duration matches the ordering of events in championship data, in which the marathon was the most impaired \cite{guy2015art}, and it extends that ordering to recreational races from 5\,km upward and to the training of individual runners. Duration and intensity were not separated: within a distance, mid-pack finishers lost the most and the fastest and slowest less, so the gradient across distances is not a pure effect of time on course. The back-loading of the race-day cost agrees with marathon pacing data in which the gap between closing and opening 5-km pace widened with temperature \cite{ely2008}, and with laboratory evidence that running speed falls once core temperature approaches about 39\degC{} part-way through a hot half marathon \cite{rodrigues2020}.
+
+The HR kinetics resemble those of controlled acclimation. Half of the build came within about \kinBuildRound{} hot-run days, as in induction studies in which the HR reduction develops most rapidly over 4 to 5 days and is virtually complete after 7 \cite{periard2015,pandolf1998}, and it followed the number of exposures rather than elapsed time or ambient heat. The decay half-life of about \kinDecayRound{} days is faster than the meta-analytic loss of 2.3\% of the HR adaptation per day \cite{daanen2018art} but within published ranges, perhaps because free-living exposures are milder than laboratory protocols; the exposure index used on race-distance efforts decays at the slower literature rate. The added cost of a race warmer than the preceding weeks agrees with the London Marathon differential \cite{vernon2021}, and the hometown association with the advantage of athletes from warmer countries in a desert ultramarathon \cite{ioannou2018}.
+
+The persistent between-runner SD of \sdPersistent{} \bpmC{} is large next to the population slope, yet body size, a source of differences in heat strain in laboratory studies \cite{marino2000,cramer2014}, explained almost none of it. Most training runs are in compensable conditions, where that mechanism is weakest, and the mass proxy is indirect, so this concerns the proxy rather than body mass. On race day, at most about \persistSpreadShare{} of the extra spread of finish times in heat was persistent, so the stable HR difference seen in training is not, in these data, a usable measure of an individual's race-day heat tolerance; group differences, such as the lower scale of women and of the fastest runners, were more robust.
+
+\subsection{Mechanisms}
+Three features of racing plausibly make heat cost more than in training of the same duration. First, a race is run close to the highest sustainable output: in training part of the heat strain is absorbed as a higher HR at an unchanged pace, whereas at race intensity it has to be paid in pace \cite{cheuvront2001,periard2015}. Second, a race fixes the distance, date and start time, while in training a runner can shorten, slow down or move to a cooler hour, which attenuates the training estimate. Third, race pace is set in advance and corrected late, which fits the back-loaded cost in the splits \cite{rodrigues2020}. The race-day scale therefore combines physiology with pacing and selection, and is not a purely physiological multiplier.
+
+\subsection{Practical applications}
+For a recreational marathoner, heat begins to cost time at a WBGT of about \costStartRange\degC{} and the cost rises quickly: about \marMinSixteen, \marMinEighteen, \marMinTwenty{} and \marMinTwentytwo{} min for a 4:00 runner at 16, 18, 20 and 22\degC, and less over shorter races (Table~\ref{tab:cost}). Slowing on hot training runs, even long ones, understates the race-day cost, so goals and pacing plans should follow the forecast race-window WBGT rather than training experience. The HR strain of heat eases after a few hot runs and the benefit fades over one to two weeks without heat, so hot running in the last weeks before a race, or arriving early, is what counts. Neither training data nor race history sorted individual runners reliably by race-day heat tolerance, so individual adjustments beyond the population scale are not supported by these data.
+
+\subsection{Strengths and limitations}
+Strengths are within-person designs on training and race data, which hold ability constant; race weather from each edition's official date, start and location; samples large enough to resolve the warm range; and independent sources analysed on a common heat curve. The design is observational, and the race-day scale absorbs pacing, field composition and selection; only finishers are observed, so more non-finishing in heat would bias it downward. Exposure comes from gridded weather fields rather than on-course measurement. Marathon editions reached a race-window WBGT of \wbgtMaxMar\degC, with \edMarTwentytwo{} at 22\degC{} or above, so costs beyond about 22\degC{} are extrapolations. The corpus consists of self-selected device users, and its race-distance efforts are not confirmed races. The curve comes from a learned model and $\alpha$ is a ratio to it, and a single scale only approximates the race-day shape. Short-race results are from the United States only, with weather at the race city. Linkage relies on names, HR was measured optically, sex was not observed in the corpus, secondary analyses were not adjusted for multiplicity, and one placement-model choice was made after inspection.
+
+% =====================================================================================================================
+\section{Conclusions}
+% =====================================================================================================================
+Environmental heat slows recreational distance runners little below a WBGT of about \flatToWBGT\degC{} and progressively more above it. The same curve, estimated within runners on training runs, describes race-day finish times in official results at a scale that rises with race duration, from about \alphaFiveKRound{} for the 5K to about \alphaMarRound{} for the marathon, roughly \ratioRound{} the cost of training runs of the same duration. Recent heat exposure reduces the HR cost of running in the heat within a few hot runs, a benefit that fades with a half-life of about \kinDecayRound{} days, and is associated with a smaller race-day cost. Runners differ persistently in their HR response to heat in training, but race-day heat cost is barely repeatable between races, so neither training data nor race history sorts individual runners reliably by race-day heat tolerance.
+
+% =====================================================================================================================
+\section*{Declarations}
+% =====================================================================================================================
+\paragraph{Ethics approval.} \placeholder{Ethics statement to be completed by the authors: name of the reviewing body and reference number, or the basis for exemption.} This study is a secondary analysis of de-identified training records held by a training platform and of finish lists publicly posted by race organisers and timing services. No individual is identifiable in any reported result.
+
+\paragraph{Consent to participate.} \placeholder{Confirm the wording of the platform's research-use consent.} Platform users permitted research use of their data. Finishers in public results did not consent individually; only aggregate estimates are reported, and no names or individual results are reproduced.
+
+\paragraph{Funding.} \placeholder{Funding statement.}
+
+\paragraph{Competing interests.} \placeholder{Competing-interests statement to be completed.} All authors are affiliated with Kailo, the company whose training platform supplied the training-run data.
+
+\paragraph{Data and code availability.} The training-run data contain location traces and cannot be shared publicly; \placeholder{access conditions}. Official results are publicly posted by race organisers; the person-linked tables derived from them are not shared because they are built from names. Analysis code and aggregate tables are available at \placeholder{repository}.
+
+\paragraph{Author contributions (CRediT).} \placeholder{Conceptualization; Data curation; Formal analysis; Methodology; Software; Visualization; Writing, original draft; Writing, review and editing: to be assigned.}
+
+\paragraph{Acknowledgements.} \placeholder{Acknowledgements.}
+
+% =====================================================================================================================
+\clearpage
+\nolinenumbers
+\singlespacing
+\bibliographystyle{vancouver}
+\bibliography{../references,../tommy_refs,journal_refs}
+
+% =====================================================================================================================
+% TABLES
+% =====================================================================================================================
+\clearpage
+\begin{table}[p]
+\centering
+\caption{Characteristics of the three data sets. Values are counts or median (interquartile range) unless stated.}
+\label{tab:cohorts}
+\small
+\renewcommand{\arraystretch}{1.25}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{2.9cm}>{\raggedright\arraybackslash}p{4.1cm}>{\raggedright\arraybackslash}p{3.6cm}>{\raggedright\arraybackslash}p{4.6cm}@{}}
+\toprule
+ & Training runs & Race-distance efforts & Official results \\
+\midrule
+Source & GPS wrist devices, users of a training platform & Subset of the training-run corpus & Public results service, marathons and half marathons \\
+Period & \corpusFirst{} to \corpusLast & \corpusFirst{} to \effortsLast & 2014 to 2026 (2020 excluded) \\
+Units & \nRuns{} runs by \nRunners{} runners; runs per runner \runsPerRunnerMed{} (\runsPerRunnerIQR) & \nEfforts{} efforts (\nEffHalf{} half, \nEffMar{} marathon) by \nEffRunners{} runners & \nFinishes{} finishes by \nPersons{} persons, \nRepeaters{} with two or more \\
+Analysed subset & All runs; between-runner analyses: \nSlopePersons{} persons with 10 or more runs above 15\degC & WBGT 18\degC{} or above: \nEffHot{} efforts by \nEffHotRunners{} runners & Marathon: \nEdMar{} editions of \nRacesMar{} races, \finMar{} finishes; half marathon: \nEdHalf{} editions of \nRacesHalf{} races, \finHalf{} finishes \\
+Distance, duration & \medDist{} km; \medDur{} min & 20.9--21.6 or 41.68--43.45\,km & Median edition finish time: marathon \medFinMar, half \medFinHalf{} (h:min) \\
+Pace, heart rate & \medPace{} min\,km$^{-1}$; \medHR{} bpm & Mean HR 80\% of maximum or more & Not recorded \\
+Exposure (WBGT) & Run mean \wbgtMed\degC{} (10th--90th percentile \wbgtPten--\wbgtPninety); \shareEighteen\% of runs at 18\degC{} or above, \shareTwentytwo\% at 22\degC{} or above & Run mean, as for training runs & Race-window mean: marathon \wbgtRangeMar\degC{} (\edMarEighteen{} editions at 18\degC{} or above, \edMarTwentytwo{} at 22\degC{} or above); half \wbgtRangeHalf\degC{} (\edHalfEighteen, \edHalfTwentytwo) \\
+Weather source & Finest available model field, sampled every 15\,min along the run & As for training runs & ERA5 at the start line, first mass start to median finish \\
+Outcome & $100\ln(\text{pace})$; HR at matched load & Loss against a pre-race prediction & Within-person edition effect \\
+\bottomrule
+\end{tabular}
+\par\smallskip
+\parbox{\linewidth}{\footnotesize Countries of training runs: \nCountries{} (United States \shareUS\%, South Korea \shareKR\%, United Kingdom \shareGB\%).}
+\end{table}
+
+\begin{table}[p]
+\centering
+\caption{Heat cost relative to WBGT 10\degC{} implied by the estimated scales: percent of time, with minutes on a reference finish time in parentheses (5K 0:30, 10K 1:00, 15\,km and 10 miles 1:30, half marathon 2:00, marathon 4:00).}
+\label{tab:cost}
+\small
+\renewcommand{\arraystretch}{1.35}
+\setlength{\tabcolsep}{5pt}
+\begin{tabular}{@{}lccccc@{}}
+\toprule
+ & & \multicolumn{4}{c}{Race-window or run WBGT (\textdegree C)} \\
+\cmidrule(lr){3-6}
+ & Scale [95\% CI] & 16 & 18 & 20 & 22 \\
+\midrule
+Training runs, all & \TabTr \\
+Training runs over 150\,min & \TabLong \\
+5K & \TabFiveK \\
+10K & \TabTenK \\
+15\,km and 10 miles & \TabFifteen \\
+Half marathon & \TabHalf \\
+Marathon & \TabMar \\
+\bottomrule
+\end{tabular}
+\par\smallskip
+\parbox{\linewidth}{\footnotesize Scales multiply the training-run curve \cW; training runs over 150\,min use the within-runner scale of that expected-duration band; 5K to 10 miles use course-clustered intervals; half marathon and marathon use the main official-results source. Percentages are $100\,[\exp(s\,c_{\log}(W)/100) - 1]$ for scale $s$ and the curve in log points $c_{\log}$. Only \edMarTwentytwo{} marathon and \edHalfTwentytwo{} half-marathon editions had a race-window WBGT of 22\degC{} or above.}
+\end{table}
+
+% =====================================================================================================================
+% FIGURES (legends and figures)
+% =====================================================================================================================
+\clearpage
+\begin{figure}[p]
+\centering
+\includegraphics[width=\linewidth]{fig1_dose_response.pdf}
+\caption{Training-run dose--response and race-day scale. \textbf{A}, the training-run heat curve \cW, the median runner's pace relative to WBGT 10\degC{} in counterfactual WBGT sweeps of the trained model (grey; zero at and below 10\degC), and the same curve multiplied by the race-day scales estimated from official results for the 5K (blue), the half marathon (green) and the marathon (orange); shaded bands are 95\% CI of the scale, and half-marathon and marathon curves are drawn up to the hottest edition in each set. \textbf{B}, within-runner scale on \cW{} for training runs in five bands of expected duration (grey; points at the band median; 95\% CI clustered by runner and by date and country; \nLtThirty, \nThirtySixty, \nSixtyNinety, \nNinetyOneFifty{} and \nGtOneFifty{} runs), race-day scales of ten distances from 5\,km to the marathon in the short-race source (open blue; course-clustered 95\% CI), and the half-marathon and marathon scales from the main official-results source (filled), placed at the median edition finish time. Dashed lines: fits on log duration across the training bands and across the ten race distances; dotted line: scale 1.}
+\label{fig:dose}
+\end{figure}
+
+\begin{figure}[p]
+\centering
+\includegraphics[width=\linewidth]{fig2_raceday_scale.pdf}
+\caption{Within-person edition effects against the training-run curve at each edition's race-window WBGT. \textbf{A}, marathon, \nEdMar{} editions of \nRacesMar{} races; \textbf{B}, half marathon, \nEdHalf{} editions of \nRacesHalf{} races; 2014 to 2026 without 2020. Each point is an edition effect net of course and calendar-year fixed effects ($100 \times$ log ratio of finish time) with a 95\% CI from person-clustered standard errors. Solid line: fitted race-day scale (weighted least squares, weights $1/\mathrm{SE}^2$); dotted line: scale 1. The top axis gives the race-window mean WBGT corresponding to each curve value. Race-window WBGT is the mean from the first mass start to that start plus the edition's median finish time, at the start line. Panel titles give the partial $R^2$ of the curve beyond the fixed effects.}
+\label{fig:raceday}
+\end{figure}
+
+\begin{figure}[p]
+\centering
+\includegraphics[width=\linewidth]{fig3_acclimation_kinetics.pdf}
+\caption{Build and decay of heat acclimation in HR at matched load. The outcome is HR minus each runner's load model (pace, duration, climb), the start-hour effect and the population heat cost, relative to each design's baseline; heat is counted from WBGT 22\degC. \textbf{A}, onset: excess on hot runs by the number of earlier hot-run days after a first hot run that followed 45 or more days without one (episode fixed effects, days-since-onset trend, control for a hot run the day before; \kinOnsetEpisodes{} episodes). \textbf{B}, trips more than 500\,km from home: excess on away runs relative to home runs in the 45 days before the trip, by day since arrival, for hot ($\geq$5\degC{} warmer than home), neutral (within 2\degC) and cool ($\geq$5\degC{} cooler) trips; line, exponential fit to hot trips. \textbf{C}, breaks after a block of at least four hot-run days in 14: excess on the first hot run back minus the block's last week, by break length (\kinBreaks{} breaks). Means or coefficients with 95\% CI (person-clustered in A and C).}
+\label{fig:kinetics}
+\end{figure}
+
+\begin{figure}[p]
+\centering
+\includegraphics[width=\linewidth]{fig4_between_runner.pdf}
+\caption{Between-runner differences in heat sensitivity in training and on race day. \textbf{A}, empirical-Bayes-shrunk HR heat slopes above WBGT 15\degC{} (\nSlopePersons{} runners); orange line, mean of the person slopes (\muPersons{} \bpmC); dashed lines, cut-points of three equal-probability tiers of the estimated true-slope distribution (\tierCuts{} \bpmC). \textbf{B}, later-half HR heat slope (mean and 95\% CI) by tier formed on the earlier half of each runner's history (\nTierRunners{} runners). \textbf{C}, race-day heat cost of hot race-distance efforts (WBGT 18\degC{} or above) by runners with at least one earlier hot effort, as a multiple of the population-typical cost after removing the runner's personal miss estimated from earlier data, by thirds of the training-derived heat trait (grey, \nTrainThirds{} efforts) or of the heat trait estimated from earlier race-distance efforts in the placement model (orange, \nEarlierThirds{} efforts); thirds use only data dated before each effort; 95\% CI from resampling runners; dotted line, typical cost. \textbf{D}, between-runner variance of the race-day scale in official results, estimated as the covariance of each runner's heat slopes from two halves of their races (95\% CI, delete-one-course jackknife): marathon halves sharing courses (naive), sharing no course, with personal trends, and sharing no calendar year; hollow markers, placebo with hot years shuffled within course; square, random-slope model on all repeat marathoners (upper bound shown); diamond, half marathon with halves sharing no course.}
+\label{fig:between}
+\end{figure}
+
+\end{document}
