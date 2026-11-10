@@ -58,15 +58,6 @@ made by its authors.
 % (surface link -> transport link, coupled through T_sk) was previously only
 % visible to a reader who had already got as far as F.5.
 %
-% REQUIRES THREE EDITS ELSEWHERE IN THE MANUSCRIPT (see handoff notes):
-%  * Section 2 currently uses T_sk = 35 C and says dry exchange reverses "near
-%    36 C". Adopting 31 C moves the reversal to 31 C and changes the 83/14/4
-%    evaporation shares. These must agree or a referee will catch it.
-%  * Appendix C's isopleth table (\label{tab:isopleth}) is computed at
-%    T_sk = 35 C, total 873.5. Table \ref{tab:wbtradeoff} below supersedes it at
-%    T_sk = 31 C, total 555.1, so DELETE the appendix one rather than keeping
-%    two isopleths at different skin temperatures. The labels differ, so
-%    nothing breaks if you leave it in place -- it will just contradict.
 % ===========================================================================
 
 % Kept at \section level deliberately. The Overleaf round-trip demoted this to
@@ -740,10 +731,11 @@ velocity falling $3.7\%$ and then a further $2.9\%$ across heat indices of $20$,
 $38$ and $55\,^{\circ}$C. This is a \emph{decelerating} response, and it is the
 only regime in this appendix where we predict one, since critical velocity is a
 three-to-thirty-minute construct and therefore sits astride $d_{bank}$, where
-the storage term still covers most of the imbalance. The same reasoning gives a
-reason beyond exposure time why identical conditions cost a slower finisher
-more: the allowance is a fixed quantity of heat, so spreading it over a longer
-race dilutes it in exactly the proportion $d_{bank}/d$. \citet{taylor2006} list
+the storage term still covers most of the imbalance. The same reasoning predicts that a fixed allowance is diluted over a longer race in the
+proportion $d_{bank}/d$, which would make identical conditions cost a slower
+finisher more; on official results the race-day scale does not rise with finish
+time once tiers are assigned independently of the outcome (Section~\ref{sec:raceday}),
+so at marathon distance this dilution is not the term that decides who loses more. \citet{taylor2006} list
 duration of competition among the determinants of compensability for the same
 reason.
 
@@ -760,6 +752,16 @@ raises the blood flow required to move the next joule
 (Section~\ref{app:physics:circulation}), so the real trajectory accelerates and
 the distances in Table~\ref{tab:duration} are upper bounds. Both caveats push
 the same way, which is toward heat binding sooner than tabulated, not later.
+
+The storage allowance is an argument about which distances heat can bind, and
+not a measured cumulative-dose term. On official results, degree-hours above
+$22\,^{\circ}$C beside the curve are not identified (their sign depends on the
+first-stage specification); in the deep model, a gate given the cumulative dose
+fitted worse than a plain heat gate (Appendix~\ref{app:ablation}); and official
+splits place about four fifths of the heat cost in the second half of the race,
+which a storage account predicts but which a fade-shaped rule or a cost rising
+with position in the race fits equally well at the conditions observed
+(Section~\ref{sec:raceday}).
 
 \subsection{Does it predict the curvature we measured?}
 \label{app:physics:curvature}

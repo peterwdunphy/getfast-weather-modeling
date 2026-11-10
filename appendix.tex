@@ -140,13 +140,15 @@ response, so averaging unnormalized curves would confound the two.
 
 The population curve is $g(w) = \bar{s}\,\cdot\,\mathrm{med}_a\,\phi_a(w)$, the median shape rescaled
 by the median sensitivity of the reference sample. The monotone projection $\max$-accumulate is
-applied to the median shape at this point; as reported in Section~\ref{sec:results} it moves 6 of 37
-grid points by at most 0.07 percentage points.
+applied to the median shape at this point; as reported in Section~\ref{sec:results} it moves 4 of 37
+grid points by at most 0.05 percentage points.
 
 A single window's sensitivity is dominated by noise: within a runner, two windows with non-overlapping
 histories correlate at about 0.2, so most of the observed spread in $s_a$ across windows is measurement
 error rather than a difference between runners. Averaging the 15 most recent windows raises the agreement
-between non-overlapping averages to about 0.65. The per-runner score is therefore the percentile rank of a runner's window-averaged
+between non-overlapping averages to about 0.65. Reliability is not validity: the averaged score does not agree with
+an independent within-runner heat slope from a gradient-boosted pace model ($r = -0.04$), so it is a stable property
+of the model's response rather than a measured heat tolerance. The per-runner score is therefore the percentile rank of a runner's window-averaged
 sensitivity against the distribution of window-averaged sensitivities, not against the noise-inflated
 single-window distribution. The prospective version uses exactly 15 preceding windows and excludes
 the target activity.
@@ -265,6 +267,14 @@ worse as well, indicating a harder optimization rather than an overfitting gap; 
 runners (37.5\%) have fewer than 60 activities, so the additional slots are padding for them. Restoring the
 dead date channel was the clearest failure, plausibly because slot position within a window is
 already carried by the positional embedding and a second, noisier copy competes with it.
+
+Three ways of letting WBGT act were compared directly in a later round, on the enlarged corpus at 200{,}000 steps,
+each with WBGT removed from the shared embedding and re-entering through a low-dimensional multiplicative gate: a plain
+gate on the run's conditions, the same gate with an explicit term for position within the run, and a gate given the
+cumulative heat dose. The plain gate scored held-out $R^2$ 0.771 and error 6.18\%, the position gate 0.765 and 6.37\%
+with its position term at zero, and the dose gate 0.730 and 6.85\%, so neither a position nor a dose term earned its
+place on training runs. The published curve comes from the ungated model of Appendix~\ref{app:model}, not from these
+gates.
 
 One negative result is methodological. The padding mask was implemented, smoke-tested against
 synthetic all-zero slots, and shipped, but never fired in training: the date-centering step described
