@@ -403,3 +403,148 @@
 \newcommand{\TabFifteen}{3.31 [2.70, 3.93] & 1.1 (1.0) & 2.2 (2.0) & 3.5 (3.1) & 5.6 (5.1)}   % 15K and 10 miles, reference finish 90 min
 \newcommand{\TabHalf}{4.21 [3.62, 4.80] & 1.4 (1.6) & 2.8 (3.4) & 4.5 (5.3) & 7.2 (8.6)}   % Half marathon, reference finish 120 min
 \newcommand{\TabMar}{5.09 [4.52, 5.67] & 1.6 (3.9) & 3.4 (8.2) & 5.4 (13.0) & 8.8 (21.0)}   % Marathon, reference finish 240 min
+
+% =====================================================================================================================
+% 7. Heart rate, cadence and stride length in heat, and the gap between the training curve and the race-day scale:
+%    mechanism_numbers.log (journal/mechanism_numbers.py, which reads the aggregate estimates behind fig_mech_* and
+%    fig_followup_*). Intervals are 95%; training-run models are within runner with runner-clustered standard errors.
+% =====================================================================================================================
+% 7a. Training runs: pace, heart rate and cadence against WBGT (estimates.json fig1; reference WBGT 8-10 C)
+\newcommand{\mechRuns}{363{,}005}   % estimates.json n_runs
+\newcommand{\mechRunners}{2{,}325}   % estimates.json n_runners
+\newcommand{\mechRunsHot}{3{,}521}   % bin_counts: runs at WBGT 28 C and over
+\newcommand{\mechPaceTwenty}{1.01 [0.80, 1.23]}   % fig1.pace at 20-22 C: pace, % slower
+\newcommand{\mechPaceTwentyFour}{2.34 [1.82, 2.87]}   % fig1.pace at 24-26 C: pace, % slower
+\newcommand{\mechPaceHot}{4.17 [3.51, 4.82]}   % fig1.pace at 28 C and over: pace, % slower
+\newcommand{\mechPaceAtHRTwenty}{1.69 [1.49, 1.90]}   % fig1.pace_at_hr at 20-22 C: pace at matched heart rate, % slower
+\newcommand{\mechPaceAtHRTwentyFour}{3.79 [3.21, 4.38]}   % fig1.pace_at_hr at 24-26 C: pace at matched heart rate, % slower
+\newcommand{\mechPaceAtHRHot}{6.60 [5.90, 7.30]}   % fig1.pace_at_hr at 28 C and over: pace at matched heart rate, % slower
+\newcommand{\mechHRTwenty}{1.87 [1.63, 2.12]}   % fig1.hr_at_pace at 20-22 C: heart rate at matched pace, bpm
+\newcommand{\mechHRTwentyFour}{4.12 [3.61, 4.62]}   % fig1.hr_at_pace at 24-26 C: heart rate at matched pace, bpm
+\newcommand{\mechHRHot}{7.08 [6.42, 7.74]}   % fig1.hr_at_pace at 28 C and over: heart rate at matched pace, bpm
+\newcommand{\mechCadTwenty}{$-0.49$ [$-0.58$, $-0.40$]}   % fig1.cad_at_pace at 20-22 C: cadence at matched pace, %
+\newcommand{\mechCadTwentyFour}{$-0.70$ [$-0.82$, $-0.58$]}   % fig1.cad_at_pace at 24-26 C: cadence at matched pace, %
+\newcommand{\mechCadHot}{$-0.98$ [$-1.22$, $-0.75$]}   % fig1.cad_at_pace at 28 C and over: cadence at matched pace, %
+% 7b. Pace cost by band of the run's mean heart rate (fig2), and two other band definitions (followups C1)
+\newcommand{\bandEasyHot}{4.14 [3.24, 5.05]}   % fig2.easy at 28 C and over, % slower
+\newcommand{\bandEasyTwentyFour}{2.23 [1.73, 2.74]}   % fig2.easy at 24-26 C, % slower
+\newcommand{\bandEasyRuns}{102{,}182}   % fig2.easy runs
+\newcommand{\bandModHot}{5.39 [4.66, 6.12]}   % fig2.moderate at 28 C and over, % slower
+\newcommand{\bandModTwentyFour}{3.19 [2.62, 3.75]}   % fig2.moderate at 24-26 C, % slower
+\newcommand{\bandModRuns}{201{,}062}   % fig2.moderate runs
+\newcommand{\bandHardHot}{9.06 [8.03, 10.09]}   % fig2.hard at 28 C and over, % slower
+\newcommand{\bandHardTwentyFour}{5.23 [4.52, 5.94]}   % fig2.hard at 24-26 C, % slower
+\newcommand{\bandHardRuns}{59{,}761}   % fig2.hard runs
+\newcommand{\bandAdjEasyHot}{1.69 [0.94, 2.45]}   % C1.eff_b[0] at 28 C and over: heat-adjusted %HRmax bands
+\newcommand{\bandAdjModHot}{3.04 [2.22, 3.86]}   % C1.eff_b[1] at 28 C and over: heat-adjusted %HRmax bands
+\newcommand{\bandAdjHardHot}{7.20 [5.50, 8.91]}   % C1.eff_b[2] at 28 C and over: heat-adjusted %HRmax bands
+\newcommand{\bandOwnEasyHot}{3.00 [1.95, 4.05]}   % C1.eff_c[0] at 28 C and over: own-HR thirds within 4 C WBGT band
+\newcommand{\bandOwnModHot}{4.04 [3.13, 4.94]}   % C1.eff_c[1] at 28 C and over: own-HR thirds within 4 C WBGT band
+\newcommand{\bandOwnHardHot}{7.39 [6.19, 8.59]}   % C1.eff_c[2] at 28 C and over: own-HR thirds within 4 C WBGT band
+\newcommand{\bandMovedPct}{5.9}   % C1: % of runs that change band after the heat adjustment
+% 7c. Speed difference split into cadence and stride length (fig4; coefficients add exactly)
+\newcommand{\splitSpeedTwenty}{$-1.01$ [$-1.23$, $-0.80$]}   % fig4.lspd at 20-22 C, %
+\newcommand{\splitCadTwenty}{$-0.73$ [$-0.83$, $-0.63$]}   % fig4.lcad at 20-22 C, %
+\newcommand{\splitStrideTwenty}{$-0.28$ [$-0.48$, $-0.09$]}   % fig4.lstr at 20-22 C, %
+\newcommand{\splitCadShareTwenty}{72}   % fig4 lcad / lspd at 20-22 C, %
+\newcommand{\splitSpeedHot}{$-4.17$ [$-4.82$, $-3.51$]}   % fig4.lspd at 28 C and over, %
+\newcommand{\splitCadHot}{$-1.97$ [$-2.27$, $-1.68$]}   % fig4.lcad at 28 C and over, %
+\newcommand{\splitStrideHot}{$-2.19$ [$-2.73$, $-1.66$]}   % fig4.lstr at 28 C and over, %
+\newcommand{\splitCadShareHot}{47}   % fig4 lcad / lspd at 28 C and over, %
+% 7d. Second half minus first half of sampled runs, WBGT 28 C and over against 10-15 C (fig5; last bin)
+\newcommand{\driftRuns}{57{,}580}   % fig5.spd_decay n
+\newcommand{\driftRunners}{1{,}783}   % fig5.spd_decay runners
+\newcommand{\driftHR}{2.24 [1.72, 2.75]}   % fig5.hr_drift at 28 C and over, bpm
+\newcommand{\driftSpeed}{$-2.44$ [$-2.96$, $-1.93$]}   % fig5.spd_decay at 28 C and over, %
+\newcommand{\driftCad}{$-1.06$ [$-1.27$, $-0.86$]}   % fig5.cad_decay at 28 C and over, %
+% 7e. Race-distance efforts at WBGT 18 C and over: loss as a multiple of the typical loss (race.json d_section21_v3)
+\newcommand{\rhoAll}{0.97 [0.84, 1.09]}   % 'all hot with both terms': rho, runner bootstrap
+\newcommand{\rhoAllN}{1{,}278}   % 'all hot with both terms': efforts
+\newcommand{\rhoRaceHeld}{0.82 [0.68, 0.98]}   % 'in-race decay held (cad_drift >= -1%)': rho, runner bootstrap
+\newcommand{\rhoRaceHeldN}{800}   % 'in-race decay held (cad_drift >= -1%)': efforts
+\newcommand{\rhoRaceFell}{1.20 [1.04, 1.35]}   % 'in-race decay (cad_drift < -1%)': rho, runner bootstrap
+\newcommand{\rhoRaceFellN}{478}   % 'in-race decay (cad_drift < -1%)': efforts
+\newcommand{\rhoCoolHeld}{0.91 [0.67, 1.13]}   % 'raw: held vs own cool races (>= -1%)': rho, runner bootstrap
+\newcommand{\rhoCoolHeldN}{296}   % 'raw: held vs own cool races (>= -1%)': efforts
+\newcommand{\rhoCoolDown}{1.61 [1.41, 1.82]}   % 'raw: down vs own cool races (< -1%)': rho, runner bootstrap
+\newcommand{\rhoCoolDownN}{399}   % 'raw: down vs own cool races (< -1%)': efforts
+\newcommand{\rhoTrainHeld}{0.93 [0.78, 1.08]}   % 'cadence held for the speed (give >= -1%)': rho, runner bootstrap
+\newcommand{\rhoTrainHeldN}{897}   % 'cadence held for the speed (give >= -1%)': efforts
+\newcommand{\rhoTrainDown}{1.07 [0.91, 1.25]}   % 'cadence down for the speed (give < -1%)': rho, runner bootstrap
+\newcommand{\rhoTrainDownN}{381}   % 'cadence down for the speed (give < -1%)': efforts
+% 7f. Gap between the all-training scale and the official race-day scale, on the curve's scale (followups A_gap)
+\newcommand{\gapTrainAll}{0.79 [0.65, 0.94]}   % A_gap.all_training: scale of all ordinary training runs
+\newcommand{\gapPlatMar}{5.64 [3.36, 7.92]}   % marathon: platform runners, finish time within runner x distance
+\newcommand{\gapPlatMarN}{735}   % marathon: efforts in that fit
+\newcommand{\gapPlatMarRunners}{252}   % marathon: runners in that fit
+\newcommand{\gapPredMar}{3.85 [2.68, 5.02]}   % marathon: loss against the fitness prediction, pooled, above 10 C
+\newcommand{\gapPredSlopeMar}{0.99 [$-0.41$, 2.39]}   % marathon: fitness prediction on the curve, within runner
+\newcommand{\gapPlatMinusOffMar}{0.55 [$-1.80$, 2.90]}   % marathon: platform scale minus official scale
+\newcommand{\gapShareDurMar}{36}   % marathon: share of the gap from run duration, %
+\newcommand{\gapShareAccMar}{6}   % marathon: share from the exposure-index difference, %
+\newcommand{\gapShareRaceMar}{77}   % marathon: share from racing the distance, same cohort, %
+\newcommand{\gapSharePlatMar}{$-13$}   % marathon: share from platform to official cohort, %
+\newcommand{\gapPlatHalf}{4.50 [3.88, 5.12]}   % half: platform runners, finish time within runner x distance
+\newcommand{\gapPlatHalfN}{3{,}567}   % half: efforts in that fit
+\newcommand{\gapPlatHalfRunners}{796}   % half: runners in that fit
+\newcommand{\gapPredHalf}{2.67 [2.11, 3.23]}   % half: loss against the fitness prediction, pooled, above 10 C
+\newcommand{\gapPredSlopeHalf}{0.75 [0.37, 1.13]}   % half: fitness prediction on the curve, within runner
+\newcommand{\gapPlatMinusOffHalf}{0.29 [$-0.57$, 1.14]}   % half: platform scale minus official scale
+\newcommand{\gapShareDurHalf}{27}   % half: share of the gap from run duration, %
+\newcommand{\gapShareAccHalf}{1}   % half: share from the exposure-index difference, %
+\newcommand{\gapShareRaceHalf}{81}   % half: share from racing the distance, same cohort, %
+\newcommand{\gapSharePlatHalf}{$-8$}   % half: share from platform to official cohort, %
+\newcommand{\gapFifthLow}{2.76 [1.79, 3.74]}   % lowest fifth of the predicted individual multiplier: scale
+\newcommand{\gapFifthHigh}{5.31 [4.29, 6.33]}   % highest fifth of the predicted individual multiplier: scale
+\newcommand{\gapEffortsPooled}{2.78 [2.24, 3.32]}   % all race-distance efforts above 10 C with a held-out prediction: scale
+% 7g. Platform race-distance efforts on the date, distance and start line of an official edition (followups B)
+\newcommand{\edlEfforts}{205}   % B.in_effort_table
+\newcommand{\edlEditions}{63}   % B.editions
+\newcommand{\edlRunners}{134}   % B.runners
+\newcommand{\edlSlope}{0.69 [$-0.02$, 1.40]}   % B: platform loss on the official edition effect, edition-clustered
+\newcommand{\edlPOne}{0.39}   % B: p for slope = 1
+\newcommand{\edlPZero}{0.06}   % B: p for slope = 0
+% 7h. Exposure index on race-distance efforts: proportional term against a level term (followups D)
+\newcommand{\formInt}{$-0.88$ [$-1.24$, $-0.52$]}   % D.form.pooled: cost x index, no level term
+\newcommand{\formIntFree}{$-0.01$ [$-0.49$, 0.48]}   % D.form.pooled: cost x index with level terms
+\newcommand{\formLevel}{$-8.90$ [$-12.56$, $-5.25$]}   % D.form.pooled: level term of the index, %
+\newcommand{\formIntFreeMar}{$-0.88$ [$-1.91$, 0.14]}   % D.form.marathon: cost x index with level terms
+\newcommand{\formIndexCostCorr}{0.69}   % D: correlation of the index with the typical cost
+\newcommand{\splitPred}{4.33 [1.85, 6.81]}   % D.split: one unit of index on the fitness prediction, %
+\newcommand{\splitFinish}{$-4.25$ [$-7.21$, $-1.29$]}   % D.split: one unit of index on the finish time, %
+\newcommand{\splitLoss}{$-8.76$ [$-11.65$, $-5.87$]}   % D.split: one unit of index on the loss, %
+\newcommand{\splitN}{4{,}302}   % D.split: efforts
+\newcommand{\splitRunners}{834}   % D.split: runners
+% 7i. Hottest minus coolest WBGT band at the same relative speed, two baselines (followups C2)
+\newcommand{\relHRThirtyDay}{1.27 to 2.32}   % C2 relspd30: HR gap range across speed bins, bpm
+\newcommand{\relCadThirtyDay}{$-1.65$ to $-0.84$}   % C2 relspd30: cadence gap range across speed bins, %
+\newcommand{\relHRFixed}{1.42 to 3.04}   % C2 relspdfix: HR gap range across speed bins, bpm
+\newcommand{\relCadFixed}{$-1.29$ to $-0.54$}   % C2 relspdfix: cadence gap range across speed bins, %
+\newcommand{\relCorr}{0.83}   % C2: correlation of the two relative speeds
+% 7j. Race-distance efforts within runner, per unit of typical heat cost (race.json a_within_runner)
+\newcommand{\raceWithinN}{3{,}025}   % a_within_runner.efforts
+\newcommand{\raceWithinRunners}{703}   % a_within_runner.runners
+\newcommand{\raceSpeed}{$-1.14$ [$-1.28$, $-0.99$]}   % log speed per unit typical cost, %
+\newcommand{\raceCad}{$-0.34$ [$-0.40$, $-0.28$]}   % log cadence per unit typical cost, %
+\newcommand{\raceStride}{$-0.80$ [$-0.90$, $-0.69$]}   % log stride length per unit typical cost, %
+\newcommand{\raceCadShare}{30 [26, 34]}   % cadence share of the heat speed loss, %
+\newcommand{\raceCadDrift}{$-0.12$ [$-0.16$, $-0.07$]}   % within-effort cadence change per unit typical cost, %
+\newcommand{\raceCondSlope}{0.48 [0.35, 0.59]}   % heat slope of loss conditional on the effort's cadence
+\newcommand{\raceCondShare}{52 [44, 62]}   % share of the heat slope that moves with cadence, %
+% 7k. Exposure index of hot race-distance efforts and hot training runs, and sensitivity fits (followups A_gap)
+\newcommand{\gapIndexHotMar}{0.22}   % marathon: mean exposure index on hot efforts
+\newcommand{\gapHotEffortsMar}{166}   % marathon: hot efforts (WBGT 18 C and over)
+\newcommand{\gapPredNMar}{685}   % marathon: efforts above 10 C in the pooled loss fit
+\newcommand{\gapPlatPredMar}{5.06 [2.94, 7.19]}   % marathon: finish-time scale with the fitness prediction as covariate
+\newcommand{\gapPlatTrendMar}{6.11 [3.82, 8.39]}   % marathon: finish-time scale with a runner time trend
+\newcommand{\gapUnitsMar}{4.30}   % marathon: official scale minus all-training scale
+\newcommand{\gapIndexHotHalf}{0.28}   % half: mean exposure index on hot efforts
+\newcommand{\gapHotEffortsHalf}{1{,}142}   % half: hot efforts (WBGT 18 C and over)
+\newcommand{\gapPredNHalf}{2{,}748}   % half: efforts above 10 C in the pooled loss fit
+\newcommand{\gapPlatPredHalf}{4.16 [3.59, 4.74]}   % half: finish-time scale with the fitness prediction as covariate
+\newcommand{\gapPlatTrendHalf}{4.47 [3.84, 5.09]}   % half: finish-time scale with a runner time trend
+\newcommand{\gapUnitsHalf}{3.42}   % half: official scale minus all-training scale
+\newcommand{\splitCurveFinish}{5.02 [4.31, 5.72]}   % D.split: finish time on the curve, within runner x distance
+\newcommand{\splitCurvePred}{0.29 [$-0.13$, 0.70]}   % D.split: fitness prediction on the curve, same model
+\newcommand{\edlSDOfficial}{1.55}   % B: SD of the official edition effect across linked editions, %
+\newcommand{\edlSDPlatform}{9.15}   % B: SD of the platform loss across linked efforts, %
