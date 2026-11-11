@@ -2,12 +2,14 @@
 """mechanism_numbers.py - section 7 of journal/numbers.tex: heart rate, cadence and stride length in heat, and the
 decomposition of the gap between the training curve and the race-day scale.
 
-Reads three aggregate JSON files (no run-level data) and prints one \\newcommand per number with its source field.
+Reads five aggregate JSON files (no run-level data) and prints one \\newcommand per number with its source field.
 Read-only; writes nothing (stdout only, kept as mechanism_numbers.log).
 
   estimates.json   pace_hr_cadence_heat_20261110/proposed_figures.py   training-run models behind fig_mech_*
   followups.json   pace_hr_cadence_heat_20261110/followups.py          gap decomposition and robustness (fig_followup_*)
   race.json        cadence_decay_20261029                              race-distance efforts split by what cadence did
+  benchmarks.json      pace_hr_cadence_heat_20261110/benchmarks.py      the same quantities in the units of earlier work
+  speed_adjusted.json  pace_hr_cadence_heat_20261110/speed_adjusted.py  cadence change net of the slowing it accompanies
 
 Run: /home/bb/test_env/bin/python3 journal/mechanism_numbers.py > journal/mechanism_numbers.log
 """
@@ -17,6 +19,8 @@ SRC = "/weather/data/fade/pace_hr_cadence_heat_20261110"
 E = json.load(open(f"{SRC}/estimates.json"))
 F = json.load(open(f"{SRC}/followups.json"))
 R = json.load(open("/weather/data/fade/cadence_decay_20261029/race.json"))["d_section21_v3"]
+BM = json.load(open(f"{SRC}/benchmarks.json"))
+SA = json.load(open(f"{SRC}/speed_adjusted.json"))
 
 
 # ---- formatting helpers (same conventions as the rest of numbers.tex) ------------------------------------------------
@@ -205,3 +209,168 @@ cmd("splitCurveFinish", est(D["split"]["finish_time"]["curve_coef"]), "D.split: 
 cmd("splitCurvePred", est(D["split"]["fitness_prediction"]["curve_coef"]), "D.split: fitness prediction on the curve, same model")
 cmd("edlSDOfficial", num(B["sd_official_effect_pct"]), "B: SD of the official edition effect across linked editions, %")
 cmd("edlSDPlatform", num(B["sd_platform_loss_pct"]), "B: SD of the platform loss across linked efforts, %")
+
+
+# =====================================================================================================================
+# Sections 7l and 7m (10 November 2026): the same quantities in the units used by earlier work, and the cadence results
+# with the accompanying slowing held fixed. Both source files hold aggregates only.
+# =====================================================================================================================
+def blh(d, nd=2, scale=1.0):
+    """Format a stored {'b', 'lo', 'hi'} regression estimate (scale=100 turns a share into a percentage)."""
+    return ci(scale * d["b"], scale * d["lo"], scale * d["hi"], nd)
+
+
+def mlh(d, nd=2, scale=1.0):
+    """Format a stored {'mean', 'lo', 'hi'} group mean with its runner-clustered interval."""
+    return ci(scale * d["mean"], scale * d["lo"], scale * d["hi"], nd)
+
+
+def eci(d, nd=2, scale=1.0):
+    """Format a stored {'est', 'ci95'} bootstrap estimate."""
+    return ci(scale * d["est"], scale * d["ci95"][0], scale * d["ci95"][1], nd)
+
+
+def rci(d, nd=2):
+    """Format a stored {'rho', 'ci95'} multiple of the typical heat cost."""
+    return ci(d["rho"], d["ci95"][0], d["ci95"][1], nd)
+
+
+# ---- 7l. benchmarks in the units of earlier work (benchmarks.json) -------------------------------------------------
+print("% 7l. The training-run results in the units of earlier work (benchmarks.json): cadence share of a speed")
+print("%     difference, heart-rate drift in bpm and %, and decoupling of pace from heart rate")
+a = BM["A_cadence_share_cool"]
+cmd("benchCoolRuns", big(a["speed_only"]["n"]), "A: runs at WBGT 5-15 C")
+cmd("benchCoolRunners", big(a["speed_only"]["runners"]), "A: runners in that fit")
+# share of a within-runner speed difference between cool runs that is cadence (the rest is stride length)
+cmd("benchCadShare", blh(a["speed_only"], 0, 100), "A.speed_only: cadence share of a cool-day speed difference, %")
+cmd("benchCadShareFit", blh(a["plus_fitness"], 0, 100), "A.plus_fitness: same with the fitness control, %")
+for tag, key in (("Slow", "slowest"), ("Mid", "middle"), ("Fast", "fastest")):
+    cmd(f"benchCadShare{tag}", blh(a["by_own_speed_third"][key], 0, 100), f"A.by_own_speed_third.{key}: cadence share, %")
+cmd("benchCadMedian", f"{a['cohort']['median_cadence_spm']:.0f}", "A.cohort: median cadence, steps per minute")
+cmd("benchPaceMedian", num(a["cohort"]["median_pace_min_km"]), "A.cohort: median pace, min/km")
+# what cadence did in heat against what the same slowing does to cadence on a cool day
+for tag, key in (("Mild", "mild_20_22"), ("Hot", "severe_28_plus")):
+    h = a["heat_vs_benchmark"][key]
+    cmd(f"benchSpeed{tag}", num(h["speed_loss"]), f"A.heat_vs_benchmark.{key}: speed difference, %")
+    cmd(f"benchCadObs{tag}", num(h["cadence_observed"]), f"A.heat_vs_benchmark.{key}: cadence difference observed, %")
+    cmd(f"benchCadOrd{tag}", num(h["cadence_if_ordinary_slowing"]), f"A.heat_vs_benchmark.{key}: cadence difference the cool-day share implies, %")
+b = BM["B_cadence_share_within_run"]
+cmd("benchHalfShareCool", blh(b["cool_under_15"], 0, 100), "B.cool_under_15: cadence share of second-half speed change, training, %")
+cmd("benchHalfShareHot", blh(b["hot_24_plus"], 0, 100), "B.hot_24_plus: same at WBGT 24 C and over, %")
+c = BM["C_hr_drift_units"]
+cmd("benchHRPerSpeed", blh(c["bpm_per_pct_speed_change"]), "C: bpm of drift per 1% of second-half speed change")
+cmd("benchDriftRuns", big(c["n"]), "C: runs with both halves sampled")
+cmd("benchDriftRunners", big(c["runners"]), "C: runners")
+# five WBGT bands; macro names cannot carry digits, so the bands are named
+BANDS = (("Cold", "<10", "below 10 C"), ("Cool", "10-15", "10-15 C"), ("Warm", "20-24", "20-24 C"),
+         ("Hot", "24-28", "24-28 C"), ("Severe", ">=28", "28 C and over"))
+for tag, key, lab in BANDS:
+    v = c["bands"][key]
+    cmd(f"hrDriftBpm{tag}", mlh(v["hr_drift_bpm"], 1), f"C.bands {lab}: second half minus first half, bpm")
+    cmd(f"hrDriftPct{tag}", mlh(v["hr_drift_pct"], 1), f"C.bands {lab}: same as % of first-half heart rate")
+    cmd(f"hrDriftPerH{tag}", mlh(v["hr_drift_bpm_per_h"], 1), f"C.bands {lab}: bpm per hour of run")
+    cmd(f"hrDriftFixed{tag}", num(v["hr_drift_bpm_at_fixed_speed"], 1), f"C.bands {lab}: bpm with the second-half speed change removed")
+    cmd(f"hrDriftN{tag}", big(v["n"]), f"C.bands {lab}: runs")
+    st = c["steady_45_90min"][key]
+    cmd(f"hrSteadyBpm{tag}", mlh(st["hr_drift_bpm"], 1), f"C.steady_45_90min {lab}: bpm, runs of 45-90 min at even pace")
+    cmd(f"hrSteadyN{tag}", big(st["hr_drift_bpm"]["n"]), f"C.steady_45_90min {lab}: runs")
+d = BM["D_decoupling"]
+for tag, key, lab in BANDS:
+    v = d["bands_raw_pct"][key]
+    cmd(f"decoup{tag}", mlh(v, 1), f"D.bands_raw_pct {lab}: decoupling of speed per beat, second half against first, %")
+    cmd(f"decoupOverFive{tag}", f"{100 * v['share_over_5pct']:.0f}", f"D {lab}: share of runs with decoupling over 5%, %")
+for tag, key, lab in BANDS:
+    if key == "10-15":
+        continue  # the reference band of the within-runner contrast
+    cmd(f"decoupWithin{tag}", blh(d["vs_10_15_within_runner"][key], 1), f"D.vs_10_15_within_runner {lab}: points of decoupling against 10-15 C")
+e = BM["E_per_degree"]
+cmd("perDegHR", blh(e["hr_bpm_per_C_at_matched_pace"]), "E: bpm per C of WBGT above 15, matched pace")
+cmd("perDegHRPct", blh(e["hr_pct_per_C_at_matched_pace"]), "E: % of heart rate per C above 15, matched pace")
+cmd("perDegCad", blh(e["cadence_pct_per_C_at_matched_pace"], 3), "E: % of cadence per C above 15, matched pace")
+
+# ---- 7m. cadence with the accompanying slowing held fixed (speed_adjusted.json) ------------------------------------
+print("% 7m. Cadence change net of the slowing it accompanies (speed_adjusted.json): race-distance efforts split by")
+print("%     cadence, the cool-day comparison, race efforts by WBGT band, and training runs at a fixed speed change")
+sm, A2 = SA["sample"], SA["A_race_effort_contrast"]
+cmd("spadjHotN", big(sm["hot_18_plus"]), "sample: hot efforts (WBGT 18 C and over) with both cadence terms")
+cmd("spadjHotRunners", big(sm["hot_runners"]), "sample: runners with a hot effort")
+cmd("spadjCoolN", big(sm["cool_under_15"]), "sample: cool efforts (WBGT under 15 C)")
+cmd("spadjCoolRunners", big(sm["cool_runners"]), "sample: runners with a cool effort")
+cmd("spadjContrast", eci(A2["as_first_estimated"]["fell_minus_held"]), "A: fell minus held, multiples of the typical cost")
+# what else differs between the two groups: the efforts whose cadence fell also slowed far more in the second half
+for tag, key in (("Held", "held"), ("Fell", "fell")):
+    g = A2["group_profile"][key]
+    cmd(f"spadjSlow{tag}", mlh(g["second_half_slowing_pct"], 1), f"A.group_profile.{key}: second-half slowing, %")
+    cmd(f"spadjCad{tag}", mlh(g["cadence_change_pct"], 1), f"A.group_profile.{key}: second-half cadence change, %")
+    cmd(f"spadjLoss{tag}", mlh(g["loss_pct"], 1), f"A.group_profile.{key}: loss against the fitness prediction, %")
+    cmd(f"spadjWbgt{tag}", num(g["wbgt"]["mean"], 1), f"A.group_profile.{key}: mean WBGT, C")
+th = A2["within_thirds_of_slowing"]
+for tag, key in (("Low", "slowed_least"), ("Mid", "middle"), ("High", "slowed_most")):
+    cmd(f"spadjThird{tag}", eci(th[key]["fell_minus_held"]), f"A.within_thirds.{key}: fell minus held inside a third of slowing")
+cmd("spadjThirdPooled", eci(th["fell_minus_held_within_thirds"]), "A.within_thirds: fell minus held, pooled within thirds")
+aj = A2["adjusted_for_slowing"]
+cmd("spadjCoolRel", blh(aj["cool_relation"]["cadence_change_per_1pct_slowing"], 3), "A.adjusted.cool_relation: % cadence per 1% of second-half slowing, cool efforts")
+cmd("spadjCorrHot", num(aj["cool_relation"]["raw_correlation_hot"]), "A.adjusted: correlation of cadence change with slowing, hot efforts")
+cmd("spadjCorrCool", num(aj["cool_relation"]["raw_correlation_cool"]), "A.adjusted: same, cool efforts")
+cmd("spadjAdjContrast", eci(aj["linear"]["same_cut_minus_1pct"]["fell_minus_held"]), "A.adjusted.linear: fell minus held on cadence net of slowing")
+cmd("spadjAdjContrastQuad", eci(aj["quadratic_plus_climb"]["same_cut_minus_1pct"]["fell_minus_held"]), "A.adjusted.quadratic_plus_climb: same, flexible adjustment")
+cmd("spadjMoved", big(aj["linear"]["moved_group_vs_first_estimate"]), "A.adjusted.linear: efforts that change group")
+jm = A2["joint_model"]
+cmd("spadjJointCad", eci(jm["both"]["per_1pct_cadence_change"], 3), "A.joint_model.both: multiple of typical cost per 1% of cadence change")
+cmd("spadjJointSlow", eci(jm["both"]["per_1pct_slowing"], 3), "A.joint_model.both: per 1% of second-half slowing")
+cmd("spadjCadOnly", eci(jm["cadence_only"]["per_1pct_cadence_change"], 3), "A.joint_model.cadence_only")
+cmd("spadjSlowOnly", eci(jm["slowing_only"]["per_1pct_slowing"], 3), "A.joint_model.slowing_only")
+# the same split on cool days: a cadence fall goes with a larger loss there too, so only the difference is about heat
+cc = A2["cool_effort_comparison"]
+cmd("spadjGapHot", eci(cc["hot"]["loss_gap_pct"]), "A.cool_effort_comparison.hot: loss, fell minus held, %")
+cmd("spadjGapCool", eci(cc["cool"]["loss_gap_pct"]), "A.cool_effort_comparison.cool: loss, fell minus held, %")
+cmd("spadjCoolFellN", big(cc["cool"]["efforts_fell"]), "cool efforts whose cadence fell by more than 1%")
+cmd("spadjCoolHeldN", big(cc["cool"]["efforts_held"]), "cool efforts whose cadence held")
+cmd("spadjCoolLossFell", num(cc["cool"]["loss_fell_pct"]), "cool efforts, cadence fell: mean loss, %")
+cmd("spadjCoolLossHeld", num(cc["cool"]["loss_held_pct"]), "cool efforts, cadence held: mean loss, %")
+cmd("spadjGapDiff", eci(cc["hot_gap_minus_cool_gap_pct"]), "hot gap minus cool gap, % of finish time")
+cmd("spadjGapDiffRho", eci(cc["heat_specific_gap_in_rho_units"]), "the same in multiples of the typical cost")
+cmd("spadjGapDiffShare", f"{100 * cc['hot_gap_minus_cool_gap_pct']['share_boot_above_0']:.0f}", "share of bootstrap draws above zero, %")
+nt = A2["rho_net_of_cool_day_loss"]
+cmd("spadjNetFell", ci(nt["fell"]["rho_net_of_cool"], *nt["fell"]["ci95"]), "rho net of the same group's cool-day loss: cadence fell")
+cmd("spadjNetHeld", ci(nt["held"]["rho_net_of_cool"], *nt["held"]["ci95"]), "rho net of the same group's cool-day loss: cadence held")
+cmd("spadjNetDiff", eci(nt["fell_minus_held"]), "difference of the two")
+# race-distance efforts by WBGT band, within runner, against 10-15 C
+B2 = SA["B_race_efforts_by_wbgt"]
+w = B2["within_runner_vs_10_15"]
+cmd("raceBandN", big(w["ps"]["n"]), "B.within_runner_vs_10_15.ps: efforts")
+cmd("raceBandRunners", big(w["ps"]["runners"]), "B.within_runner_vs_10_15.ps: runners")
+RB = (("Mild", "15-18", "15-18 C"), ("Warm", "18-22", "18-22 C"), ("Hot", "22-26", "22-26 C"), ("Severe", ">=26", "26 C and over"))
+for tag, key, lab in RB:
+    cmd(f"raceBandSlow{tag}", blh(w["ps"][key], 1), f"B.within.ps {lab}: second-half slowing, points against 10-15 C")
+    cmd(f"raceBandCad{tag}", blh(w["cad_drift"][key], 1), f"B.within.cad_drift {lab}: second-half cadence change, points")
+    cmd(f"raceBandHR{tag}", blh(w["hr_drift"][key], 1), f"B.within.hr_drift {lab}: heart-rate drift, % points")
+    cmd(f"raceBandDec{tag}", blh(w["dec"][key], 1), f"B.within.dec {lab}: decoupling, points")
+    cmd(f"raceBandCadFixed{tag}", blh(B2["cadence_change_at_fixed_slowing_vs_10_15"][key]), f"B.cadence_change_at_fixed_slowing {lab}: cadence change at the same slowing, points")
+cmd("raceBandCadPerSlow", blh(B2["cadence_change_at_fixed_slowing_vs_10_15"]["per_1pct_slowing"], 3), "B: % cadence per 1% of second-half slowing, all efforts")
+rv = B2["raw_by_band"]
+cmd("raceBandSevereN", big(rv[">=26"]["second_half_slowing_pct"]["n"]), "B.raw_by_band: efforts at 26 C and over")
+cmd("raceBandSevereRunners", big(rv[">=26"]["second_half_slowing_pct"]["runners"]), "B.raw_by_band: runners at 26 C and over")
+for tag, key, lab in (("Cold", "<10", "below 10 C"), ("Cool", "10-15", "10-15 C")) + RB:
+    cmd(f"raceRawSlow{tag}", mlh(rv[key]["second_half_slowing_pct"], 1), f"B.raw_by_band {lab}: second-half slowing, %")
+    cmd(f"raceRawHR{tag}", mlh(rv[key]["hr_drift_pct"], 1), f"B.raw_by_band {lab}: heart-rate drift, %")
+    cmd(f"raceRawDec{tag}", mlh(rv[key]["decoupling_pct"], 1), f"B.raw_by_band {lab}: decoupling, %")
+    cmd(f"raceRawOverFive{tag}", f"{100 * rv[key]['share_decoupling_over_5pct']:.0f}", f"B.raw_by_band {lab}: share with decoupling over 5%, %")
+sh = B2["cadence_share_of_second_half_speed_change"]
+cmd("raceHalfShareCool", blh(sh["cool_under_15"], 0, 100), "B: cadence share of the second-half speed change, cool efforts, %")
+cmd("raceHalfShareHot", blh(sh["hot_18_plus"], 0, 100), "B: same, efforts at 18 C and over, %")
+cmd("raceHalfShareHotter", blh(sh["hot_22_plus"], 0, 100), "B: same, efforts at 22 C and over, %")
+# training runs: second half against first half at 28 C and over, observed and at a fixed speed change
+C3 = SA["C_training_within_run"]
+cmd("trainHalfRuns", big(C3["cad_decay"]["observed"]["n"]), "C.cad_decay: runs")
+cmd("trainHalfRunners", big(C3["cad_decay"]["observed"]["runners"]), "C.cad_decay: runners")
+cmd("trainCadObs", blh(C3["cad_decay"]["observed"][">=28"]), "C.cad_decay.observed at 28 C and over, % against 10-15 C")
+cmd("trainCadFixed", blh(C3["cad_decay"]["at_fixed_speed_change"][">=28"]), "C.cad_decay.at_fixed_speed_change at 28 C and over, %")
+cmd("trainCadFixedQuad", blh(C3["cad_decay"]["at_fixed_speed_change_quadratic"][">=28"]), "C.cad_decay, quadratic in the speed change")
+cmd("trainCadFixedFree", blh(C3["cad_decay"]["at_fixed_speed_change_slope_free_in_heat"][">=28"]), "C.cad_decay, speed-change slope free to differ in heat")
+cmd("trainCadPerSpeed", blh(C3["cad_decay"]["at_fixed_speed_change"]["per_1pct_speed_change"], 3), "C.cad_decay: % cadence per 1% of speed change")
+cmd("trainCadRemain", f"{100 * C3['share_of_cadence_fall_not_accounted_for_by_slowing_28_plus']:.0f}", "C: share of the cadence fall that remains at a fixed speed change, %")
+cmd("trainHRObs", blh(C3["hr_drift"]["observed"][">=28"]), "C.hr_drift.observed at 28 C and over, bpm against 10-15 C")
+cmd("trainHRFixed", blh(C3["hr_drift"]["at_fixed_speed_change"][">=28"]), "C.hr_drift.at_fixed_speed_change at 28 C and over, bpm")
+cmd("trainHRPerSpeed", blh(C3["hr_drift"]["at_fixed_speed_change"]["per_1pct_speed_change"], 3), "C.hr_drift: bpm per 1% of speed change")
+cmd("trainSpdObs", blh(C3["spd_decay"]["observed"][">=28"]), "C.spd_decay.observed at 28 C and over, %")

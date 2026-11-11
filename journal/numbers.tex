@@ -407,7 +407,8 @@
 % =====================================================================================================================
 % 7. Heart rate, cadence and stride length in heat, and the gap between the training curve and the race-day scale:
 %    mechanism_numbers.log (journal/mechanism_numbers.py, which reads the aggregate estimates behind fig_mech_* and
-%    fig_followup_*). Intervals are 95%; training-run models are within runner with runner-clustered standard errors.
+%    fig_followup_*, plus benchmarks.json and speed_adjusted.json for 7l and 7m). Intervals are 95%; training-run
+%    models are within runner with runner-clustered standard errors.
 % =====================================================================================================================
 % 7a. Training runs: pace, heart rate and cadence against WBGT (estimates.json fig1; reference WBGT 8-10 C)
 \newcommand{\mechRuns}{363{,}005}   % estimates.json n_runs
@@ -548,3 +549,182 @@
 \newcommand{\splitCurvePred}{0.29 [$-0.13$, 0.70]}   % D.split: fitness prediction on the curve, same model
 \newcommand{\edlSDOfficial}{1.55}   % B: SD of the official edition effect across linked editions, %
 \newcommand{\edlSDPlatform}{9.15}   % B: SD of the platform loss across linked efforts, %
+% 7l. The training-run results in the units of earlier work (benchmarks.json): cadence share of a speed
+%     difference, heart-rate drift in bpm and %, and decoupling of pace from heart rate
+\newcommand{\benchCoolRuns}{136{,}000}   % A: runs at WBGT 5-15 C
+\newcommand{\benchCoolRunners}{2{,}039}   % A: runners in that fit
+\newcommand{\benchCadShare}{24 [23, 25]}   % A.speed_only: cadence share of a cool-day speed difference, %
+\newcommand{\benchCadShareFit}{24 [23, 24]}   % A.plus_fitness: same with the fitness control, %
+\newcommand{\benchCadShareSlow}{36 [34, 38]}   % A.by_own_speed_third.slowest: cadence share, %
+\newcommand{\benchCadShareMid}{20 [18, 22]}   % A.by_own_speed_third.middle: cadence share, %
+\newcommand{\benchCadShareFast}{21 [20, 22]}   % A.by_own_speed_third.fastest: cadence share, %
+\newcommand{\benchCadMedian}{164}   % A.cohort: median cadence, steps per minute
+\newcommand{\benchPaceMedian}{5.83}   % A.cohort: median pace, min/km
+\newcommand{\benchSpeedMild}{$-1.01$}   % A.heat_vs_benchmark.mild_20_22: speed difference, %
+\newcommand{\benchCadObsMild}{$-0.73$}   % A.heat_vs_benchmark.mild_20_22: cadence difference observed, %
+\newcommand{\benchCadOrdMild}{$-0.24$}   % A.heat_vs_benchmark.mild_20_22: cadence difference the cool-day share implies, %
+\newcommand{\benchSpeedHot}{$-4.17$}   % A.heat_vs_benchmark.severe_28_plus: speed difference, %
+\newcommand{\benchCadObsHot}{$-1.97$}   % A.heat_vs_benchmark.severe_28_plus: cadence difference observed, %
+\newcommand{\benchCadOrdHot}{$-1.00$}   % A.heat_vs_benchmark.severe_28_plus: cadence difference the cool-day share implies, %
+\newcommand{\benchHalfShareCool}{19 [18, 19]}   % B.cool_under_15: cadence share of second-half speed change, training, %
+\newcommand{\benchHalfShareHot}{20 [19, 22]}   % B.hot_24_plus: same at WBGT 24 C and over, %
+\newcommand{\benchHRPerSpeed}{0.55 [0.54, 0.57]}   % C: bpm of drift per 1% of second-half speed change
+\newcommand{\benchDriftRuns}{57{,}492}   % C: runs with both halves sampled
+\newcommand{\benchDriftRunners}{1{,}783}   % C: runners
+\newcommand{\hrDriftBpmCold}{2.9 [2.7, 3.0]}   % C.bands below 10 C: second half minus first half, bpm
+\newcommand{\hrDriftPctCold}{1.9 [1.8, 2.0]}   % C.bands below 10 C: same as % of first-half heart rate
+\newcommand{\hrDriftPerHCold}{5.7 [5.4, 6.0]}   % C.bands below 10 C: bpm per hour of run
+\newcommand{\hrDriftFixedCold}{2.9}   % C.bands below 10 C: bpm with the second-half speed change removed
+\newcommand{\hrDriftNCold}{16{,}584}   % C.bands below 10 C: runs
+\newcommand{\hrSteadyBpmCold}{2.8 [2.6, 3.1]}   % C.steady_45_90min below 10 C: bpm, runs of 45-90 min at even pace
+\newcommand{\hrSteadyNCold}{3{,}519}   % C.steady_45_90min below 10 C: runs
+\newcommand{\hrDriftBpmCool}{3.2 [3.0, 3.4]}   % C.bands 10-15 C: second half minus first half, bpm
+\newcommand{\hrDriftPctCool}{2.2 [2.0, 2.3]}   % C.bands 10-15 C: same as % of first-half heart rate
+\newcommand{\hrDriftPerHCool}{6.3 [5.9, 6.6]}   % C.bands 10-15 C: bpm per hour of run
+\newcommand{\hrDriftFixedCool}{3.4}   % C.bands 10-15 C: bpm with the second-half speed change removed
+\newcommand{\hrDriftNCool}{14{,}579}   % C.bands 10-15 C: runs
+\newcommand{\hrSteadyBpmCool}{3.4 [3.1, 3.6]}   % C.steady_45_90min 10-15 C: bpm, runs of 45-90 min at even pace
+\newcommand{\hrSteadyNCool}{3{,}132}   % C.steady_45_90min 10-15 C: runs
+\newcommand{\hrDriftBpmWarm}{4.4 [4.2, 4.5]}   % C.bands 20-24 C: second half minus first half, bpm
+\newcommand{\hrDriftPctWarm}{2.9 [2.8, 3.1]}   % C.bands 20-24 C: same as % of first-half heart rate
+\newcommand{\hrDriftPerHWarm}{8.5 [8.2, 8.9]}   % C.bands 20-24 C: bpm per hour of run
+\newcommand{\hrDriftFixedWarm}{4.8}   % C.bands 20-24 C: bpm with the second-half speed change removed
+\newcommand{\hrDriftNWarm}{17{,}630}   % C.bands 20-24 C: runs
+\newcommand{\hrSteadyBpmWarm}{4.7 [4.5, 5.0]}   % C.steady_45_90min 20-24 C: bpm, runs of 45-90 min at even pace
+\newcommand{\hrSteadyNWarm}{3{,}535}   % C.steady_45_90min 20-24 C: runs
+\newcommand{\hrDriftBpmHot}{5.2 [5.0, 5.5]}   % C.bands 24-28 C: second half minus first half, bpm
+\newcommand{\hrDriftPctHot}{3.5 [3.3, 3.7]}   % C.bands 24-28 C: same as % of first-half heart rate
+\newcommand{\hrDriftPerHHot}{10.3 [9.8, 10.7]}   % C.bands 24-28 C: bpm per hour of run
+\newcommand{\hrDriftFixedHot}{5.8}   % C.bands 24-28 C: bpm with the second-half speed change removed
+\newcommand{\hrDriftNHot}{7{,}971}   % C.bands 24-28 C: runs
+\newcommand{\hrSteadyBpmHot}{5.8 [5.5, 6.1]}   % C.steady_45_90min 24-28 C: bpm, runs of 45-90 min at even pace
+\newcommand{\hrSteadyNHot}{1{,}641}   % C.steady_45_90min 24-28 C: runs
+\newcommand{\hrDriftBpmSevere}{5.8 [5.1, 6.4]}   % C.bands 28 C and over: second half minus first half, bpm
+\newcommand{\hrDriftPctSevere}{3.8 [3.4, 4.2]}   % C.bands 28 C and over: same as % of first-half heart rate
+\newcommand{\hrDriftPerHSevere}{11.7 [10.4, 13.1]}   % C.bands 28 C and over: bpm per hour of run
+\newcommand{\hrDriftFixedSevere}{7.1}   % C.bands 28 C and over: bpm with the second-half speed change removed
+\newcommand{\hrDriftNSevere}{721}   % C.bands 28 C and over: runs
+\newcommand{\hrSteadyBpmSevere}{7.4 [6.4, 8.3]}   % C.steady_45_90min 28 C and over: bpm, runs of 45-90 min at even pace
+\newcommand{\hrSteadyNSevere}{147}   % C.steady_45_90min 28 C and over: runs
+\newcommand{\decoupCold}{2.0 [1.9, 2.2]}   % D.bands_raw_pct below 10 C: decoupling of speed per beat, second half against first, %
+\newcommand{\decoupOverFiveCold}{26}   % D below 10 C: share of runs with decoupling over 5%, %
+\newcommand{\decoupCool}{2.6 [2.4, 2.7]}   % D.bands_raw_pct 10-15 C: decoupling of speed per beat, second half against first, %
+\newcommand{\decoupOverFiveCool}{30}   % D 10-15 C: share of runs with decoupling over 5%, %
+\newcommand{\decoupWarm}{3.7 [3.5, 3.8]}   % D.bands_raw_pct 20-24 C: decoupling of speed per beat, second half against first, %
+\newcommand{\decoupOverFiveWarm}{38}   % D 20-24 C: share of runs with decoupling over 5%, %
+\newcommand{\decoupHot}{4.5 [4.3, 4.7]}   % D.bands_raw_pct 24-28 C: decoupling of speed per beat, second half against first, %
+\newcommand{\decoupOverFiveHot}{44}   % D 24-28 C: share of runs with decoupling over 5%, %
+\newcommand{\decoupSevere}{6.2 [5.6, 6.7]}   % D.bands_raw_pct 28 C and over: decoupling of speed per beat, second half against first, %
+\newcommand{\decoupOverFiveSevere}{58}   % D 28 C and over: share of runs with decoupling over 5%, %
+\newcommand{\decoupWithinCold}{$-0.5$ [$-0.6$, $-0.3$]}   % D.vs_10_15_within_runner below 10 C: points of decoupling against 10-15 C
+\newcommand{\decoupWithinWarm}{1.3 [1.1, 1.4]}   % D.vs_10_15_within_runner 20-24 C: points of decoupling against 10-15 C
+\newcommand{\decoupWithinHot}{2.4 [2.2, 2.6]}   % D.vs_10_15_within_runner 24-28 C: points of decoupling against 10-15 C
+\newcommand{\decoupWithinSevere}{3.8 [3.4, 4.2]}   % D.vs_10_15_within_runner 28 C and over: points of decoupling against 10-15 C
+\newcommand{\perDegHR}{0.41 [0.37, 0.45]}   % E: bpm per C of WBGT above 15, matched pace
+\newcommand{\perDegHRPct}{0.28 [0.26, 0.31]}   % E: % of heart rate per C above 15, matched pace
+\newcommand{\perDegCad}{$-0.043$ [$-0.052$, $-0.034$]}   % E: % of cadence per C above 15, matched pace
+% 7m. Cadence change net of the slowing it accompanies (speed_adjusted.json): race-distance efforts split by
+%     cadence, the cool-day comparison, race efforts by WBGT band, and training runs at a fixed speed change
+\newcommand{\spadjHotN}{1{,}278}   % sample: hot efforts (WBGT 18 C and over) with both cadence terms
+\newcommand{\spadjHotRunners}{565}   % sample: runners with a hot effort
+\newcommand{\spadjCoolN}{2{,}962}   % sample: cool efforts (WBGT under 15 C)
+\newcommand{\spadjCoolRunners}{971}   % sample: runners with a cool effort
+\newcommand{\spadjContrast}{0.37 [0.18, 0.58]}   % A: fell minus held, multiples of the typical cost
+\newcommand{\spadjSlowHeld}{1.2 [0.5, 1.9]}   % A.group_profile.held: second-half slowing, %
+\newcommand{\spadjCadHeld}{0.7 [0.6, 0.8]}   % A.group_profile.held: second-half cadence change, %
+\newcommand{\spadjLossHeld}{5.3 [4.4, 6.2]}   % A.group_profile.held: loss against the fitness prediction, %
+\newcommand{\spadjWbgtHeld}{21.7}   % A.group_profile.held: mean WBGT, C
+\newcommand{\spadjSlowFell}{9.9 [8.9, 10.9]}   % A.group_profile.fell: second-half slowing, %
+\newcommand{\spadjCadFell}{$-3.7$ [$-4.0$, $-3.4$]}   % A.group_profile.fell: second-half cadence change, %
+\newcommand{\spadjLossFell}{8.5 [7.3, 9.8]}   % A.group_profile.fell: loss against the fitness prediction, %
+\newcommand{\spadjWbgtFell}{22.1}   % A.group_profile.fell: mean WBGT, C
+\newcommand{\spadjThirdLow}{0.23 [$-0.34$, 0.78]}   % A.within_thirds.slowed_least: fell minus held inside a third of slowing
+\newcommand{\spadjThirdMid}{0.24 [$-0.11$, 0.57]}   % A.within_thirds.middle: fell minus held inside a third of slowing
+\newcommand{\spadjThirdHigh}{0.40 [0.12, 0.70]}   % A.within_thirds.slowed_most: fell minus held inside a third of slowing
+\newcommand{\spadjThirdPooled}{0.30 [0.03, 0.52]}   % A.within_thirds: fell minus held, pooled within thirds
+\newcommand{\spadjCoolRel}{$-0.173$ [$-0.191$, $-0.154$]}   % A.adjusted.cool_relation: % cadence per 1% of second-half slowing, cool efforts
+\newcommand{\spadjCorrHot}{$-0.58$}   % A.adjusted: correlation of cadence change with slowing, hot efforts
+\newcommand{\spadjCorrCool}{$-0.61$}   % A.adjusted: same, cool efforts
+\newcommand{\spadjAdjContrast}{0.37 [0.18, 0.57]}   % A.adjusted.linear: fell minus held on cadence net of slowing
+\newcommand{\spadjAdjContrastQuad}{0.35 [0.16, 0.55]}   % A.adjusted.quadratic_plus_climb: same, flexible adjustment
+\newcommand{\spadjMoved}{222}   % A.adjusted.linear: efforts that change group
+\newcommand{\spadjJointCad}{$-0.064$ [$-0.097$, $-0.037$]}   % A.joint_model.both: multiple of typical cost per 1% of cadence change
+\newcommand{\spadjJointSlow}{$-0.002$ [$-0.011$, 0.006]}   % A.joint_model.both: per 1% of second-half slowing
+\newcommand{\spadjCadOnly}{$-0.061$ [$-0.088$, $-0.037$]}   % A.joint_model.cadence_only
+\newcommand{\spadjSlowOnly}{0.008 [0.000, 0.016]}   % A.joint_model.slowing_only
+\newcommand{\spadjGapHot}{3.26 [1.83, 4.71]}   % A.cool_effort_comparison.hot: loss, fell minus held, %
+\newcommand{\spadjGapCool}{2.09 [1.04, 3.05]}   % A.cool_effort_comparison.cool: loss, fell minus held, %
+\newcommand{\spadjCoolFellN}{751}   % cool efforts whose cadence fell by more than 1%
+\newcommand{\spadjCoolHeldN}{2{,}211}   % cool efforts whose cadence held
+\newcommand{\spadjCoolLossFell}{2.49}   % cool efforts, cadence fell: mean loss, %
+\newcommand{\spadjCoolLossHeld}{0.40}   % cool efforts, cadence held: mean loss, %
+\newcommand{\spadjGapDiff}{1.17 [$-0.41$, 2.68]}   % hot gap minus cool gap, % of finish time
+\newcommand{\spadjGapDiffRho}{0.18 [$-0.06$, 0.40]}   % the same in multiples of the typical cost
+\newcommand{\spadjGapDiffShare}{93}   % share of bootstrap draws above zero, %
+\newcommand{\spadjNetFell}{0.85 [0.66, 1.04]}   % rho net of the same group's cool-day loss: cadence fell
+\newcommand{\spadjNetHeld}{0.76 [0.60, 0.91]}   % rho net of the same group's cool-day loss: cadence held
+\newcommand{\spadjNetDiff}{0.09 [$-0.14$, 0.30]}   % difference of the two
+\newcommand{\raceBandN}{4{,}957}   % B.within_runner_vs_10_15.ps: efforts
+\newcommand{\raceBandRunners}{1{,}217}   % B.within_runner_vs_10_15.ps: runners
+\newcommand{\raceBandSlowMild}{1.1 [0.3, 1.9]}   % B.within.ps 15-18 C: second-half slowing, points against 10-15 C
+\newcommand{\raceBandCadMild}{$-0.3$ [$-0.5$, $-0.1$]}   % B.within.cad_drift 15-18 C: second-half cadence change, points
+\newcommand{\raceBandHRMild}{$-0.4$ [$-0.8$, 0.0]}   % B.within.hr_drift 15-18 C: heart-rate drift, % points
+\newcommand{\raceBandDecMild}{0.8 [0.1, 1.4]}   % B.within.dec 15-18 C: decoupling, points
+\newcommand{\raceBandCadFixedMild}{$-0.13$ [$-0.30$, 0.05]}   % B.cadence_change_at_fixed_slowing 15-18 C: cadence change at the same slowing, points
+\newcommand{\raceBandSlowWarm}{1.9 [1.1, 2.8]}   % B.within.ps 18-22 C: second-half slowing, points against 10-15 C
+\newcommand{\raceBandCadWarm}{$-0.5$ [$-0.8$, $-0.3$]}   % B.within.cad_drift 18-22 C: second-half cadence change, points
+\newcommand{\raceBandHRWarm}{0.0 [$-0.5$, 0.5]}   % B.within.hr_drift 18-22 C: heart-rate drift, % points
+\newcommand{\raceBandDecWarm}{2.0 [1.3, 2.7]}   % B.within.dec 18-22 C: decoupling, points
+\newcommand{\raceBandCadFixedWarm}{$-0.24$ [$-0.44$, $-0.04$]}   % B.cadence_change_at_fixed_slowing 18-22 C: cadence change at the same slowing, points
+\newcommand{\raceBandSlowHot}{3.4 [2.1, 4.7]}   % B.within.ps 22-26 C: second-half slowing, points against 10-15 C
+\newcommand{\raceBandCadHot}{$-0.8$ [$-1.2$, $-0.5$]}   % B.within.cad_drift 22-26 C: second-half cadence change, points
+\newcommand{\raceBandHRHot}{0.6 [$-0.1$, 1.3]}   % B.within.hr_drift 22-26 C: heart-rate drift, % points
+\newcommand{\raceBandDecHot}{4.0 [2.9, 5.1]}   % B.within.dec 22-26 C: decoupling, points
+\newcommand{\raceBandCadFixedHot}{$-0.35$ [$-0.66$, $-0.04$]}   % B.cadence_change_at_fixed_slowing 22-26 C: cadence change at the same slowing, points
+\newcommand{\raceBandSlowSevere}{8.2 [5.2, 11.2]}   % B.within.ps 26 C and over: second-half slowing, points against 10-15 C
+\newcommand{\raceBandCadSevere}{$-2.2$ [$-3.0$, $-1.3$]}   % B.within.cad_drift 26 C and over: second-half cadence change, points
+\newcommand{\raceBandHRSevere}{$-0.2$ [$-1.5$, 1.1]}   % B.within.hr_drift 26 C and over: heart-rate drift, % points
+\newcommand{\raceBandDecSevere}{8.0 [5.3, 10.7]}   % B.within.dec 26 C and over: decoupling, points
+\newcommand{\raceBandCadFixedSevere}{$-0.92$ [$-1.69$, $-0.16$]}   % B.cadence_change_at_fixed_slowing 26 C and over: cadence change at the same slowing, points
+\newcommand{\raceBandCadPerSlow}{$-0.149$ [$-0.165$, $-0.133$]}   % B: % cadence per 1% of second-half slowing, all efforts
+\newcommand{\raceBandSevereN}{92}   % B.raw_by_band: efforts at 26 C and over
+\newcommand{\raceBandSevereRunners}{65}   % B.raw_by_band: runners at 26 C and over
+\newcommand{\raceRawSlowCold}{1.4 [1.0, 1.8]}   % B.raw_by_band below 10 C: second-half slowing, %
+\newcommand{\raceRawHRCold}{3.2 [3.0, 3.5]}   % B.raw_by_band below 10 C: heart-rate drift, %
+\newcommand{\raceRawDecCold}{4.7 [4.3, 5.0]}   % B.raw_by_band below 10 C: decoupling, %
+\newcommand{\raceRawOverFiveCold}{42}   % B.raw_by_band below 10 C: share with decoupling over 5%, %
+\newcommand{\raceRawSlowCool}{3.0 [2.6, 3.5]}   % B.raw_by_band 10-15 C: second-half slowing, %
+\newcommand{\raceRawHRCool}{3.1 [2.8, 3.4]}   % B.raw_by_band 10-15 C: heart-rate drift, %
+\newcommand{\raceRawDecCool}{6.1 [5.7, 6.5]}   % B.raw_by_band 10-15 C: decoupling, %
+\newcommand{\raceRawOverFiveCool}{52}   % B.raw_by_band 10-15 C: share with decoupling over 5%, %
+\newcommand{\raceRawSlowMild}{3.6 [2.9, 4.3]}   % B.raw_by_band 15-18 C: second-half slowing, %
+\newcommand{\raceRawHRMild}{3.2 [2.8, 3.5]}   % B.raw_by_band 15-18 C: heart-rate drift, %
+\newcommand{\raceRawDecMild}{6.8 [6.1, 7.4]}   % B.raw_by_band 15-18 C: decoupling, %
+\newcommand{\raceRawOverFiveMild}{57}   % B.raw_by_band 15-18 C: share with decoupling over 5%, %
+\newcommand{\raceRawSlowWarm}{4.3 [3.5, 5.2]}   % B.raw_by_band 18-22 C: second-half slowing, %
+\newcommand{\raceRawHRWarm}{3.5 [3.0, 4.0]}   % B.raw_by_band 18-22 C: heart-rate drift, %
+\newcommand{\raceRawDecWarm}{7.9 [7.2, 8.5]}   % B.raw_by_band 18-22 C: decoupling, %
+\newcommand{\raceRawOverFiveWarm}{64}   % B.raw_by_band 18-22 C: share with decoupling over 5%, %
+\newcommand{\raceRawSlowHot}{4.7 [3.7, 5.7]}   % B.raw_by_band 22-26 C: second-half slowing, %
+\newcommand{\raceRawHRHot}{3.8 [3.2, 4.4]}   % B.raw_by_band 22-26 C: heart-rate drift, %
+\newcommand{\raceRawDecHot}{8.5 [7.6, 9.4]}   % B.raw_by_band 22-26 C: decoupling, %
+\newcommand{\raceRawOverFiveHot}{64}   % B.raw_by_band 22-26 C: share with decoupling over 5%, %
+\newcommand{\raceRawSlowSevere}{8.4 [5.8, 10.9]}   % B.raw_by_band 26 C and over: second-half slowing, %
+\newcommand{\raceRawHRSevere}{3.5 [2.5, 4.6]}   % B.raw_by_band 26 C and over: heart-rate drift, %
+\newcommand{\raceRawDecSevere}{11.9 [9.5, 14.3]}   % B.raw_by_band 26 C and over: decoupling, %
+\newcommand{\raceRawOverFiveSevere}{74}   % B.raw_by_band 26 C and over: share with decoupling over 5%, %
+\newcommand{\raceHalfShareCool}{16 [14, 18]}   % B: cadence share of the second-half speed change, cool efforts, %
+\newcommand{\raceHalfShareHot}{15 [12, 18]}   % B: same, efforts at 18 C and over, %
+\newcommand{\raceHalfShareHotter}{14 [10, 18]}   % B: same, efforts at 22 C and over, %
+\newcommand{\trainHalfRuns}{57{,}580}   % C.cad_decay: runs
+\newcommand{\trainHalfRunners}{1{,}783}   % C.cad_decay: runners
+\newcommand{\trainCadObs}{$-1.06$ [$-1.27$, $-0.86$]}   % C.cad_decay.observed at 28 C and over, % against 10-15 C
+\newcommand{\trainCadFixed}{$-0.59$ [$-0.74$, $-0.43$]}   % C.cad_decay.at_fixed_speed_change at 28 C and over, %
+\newcommand{\trainCadFixedQuad}{$-0.57$ [$-0.72$, $-0.41$]}   % C.cad_decay, quadratic in the speed change
+\newcommand{\trainCadFixedFree}{$-0.56$ [$-0.72$, $-0.41$]}   % C.cad_decay, speed-change slope free to differ in heat
+\newcommand{\trainCadPerSpeed}{0.195 [0.188, 0.201]}   % C.cad_decay: % cadence per 1% of speed change
+\newcommand{\trainCadRemain}{55}   % C: share of the cadence fall that remains at a fixed speed change, %
+\newcommand{\trainHRObs}{2.24 [1.72, 2.75]}   % C.hr_drift.observed at 28 C and over, bpm against 10-15 C
+\newcommand{\trainHRFixed}{3.62 [3.21, 4.04]}   % C.hr_drift.at_fixed_speed_change at 28 C and over, bpm
+\newcommand{\trainHRPerSpeed}{0.567 [0.554, 0.579]}   % C.hr_drift: bpm per 1% of speed change
+\newcommand{\trainSpdObs}{$-2.44$ [$-2.96$, $-1.93$]}   % C.spd_decay.observed at 28 C and over, %
